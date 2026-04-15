@@ -1,0 +1,25 @@
+{
+  "name": "tpi-ddso-jm-g2",
+  "version": "1.0.0",
+  "description": "| Apellido | Nombre | Legajo |\r | --- | --- | --- |\r |  |  |  |\r | Cantero | Leonel | 211.467-7 |\r | Koval | Pablo | 222.437-9 |\r | Letizia | Joaquín | 222.458-6 |\r | Tolentino | Gabriel | 222.745-9 |",
+  "homepage": "https://github.com/leocantero/tpi-ddso-jm-g2#readme",
+  "bugs": {
+    "url": "https://github.com/leocantero/tpi-ddso-jm-g2/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leocantero/tpi-ddso-jm-g2.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {},
+  "keywords": []
+}
