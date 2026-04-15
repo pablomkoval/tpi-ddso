@@ -1,0 +1,6 @@
+const EstadoTurno = Object.freeze({
+  DISPONIBLE: "DISPONIBLE",
+  CONFIRMADO: "CONFIRMADO",
+  CANCELADO: "CANCELADO",
+  REALIZADO: "REALIZADO"
+});
