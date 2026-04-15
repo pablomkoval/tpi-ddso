@@ -1,0 +1,195 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+enum EstadoTurno {
+    DISPONIBLE
+    RESERVADO
+    CONFIRMADO
+    CANCELADO
+    REALIZADO
+}
+
+enum NivelCobertura {
+    TOTAL
+    PARCIAL
+    NO_CUBIERTA
+}
+
+enum DiaSemana {
+    LUNES
+    MARTES
+    MIERCOLES
+    JUEVES
+    VIERNES
+    SABADO
+    DOMINGO
+}
+
+class Turno {
+    - id: String
+    - medico: Medico
+    - paciente: Paciente
+    - fechaHora: date
+    - sede: Sede
+    - practica: Practica
+    - estado: EstadoTurno
+    - historialEstados: CambioEstadoTurno[]
+    - costo: number
+    + actualizarEstado(nuevoEstado: EstadoTurno, quien: Usuario, motivo: String): void
+}
+
+class CambioEstadoTurno {
+    - fechaHoraIngreso: date
+    - estado: EstadoTurno
+    - turno: Turno
+    - usuario: Usuario
+    - motivo: String
+}
+
+class Agenda {
+    + generarTurnosPara(especialidad: Especialidad, medico: Medico): Turno[]
+    + generarTurnosPara(practica: Practica, medico: Medico): Turno[]
+    + refrescarTurnosSegunDisponibilidadDe(medico: Medico): Turno[]
+}
+
+class Paciente {
+    - id: String
+    - usuario: Usuario
+    - dni: String
+    - nombre: String
+    - obraSocial: ObraSocial
+    - plan: Plan
+}
+
+class Medico {
+    - id: String
+    - usuario: Usuario
+    - matricula: String
+    - nombre: String
+    - especialidades: Especialidad[]
+    - practicas: Practica[]
+    - sedes: Sede[]
+    - disponibilidades: DisponibilidadHoraria[]
+    + definirDisponibilidad(disponibilidad: DisponibilidadHoraria): void
+}
+
+class DisponibilidadHoraria {
+    - diaSemana: DiaSemana
+    - horaDesde: String
+    - horaHasta: String
+}
+
+class Sede {
+    - id: String
+    - nombre: String
+    - direccion: String
+}
+
+class ObraSocial {
+    - id: String
+    - nombre: String
+    - planes: Plan[]
+}
+
+class Plan {
+    - id: String
+    - nombre: String
+    - coberturasEspecialidad: CoberturaEspecialidad[]
+    - coberturasPractica: CoberturaPractica[]
+    + obtenerCobertura(e: Especialidad): NivelCobertura
+    + obtenerCobertura(p: Practica): NivelCobertura
+}
+
+class CoberturaEspecialidad {
+    - especialidad: Especialidad
+    - nivel: NivelCobertura
+}
+
+class CoberturaPractica {
+    - practica: Practica
+    - nivel: NivelCobertura
+}
+
+class Especialidad {
+    - id: String
+    - nombre: String
+    - duracionTurnoEnMins: Integer
+    - costoConsulta: number
+}
+
+class Practica {
+    - id: String
+    - codigo: String
+    - nombre: String
+    - duracionTurnoEnMins: Integer
+    - costo: number
+}
+
+class Usuario {
+    - id: String
+    - nombreUsuario: String
+    - password: String
+}
+
+class FactoryNotificacion {
+    + crearSegunEstadoTurno(turno: Turno): Notificacion
+}
+
+class Notificacion {
+    - id: String
+    - destinatario: Usuario
+    - remitente: Usuario
+    - mensaje: String
+    - fechaHoraCreacion: date
+    - fechaHoraLeida: date
+    - leida: boolean
+    + marcarComoLeida(): void
+}
+
+' Relaciones
+Agenda ..> Turno
+Agenda ..> Medico
+Agenda ..> Especialidad
+Agenda ..> Practica
+
+Turno "1" *-- "*" CambioEstadoTurno : historialEstados
+Turno --> Medico
+Turno --> Paciente
+Turno --> Sede
+Turno --> Practica
+Turno ..> EstadoTurno
+
+CambioEstadoTurno --> Usuario
+CambioEstadoTurno ..> EstadoTurno
+
+Paciente --> Usuario
+Paciente --> ObraSocial
+Paciente --> Plan
+
+Medico --> Usuario
+Medico "1" --> "*" Sede
+Medico "1" --> "*" Especialidad
+Medico "1" --> "*" Practica
+Medico "1" --> "*" DisponibilidadHoraria
+
+DisponibilidadHoraria ..> DiaSemana
+
+ObraSocial "1" *-- "*" Plan
+
+Plan "1" *-- "*" CoberturaEspecialidad
+Plan "1" *-- "*" CoberturaPractica
+Plan ..> NivelCobertura
+
+CoberturaEspecialidad --> Especialidad
+CoberturaEspecialidad ..> NivelCobertura
+
+CoberturaPractica --> Practica
+CoberturaPractica ..> NivelCobertura
+
+FactoryNotificacion ..> Turno
+FactoryNotificacion ..> Notificacion
+
+Notificacion --> Usuario : remitente
+Notificacion --> Usuario : destinatario
+
+@enduml
