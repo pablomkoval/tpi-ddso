@@ -1,1 +1,9 @@
-# tpi-ddso-jm-g2
+## Integrantes
+
+| Nombre | Apellido | Legajo |
+| --- | --- | --- |
+| Leonel | Cantero | 211.467-7 |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
