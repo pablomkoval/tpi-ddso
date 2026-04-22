@@ -1,4 +1,4 @@
-const EstadoTurno = Object.freeze({
+export const EstadoTurno = Object.freeze({
   DISPONIBLE: "DISPONIBLE",
   CONFIRMADO: "CONFIRMADO",
   CANCELADO: "CANCELADO",

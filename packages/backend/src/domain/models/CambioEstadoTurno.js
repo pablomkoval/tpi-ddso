@@ -1,9 +1,11 @@
+import { date } from "zod";
+
 class CambioEstadoTurno{
 
-    constructor (fechaHoraIngreso, estado, turno, usuario, motivo){
-        this.fechaHoraIngreso = fechaHoraIngreso;
+    constructor (estado, turno, usuario, motivo){
+        this.fechaHoraIngreso = new date;
         this.estado = estado;
-        this.turno = turno;
+        this.turno = turno; //por que conoce el turno (?)
         this.usuario = usuario;
         this.motivo = motivo;
     }

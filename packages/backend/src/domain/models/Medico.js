@@ -24,11 +24,13 @@ export class Medico{
         this.sedes.push(nuevaSede);
     }
 
-    definirDisponibilidad(disponibilidad){
+    definirDisponibilidad(disponibilidad){ //no saca tambien disponibilidad?
         this.disponibilidades.push(disponibilidad);
     }
 
-
+    prestaServicio(criterio){
+        return this.especialidades.contains(criterio) || this.practicas.contains(criterio);
+    }
 
 
 }

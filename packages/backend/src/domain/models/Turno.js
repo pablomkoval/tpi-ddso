@@ -2,25 +2,29 @@ import{EstadoTurno} from "domain/enum";
 import{cambioEstadoTurno} from "domain/models";
 
 export class Turno{
-
+    paciente;
+    costo;
+    sede;
     historialEstados = [];
     //estado = disponible?
-    // distintos tipos de dato, quiza otra forma de armarlo mas prolija
-    constructor(id, medico, paciente, fechaHora, sede, practica, estado, costo){
-        this.id = id; //id se le asigna o se genera segun una base de datos?       
+    
+    constructor(medico, fechaHora, servicio){
+        this.id = "placeholder"; //id se le asigna o se genera segun una base de datos?       
         this.medico = medico;
-        this.paciente = paciente;
+        //paciente no se define al crear un turno, solo esta disponible
         this.fechaHora = fechaHora;
-        this.sede = sede;
-        this.practica = practica;
-        this.estado = estado;
-        this.costo = costo;
+        //la sede no queda definida hasta que se confirme el turno (consultar)
+
+        this.servicio = servicio; // servicio: especialidad o practica
+        
+        this.estado = EstadoTurno.DISPONIBLE;
+        //sin paciente no hay costo aún
     }
 
     actualizarEstado(nuevoEstado, quien, motivoCambio){
         this.estado = nuevoEstado; 
-        const cambioEstado = /* ojo fechahoraingreso, y que estado se registra */
-            new cambioEstadoTurno(fechaHoraIngeso = this.fechaHora, estado = nuevoEstado, turno = this, usuario = quien, motivo = motivoCambio);
+        /* ojo fechahoraingreso, y que estado se registra */
+        const cambioEstado = new cambioEstadoTurno(nuevoEstado, this, quien, motivoCambio);
         this.historialEstados.push(cambioEstado);
     }
 }
