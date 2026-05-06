@@ -1,11 +1,11 @@
 export class Paciente{
 
-    constructor(id, usuario, dni, nombre, obraSocial, plan){
-        this.id = id;
+    constructor(usuario, dni, nombre, obraSocial, plan){
+        this.id = "placeholder";
         this.usuario = usuario;
         this.dni = dni;
         this.nombre = nombre;
-        this.obraSocial = obraSocial;
+        this.obraSocial = obraSocial; //por que obra social Y plan?
         this.plan = plan
     }
 

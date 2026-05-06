@@ -1,18 +1,19 @@
 export class Medico{
 
-    constructor(id, usuario, matricula, nombre){
-        this.id = id;
+    especialidades = [];
+    practicas = [];
+    sedes = [];
+    disponibilidades = [];
+
+    constructor(usuario, matricula, nombre){
+        this.id = "placeholder";
         this.usuario = usuario;
         this.matricula = matricula;
         this.nombre = nombre;
 
-        this.especialidades = [];
-        this.practicas = [];
-        this.sedes = [];
-        this.disponibilidades = [];
     }
 
-    agregarEspescialidad (nuevaEspecialidad){
+    agregarEspecialidad (nuevaEspecialidad){
         this.especialidades.push(nuevaEspecialidad);
     }
 
@@ -28,8 +29,10 @@ export class Medico{
         this.disponibilidades.push(disponibilidad);
     }
 
-    prestaServicio(criterio){
-        return this.especialidades.contains(criterio) || this.practicas.contains(criterio);
+    //quitarDisponibilidad(disponibilidad)?
+
+    prestaServicio(servicio){
+        return this.especialidades.contains(servicio) || this.practicas.contains(servicio);
     }
 
 

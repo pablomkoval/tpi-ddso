@@ -12,23 +12,9 @@ export class FactoryNotificacion{ // instanciar un objeto notificacion segun swi
 
         
         return new Notificacion(
-            0, //id
             destinatario, //destinatario
             ultimoCambioEstado.usuario, //remitente
             mensaje
         );
-        
-        
-        // switch (ultimoCambioEstado.estado) {
-        //     case "pendiente": notificacion.mensaje = "El turno esta en estado: " + ultimoCambioEstado.estado + ultimoCambioEstado.motivo;
-        //         break;
-        //     case "confirmado": notificacion
-        //         break;
-        //     case "cancelado": notificacion
-        //         break;
-        //     case "finalizado": notificacion
-        //         break;
-        //     default: notificacion = {}    
-        // }
     }
 }

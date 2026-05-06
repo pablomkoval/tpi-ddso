@@ -1,5 +1,5 @@
 export const DiaSemana = Object.freeze({
-  DOMINGO: 0,
+  DOMINGO: 0, //puesto domingo como primero para coincidir formato date
   LUNES: 1,
   MARTES: 2,
   MIERCOLES: 3,

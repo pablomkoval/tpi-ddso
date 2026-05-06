@@ -1,8 +1,8 @@
 export class Usuario{
 
-    constructor(idUser, nombreUser, passwordUser){
-        id = idUser;
-        nombreUsuario = nombreUser;
-        password = passwordUser;
+    constructor(nombre, password){
+        this.id = "placeholder";
+        this.nombreUsuario = nombreUser;
+        this.password = password;
     }
 }

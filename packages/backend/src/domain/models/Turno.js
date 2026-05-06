@@ -5,6 +5,7 @@ export class Turno{
     paciente;
     costo;
     sede;
+    estado = EstadoTurno.DISPONIBLE;
     historialEstados = [];
     //estado = disponible?
     
@@ -17,7 +18,7 @@ export class Turno{
 
         this.servicio = servicio; // servicio: especialidad o practica
         
-        this.estado = EstadoTurno.DISPONIBLE;
+        //estado comienza disponible
         //sin paciente no hay costo aún
     }
 

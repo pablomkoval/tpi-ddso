@@ -2,13 +2,13 @@ import { Especialidad } from "./Especialidad";
 import { Practica } from "./Practica";
 
 export class Plan {
-    constructor (id, nombre, cobEsp, cobPrac){
-        this.id = id;
+    constructor (nombre, cobEsp, cobPrac){
+        this.id = "placeholder";
         this.nombre = nombre;
         this.coberturasEspecialidad = cobEsp;
         this.coberturasPractica = cobPrac;
     }
-    obtenerCobertura(e){
+    obtenerCoberturaEspecialidad(e){ //recorrer las 2 listas para polimorfismo? por qué 2 métodos mismo nombre
         return this.coberturasEspecialidad.find(elem => elem.especialidad.id === e.id).nivel;
     }
     obtenerCoberturaPractica(p){

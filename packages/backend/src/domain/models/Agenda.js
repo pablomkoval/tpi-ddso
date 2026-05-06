@@ -31,7 +31,7 @@ export class Agenda{ //turnos posibles?
 
                 for (let i = 0; i < cantidadTurnosDisponibles; i++) {
                     
-                    const fechaHoraTurno = fechaActual.setMinutes(60 * disponibilidad.getHoraDesde() + i * servicio.duracionTurnoEnMins)
+                    const fechaHoraTurno = fechaActual.setMinutes(disponibilidad.obtenerHoraDesde() + i * servicio.duracionTurnoEnMins)
                     fechaActual.setHours(1) // por si acaso, evitar caso limite 00:00
                     
                     turno = new Turno(medico, fechaHoraTurno, servicio)    
@@ -51,8 +51,14 @@ export class Agenda{ //turnos posibles?
         /* posible solucion:
             ir a base de datos con un medico
             preguntar por los turnos que posean a ese medico
-            y actualizo en la base de datos esa lista de turnos segun la nueva disbonilidad del médico
+            y actualizo en la base de datos esa lista de turnos segun la nueva disponilidad del médico
+                nueva disponibilidad que implica?
+                    turnos reservados
+                    cambio de atributo disponibilidades en médico 
         */
+        turnos = []
+        
+
     }
 
 }

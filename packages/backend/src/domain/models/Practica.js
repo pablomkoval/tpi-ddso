@@ -1,8 +1,8 @@
 export class Practica{
 
-    constructor(id, codigo, nombre, duracionTurnoEnMins, costo){
-        this.id = id;
-        this.codigo = codigo;
+    constructor(codigo, nombre, duracionTurnoEnMins, costo){
+        this.id = "placeholder";
+        this.codigo = codigo; //diferencia código, id y nombre?
         this.nombre = nombre;
         this.duracionTurnoEnMins = duracionTurnoEnMins;
         this.costo = costo;

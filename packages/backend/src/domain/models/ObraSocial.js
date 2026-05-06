@@ -1,7 +1,7 @@
 export class ObraSocial{
 
-    constructor(id, nombre, planes){
-        this.id = id;
+    constructor(nombre, planes){
+        this.id = "placeholder";
         this.nombre = nombre;
         this.planes = planes;
     }
