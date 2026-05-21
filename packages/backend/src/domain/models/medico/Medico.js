@@ -1,4 +1,4 @@
-import { SedeNoAutorizadaError } from "../errors/SedeNoAutorizadaError.js";
+import { SedeNoAutorizadaError } from "../../errors/SedeNoAutorizadaError.js";
 
 export class Medico{
 

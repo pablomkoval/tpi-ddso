@@ -1,7 +1,7 @@
-import { DiaSemana } from "../enum/DiaSemana.js";
-import { HorarioInvalidoError } from "../errors/HorarioInvalidoError.js";
-import { RangoHorarioInvalidoError } from "../errors/RangoHorarioInvalidoError.js";
-import { DiaSemanaInvalidoError } from "../errors/DiaSemanaInvalidoError.js";
+import { DiaSemana } from "../../enum/DiaSemana.js";
+import { HorarioInvalidoError } from "../../errors/HorarioInvalidoError.js";
+import { RangoHorarioInvalidoError } from "../../errors/RangoHorarioInvalidoError.js";
+import { DiaSemanaInvalidoError } from "../../errors/DiaSemanaInvalidoError.js";
 
 export class DisponibilidadHoraria{
 
