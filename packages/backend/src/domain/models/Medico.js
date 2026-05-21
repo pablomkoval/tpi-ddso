@@ -1,3 +1,5 @@
+import { SedeNoAutorizadaError } from "../errors/SedeNoAutorizadaError.js";
+
 export class Medico{
 
     especialidades = [];
@@ -26,6 +28,11 @@ export class Medico{
     }
 
     definirDisponibilidad(disponibilidad){ //no saca tambien disponibilidad?
+        // Validar que la sede de la disponibilidad corresponde con las sedes del médico
+        const sedeValida = this.sedes.some(sede => sede.id === disponibilidad.sede.id);
+        if (!sedeValida) {
+            throw new SedeNoAutorizadaError(`La sede "${disponibilidad.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
+        }
         this.disponibilidades.push(disponibilidad);
     }
 
