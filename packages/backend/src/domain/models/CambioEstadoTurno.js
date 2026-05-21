@@ -1,6 +1,6 @@
-import { date } from "zod";
-
-class CambioEstadoTurno{
+/* import { date } from "zod";
+ */
+export class CambioEstadoTurno{
 
     constructor (estado, turno, usuario, motivo){
         this.fechaHoraIngreso = new Date();

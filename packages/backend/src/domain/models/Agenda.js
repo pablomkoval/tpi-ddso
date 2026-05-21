@@ -1,11 +1,12 @@
-import{DiaSemana} from "domain/enum";
+import {Turno} from "./Turno"
+
 
 export class Agenda{ //turnos posibles?
     //genero todo los turnos o laburo con lista de turnos existentes?
         //atributo turnos[]? una agenda para cada medico sería
     // diferencia entre ambos metodos?
     generarTurnosPara(servicio, medico){ //servicio siendo especialidad ó practica
-        turnos = []
+        const turnos = []
         if (!medico.prestaServicio(servicio)){
             return turnos;
         }
@@ -20,21 +21,21 @@ export class Agenda{ //turnos posibles?
         medico.disponibilidades.forEach(disponibilidad => {
             let fechaActual = fecha_inicio //sumar un dia para empezar a generar turnos?
             // Calcular los turnos del día de semana actual hasta la fecha de fin
-            while(fechaActual <= fecha_fin){
+            while(fechaActual <= fecha_final){
 
                 if(fechaActual.getDay != disponibilidad.getDiaSemana()){
                     fechaActual.setDate(fechaActual.getDate + 1)
                     continue
                 }
 
-                cantidadTurnosDisponibles = disponibilidad.cantidadTurnosPosiblesSegun(servicio.duracionTurnoEnMins)
+                let cantidadTurnosDisponibles = disponibilidad.cantidadTurnosPosiblesSegun(servicio.duracionTurnoEnMins)
 
                 for (let i = 0; i < cantidadTurnosDisponibles; i++) {
                     
                     const fechaHoraTurno = fechaActual.setMinutes(disponibilidad.obtenerHoraDesde() + i * servicio.duracionTurnoEnMins)
                     fechaActual.setHours(1) // por si acaso, evitar caso limite 00:00
                     
-                    turno = new Turno(medico, fechaHoraTurno, servicio)    
+                    const turno = new Turno(medico, fechaHoraTurno, servicio)    
                     turnos.push(turno)
                 }
 
@@ -46,7 +47,7 @@ export class Agenda{ //turnos posibles?
         return turnos
     }
 
-    refrescarTurnosSegunDisponibilidadDe(medico){
+    refrescarTurnosSegunDisponibilidadDe(/* medico */){
         // cuales turnos??
         /* posible solucion:
             ir a base de datos con un medico
@@ -56,7 +57,7 @@ export class Agenda{ //turnos posibles?
                     turnos reservados
                     cambio de atributo disponibilidades en médico 
         */
-        turnos = []
+        //const turnos = []
         
 
     }

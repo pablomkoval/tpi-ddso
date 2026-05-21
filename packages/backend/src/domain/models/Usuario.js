@@ -2,7 +2,7 @@ export class Usuario{
 
     constructor(nombre, password){
         this.id = "placeholder";
-        this.nombreUsuario = nombreUser;
+        this.nombreUsuario = nombre;
         this.password = password;
     }
 }

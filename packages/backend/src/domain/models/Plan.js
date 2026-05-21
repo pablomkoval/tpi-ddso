@@ -1,5 +1,5 @@
-import { Especialidad } from "./Especialidad";
-import { Practica } from "./Practica";
+/* import { Especialidad } from "./Especialidad";
+import { Practica } from "./Practica"; */
 
 export class Plan {
     constructor (nombre, cobEsp, cobPrac){
