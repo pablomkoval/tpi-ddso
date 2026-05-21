@@ -46,6 +46,14 @@ http://localhost:3000/v1/healthcheck
 
 Si todo está bien, la respuesta debería indicar que el estado es `ok`.
 
+5. Para correr los tests del proyecto, ejecutar:
+
+```bash
+npm test
+```
+
+Ese es el comando previsto para automatizar y ejecutar la suite de pruebas desde la raíz del repositorio.
+
 
 ## Justificaciones de Diseño / Implementación de dominio
 * Enum DiaSemana tiene asignado como primer elemento el Domingo para poder coincidir con el formato de enumerado de días de JS.
