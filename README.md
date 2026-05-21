@@ -53,7 +53,3 @@ npm test
 ```
 
 Ese es el comando previsto para automatizar y ejecutar la suite de pruebas desde la raíz del repositorio.
-
-
-## Justificaciones de Diseño / Implementación de dominio
-* Enum DiaSemana tiene asignado como primer elemento el Domingo para poder coincidir con el formato de enumerado de días de JS.
