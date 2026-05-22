@@ -61,10 +61,11 @@ export class Medico{
             return fecha;
         };
 
-        this.disponibilidades.forEach(disponibilidad => {
+        const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
+        for (const disponibilidad of this.disponibilidades) {
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
                 fechaActual <= fechaFinal;
-                fechaActual.setDate(fechaActual.getDate() + 7)) {
+                fechaActual = new Date(fechaActual.getTime() + SEMANA_MS)) {
 
                 const instantes = disponibilidad.generarInstantesTurnoParaFecha(fechaActual, duracionTurnoEnMins);
                 for (const fechaHoraTurno of instantes) {
@@ -72,7 +73,7 @@ export class Medico{
                     this.turnos.push(turno);
                 }
             }
-        });
+        }
     }
 
     obtenerTurnos(){
