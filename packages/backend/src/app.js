@@ -1,4 +1,5 @@
 import express from "express";
+import router from "./routes/router.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger.js";
 
@@ -9,11 +10,7 @@ app.use(express.json());
 // Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.get("/v1/healthcheck", (req, res) => {
-    res.json({
-        status: "ok",
-    });
-});
+app.use(router);
 
 export default app;
 
