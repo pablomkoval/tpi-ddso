@@ -15,8 +15,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node packages/backend/src/index.js",
-    "dev": "node --watch packages/backend/src/index.js",
+    "start": "node packages/backend/src/server.js",
+    "dev": "node --watch packages/backend/src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

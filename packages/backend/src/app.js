@@ -3,6 +3,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger.js";
 
 const app = express();
+
 app.use(express.json());
 
 // Swagger Documentation
@@ -14,9 +15,6 @@ app.get("/v1/healthcheck", (req, res) => {
     });
 });
 
-const puerto =  3000;
-app.listen(puerto, () => {
-    console.log("El servidor inicio en el puerto " + puerto);
-});
+export default app;
 
 
