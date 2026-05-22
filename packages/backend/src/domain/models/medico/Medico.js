@@ -44,6 +44,10 @@ export class Medico{
             || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
     }
 
+    tieneTurnoEn(fechaHora){
+        return this.turnos.some(turno => turno.fechaHora.getTime() === fechaHora.getTime());
+    }
+
     generarTurnosPara(servicio, diasACubrir = 7){
         if (!this.prestaServicio(servicio)){
             throw new ServicioNoPrestadoError(`El médico "${this.nombre}" no presta el servicio "${servicio.nombre}"`);
@@ -69,6 +73,9 @@ export class Medico{
 
                 const instantes = disponibilidad.generarInstantesTurnoParaFecha(fechaActual, duracionTurnoEnMins);
                 for (const fechaHoraTurno of instantes) {
+                    if (this.tieneTurnoEn(fechaHoraTurno)) {
+                        continue;
+                    }
                     const turno = new Turno(this, fechaHoraTurno, servicio);
                     this.turnos.push(turno);
                 }
