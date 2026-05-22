@@ -61,4 +61,18 @@ export class DisponibilidadHoraria{
         return Math.floor(cantidadTurnosPosibles);
     }
 
+    generarInstantesTurnoParaFecha(fecha, duracionServicioMins){
+        const cantidadTurnos = this.cantidadTurnosPosiblesSegun(duracionServicioMins);
+        const instantes = [];
+
+        for (let i = 0; i < cantidadTurnos; i++) {
+            const inicioMinutos = this.obtenerHoraDesde() + (i * duracionServicioMins);
+            const fechaHora = new Date(fecha);
+            fechaHora.setHours(0, inicioMinutos, 0, 0);
+            instantes.push(fechaHora);
+        }
+
+        return instantes;
+    }
+
 }

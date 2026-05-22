@@ -1,5 +1,5 @@
-import{EstadoTurno} from "domain/enum";
-import{cambioEstadoTurno} from "domain/models";
+import { EstadoTurno } from "../../enum/EstadoTurno.js";
+import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
 
 export class Turno{
     paciente;
@@ -25,7 +25,7 @@ export class Turno{
     actualizarEstado(nuevoEstado, quien, motivoCambio){
         this.estado = nuevoEstado; 
         /* ojo fechahoraingreso, y que estado se registra */
-        const cambioEstado = new cambioEstadoTurno(nuevoEstado, this, quien, motivoCambio);
+        const cambioEstado = new CambioEstadoTurno(nuevoEstado, this, quien, motivoCambio);
         this.historialEstados.push(cambioEstado);
     }
 }

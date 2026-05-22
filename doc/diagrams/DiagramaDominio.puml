@@ -46,12 +46,6 @@ class CambioEstadoTurno {
     - motivo: String
 }
 
-class Agenda {
-    + generarTurnosPara(especialidad: Especialidad, medico: Medico): Turno[]
-    + generarTurnosPara(practica: Practica, medico: Medico): Turno[]
-    + refrescarTurnosSegunDisponibilidadDe(medico: Medico): Turno[]
-}
-
 class Paciente {
     - id: String
     - usuario: Usuario
@@ -70,13 +64,17 @@ class Medico {
     - practicas: Practica[]
     - sedes: Sede[]
     - disponibilidades: DisponibilidadHoraria[]
+    - turnos: Turno[]
     + definirDisponibilidad(disponibilidad: DisponibilidadHoraria): void
+    + generarTurnosPara(servicio: Servicio): void
+    + prestaServicio(servicio: Servicio): boolean
 }
 
 class DisponibilidadHoraria {
     - diaSemana: DiaSemana
     - horaDesde: String
     - horaHasta: String
+    - sede: Sede
 }
 
 class Sede {
@@ -147,12 +145,7 @@ class Notificacion {
 }
 
 ' Relaciones
-Agenda ..> Turno
-Agenda ..> Medico
-Agenda ..> Especialidad
-Agenda ..> Practica
-
-Turno "1" *-- "*" CambioEstadoTurno : historialEstados
+Turno "1" *-- "*" CambioEstadoTurno
 Turno --> Medico
 Turno --> Paciente
 Turno --> Sede
@@ -171,6 +164,7 @@ Medico "1" --> "*" Sede
 Medico "1" --> "*" Especialidad
 Medico "1" --> "*" Practica
 Medico "1" --> "*" DisponibilidadHoraria
+Medico "1" --> "*" Turno
 
 DisponibilidadHoraria ..> DiaSemana
 

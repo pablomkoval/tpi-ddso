@@ -1,4 +1,6 @@
 import { SedeNoAutorizadaError } from "../../errors/SedeNoAutorizadaError.js";
+import { ServicioNoPrestadoError } from "../../errors/ServicioNoPrestadoError.js";
+import { Turno } from "../turnos/Turno.js";
 
 export class Medico{
 
@@ -6,6 +8,7 @@ export class Medico{
     practicas = [];
     sedes = [];
     disponibilidades = [];
+    turnos = [];
 
     constructor(usuario, matricula, nombre){
         this.id = "placeholder";
@@ -27,7 +30,7 @@ export class Medico{
         this.sedes.push(nuevaSede);
     }
 
-    definirDisponibilidad(disponibilidad){ //no saca tambien disponibilidad?
+    definirDisponibilidad(disponibilidad){
         // Validar que la sede de la disponibilidad corresponde con las sedes del médico
         const sedeValida = this.sedes.some(sede => sede.id === disponibilidad.sede.id);
         if (!sedeValida) {
@@ -36,11 +39,44 @@ export class Medico{
         this.disponibilidades.push(disponibilidad);
     }
 
-    //quitarDisponibilidad(disponibilidad)?
-
     prestaServicio(servicio){
-        return this.especialidades.contains(servicio) || this.practicas.contains(servicio);
+        return this.especialidades.some(especialidad => especialidad.esMismoServicioQue(servicio))
+            || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
     }
 
+    generarTurnosPara(servicio, diasACubrir = 7){
+        if (!this.prestaServicio(servicio)){
+            throw new ServicioNoPrestadoError(`El médico "${this.nombre}" no presta el servicio "${servicio.nombre}"`);
+        }
+        const fechaInicio = new Date();
+        const fechaFinal = new Date(fechaInicio);
+        fechaFinal.setDate(fechaFinal.getDate() + diasACubrir);
+        const duracionTurnoEnMins = servicio.obtenerDuracionTurnoEnMins();
+
+        const siguienteFechaParaDia = (fechaBase, diaSemana) => {
+            const fecha = new Date(fechaBase);
+            const diff = (diaSemana - fecha.getDay() + 7) % 7;
+            fecha.setDate(fecha.getDate() + diff);
+            fecha.setHours(0, 0, 0, 0);
+            return fecha;
+        };
+
+        this.disponibilidades.forEach(disponibilidad => {
+            for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
+                fechaActual <= fechaFinal;
+                fechaActual.setDate(fechaActual.getDate() + 7)) {
+
+                const instantes = disponibilidad.generarInstantesTurnoParaFecha(fechaActual, duracionTurnoEnMins);
+                for (const fechaHoraTurno of instantes) {
+                    const turno = new Turno(this, fechaHoraTurno, servicio);
+                    this.turnos.push(turno);
+                }
+            }
+        });
+    }
+
+    obtenerTurnos(){
+        return [...this.turnos];
+    }
 
 }
