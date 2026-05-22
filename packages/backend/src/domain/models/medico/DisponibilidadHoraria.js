@@ -39,9 +39,6 @@ export class DisponibilidadHoraria{
         }
     }
     
-    getDiaSemana(){ //getters no tan necesarios,tan clean pero borrar para ser consistente?
-        return this.diaSemana
-    }
     obtenerHoraDesde(){
         return this.obtenerHoraMin(this.horaDesde)
     }

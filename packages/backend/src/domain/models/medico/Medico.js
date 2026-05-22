@@ -2,7 +2,7 @@ import { SedeNoAutorizadaError } from "../../errors/SedeNoAutorizadaError.js";
 import { ServicioNoPrestadoError } from "../../errors/ServicioNoPrestadoError.js";
 import { Turno } from "../turnos/Turno.js";
 
-export class Medico{
+export class Medico {
 
     especialidades = [];
     practicas = [];
@@ -10,7 +10,7 @@ export class Medico{
     disponibilidades = [];
     turnos = [];
 
-    constructor(usuario, matricula, nombre){
+    constructor(usuario, matricula, nombre) {
         this.id = "placeholder";
         this.usuario = usuario;
         this.matricula = matricula;
@@ -18,19 +18,19 @@ export class Medico{
 
     }
 
-    agregarEspecialidad (nuevaEspecialidad){
+    agregarEspecialidad(nuevaEspecialidad) {
         this.especialidades.push(nuevaEspecialidad);
     }
 
-    agregarPractica(nuevaPractica){
+    agregarPractica(nuevaPractica) {
         this.practicas.push(nuevaPractica);
     }
 
-    agregarSede(nuevaSede){
+    agregarSede(nuevaSede) {
         this.sedes.push(nuevaSede);
     }
 
-    definirDisponibilidad(disponibilidad){
+    definirDisponibilidad(disponibilidad) {
         // Validar que la sede de la disponibilidad corresponde con las sedes del médico
         const sedeValida = this.sedes.some(sede => sede.id === disponibilidad.sede.id);
         if (!sedeValida) {
@@ -39,17 +39,17 @@ export class Medico{
         this.disponibilidades.push(disponibilidad);
     }
 
-    prestaServicio(servicio){
+    prestaServicio(servicio) {
         return this.especialidades.some(especialidad => especialidad.esMismoServicioQue(servicio))
             || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
     }
 
-    tieneTurnoEn(fechaHora){
+    tieneTurnoEn(fechaHora) {
         return this.turnos.some(turno => turno.fechaHora.getTime() === fechaHora.getTime());
     }
 
-    generarTurnosPara(servicio, diasACubrir = 7){
-        if (!this.prestaServicio(servicio)){
+    generarTurnosPara(servicio, diasACubrir = 7) {
+        if (!this.prestaServicio(servicio)) {
             throw new ServicioNoPrestadoError(`El médico "${this.nombre}" no presta el servicio "${servicio.nombre}"`);
         }
         const fechaInicio = new Date();
@@ -83,7 +83,7 @@ export class Medico{
         }
     }
 
-    obtenerTurnos(){
+    obtenerTurnos() {
         return [...this.turnos];
     }
 

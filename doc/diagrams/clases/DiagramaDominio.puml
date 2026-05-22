@@ -16,13 +16,13 @@ enum NivelCobertura {
 }
 
 enum DiaSemana {
+    DOMINGO
     LUNES
     MARTES
     MIERCOLES
     JUEVES
     VIERNES
     SABADO
-    DOMINGO
 }
 
 class Turno {
@@ -167,6 +167,7 @@ Medico "1" --> "*" DisponibilidadHoraria
 Medico "1" --> "*" Turno
 
 DisponibilidadHoraria ..> DiaSemana
+DisponibilidadHoraria --> Sede
 
 ObraSocial "1" *-- "*" Plan
 
