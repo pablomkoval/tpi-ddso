@@ -1,5 +1,5 @@
-import { SedeNoAutorizadaError } from "../../errors/SedeNoAutorizadaError.js";
-import { ServicioNoPrestadoError } from "../../errors/ServicioNoPrestadoError.js";
+import { SedeNoAutorizadaError } from "../../../errors/SedeNoAutorizadaError.js";
+import { ServicioNoPrestadoError } from "../../../errors/ServicioNoPrestadoError.js";
 import { Turno } from "../turnos/Turno.js";
 
 export class Medico {

@@ -1,4 +1,4 @@
-import { EstadoTurno } from "../../enum/EstadoTurno.js";
+import { EstadoTurno } from "../../../enum/EstadoTurno.js";
 import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
 
 export class Turno{
