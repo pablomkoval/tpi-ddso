@@ -1,17 +1,19 @@
 import express from "express";
-import MedicoController from "../../../controllers/MedicoController.js";
+import MedicoController from "../../../controllers/medicos/MedicoController.js";
 
 const router = express.Router();
 const medicoController = new MedicoController();
 
 router.route('/')
-    .get((req,res) => medicoController.findAll(req,res))
+    .get((req, res, next) => medicoController.findAll(req, res, next))
 
 router.route('/')
-    .post((req,res) => medicoController.create(req,res))
+    .post((req, res, next) => medicoController.create(req, res, next))
 
 router.route('/:id')
-    .get((req,res) => medicoController.findById(req,res))
-
+    .get((req, res, next) => medicoController.findById(req, res, next))
+    
 router.route('/:id/disponibilidad')
     .get((req,res,next) => medicoController.obtenerDisponibilidades(req,res,next))
+
+export default router;

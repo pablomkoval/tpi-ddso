@@ -1,4 +1,4 @@
-import { AppError } from "../../shared/errors/AppError.js";
+import AppError from "../../shared/errors/AppError.js";
 
 export class SedeNoAutorizadaError extends AppError {
     constructor(mensaje = "La sede no está autorizada para este médico") {

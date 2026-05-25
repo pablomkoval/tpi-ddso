@@ -5,6 +5,21 @@ export default class MedicoRepository {
         this.model = MedicoModel;
     }
 
+    async save(medico) {
+        const nuevoMedico = new this.model(medico);
+        return await nuevoMedico.save();
+    }
+
+    async findAll() {
+        return await this.model.find();
+    }
+
+    async findById(id) {
+        return await this.model.findById(id);
+    }
+
+    async 
+
     async findDisponibilidadesById(id) {
         try {
             const medico = await this.model.findById(id).populate('disponibilidades');
