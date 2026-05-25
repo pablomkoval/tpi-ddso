@@ -219,5 +219,4 @@ class TurnoService {
     return turno;
   }
 }
-
 export default new TurnoService();

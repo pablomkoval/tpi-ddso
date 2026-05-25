@@ -151,7 +151,6 @@ describe("TurnoService", () => {
       mockPacienteRepository.findById.mockResolvedValue(null);
       const params = { especialidad: "esp1", paciente: "pac1" };
 
-      // Act & Assert
       await expect(
         turnoService.buscarDisponibles(params),
       ).rejects.toMatchObject({
@@ -163,7 +162,6 @@ describe("TurnoService", () => {
     // --- Búsquedas exitosas ---
 
     it("debe retornar turnos disponibles con paginación", async () => {
-      // Arrange
       const turnosMock = [
         {
           _id: "turno1",
@@ -282,7 +280,7 @@ describe("TurnoService", () => {
       expect(filtros.medico).toBe("med1");
       expect(filtros.fechaDesde).toBe("2026-06-01");
       expect(filtros.fechaHasta).toBe("2026-06-30");
-      expect(opciones.skip).toBe(5); // (page 2 - 1) * limit 5
+      expect(opciones.skip).toBe(5);
       expect(opciones.limit).toBe(5);
       expect(opciones.sort).toEqual({ costo: -1 });
     });
@@ -308,7 +306,6 @@ describe("TurnoService", () => {
     });
 
     it("debe limitar el máximo de resultados por página a 50", async () => {
-      // Arrange
       mockEspecialidadRepository.findById.mockResolvedValue({ _id: "esp1" });
       mockTurnoRepository.buscarDisponibles.mockResolvedValue({
         turnos: [],
@@ -320,12 +317,10 @@ describe("TurnoService", () => {
 
       const resultado = await turnoService.buscarDisponibles(params);
 
-      
       expect(resultado.pagination.limit).toBe(50);
     });
 
     it("debe buscar por práctica sin especialidad", async () => {
-   
       mockTurnoRepository.buscarDisponibles.mockResolvedValue({
         turnos: [],
         total: 0,
