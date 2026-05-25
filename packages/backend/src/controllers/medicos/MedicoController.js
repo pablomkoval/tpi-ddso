@@ -5,8 +5,6 @@ export default class MedicoController {
         this.medicoService = medicoService;
     }
     
-    
-
     async create(req, res, next) {
         try {
             const medico = await this.medicoService.create(req.body);
