@@ -9,7 +9,7 @@ export default class MedicoService {
     toDTO(medico) {
         return {
             id: medico.id || medico._id,
-            usuario: medico.usiario,
+            usuario: medico.usuario,
             matricula: medico.matricula,
             nombre: medico.nombre,
             especialidades: medico.especialidades,
