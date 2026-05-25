@@ -1,5 +1,5 @@
 import express from "express";
-import MedicoController from "../../../controllers/MedicoController.js";
+import MedicoController from "../../../controllers/medicos/MedicoController.js";
 
 const router = express.Router();
 const medicoController = new MedicoController();
@@ -12,3 +12,5 @@ router.route('/')
 
 router.route('/:id')
     .get((req, res, next) => medicoController.findById(req, res, next))
+
+export default router;

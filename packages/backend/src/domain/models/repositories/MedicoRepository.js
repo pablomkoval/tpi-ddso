@@ -10,7 +10,7 @@ export default class MedicoRepository {
         return await nuevoMedico.save();
     }
 
-    async findall() {
+    async findAll() {
         return await this.model.find();
     }
 

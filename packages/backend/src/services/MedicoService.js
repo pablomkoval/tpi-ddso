@@ -1,6 +1,6 @@
-import MedicoRepository from "../../repositories/MedicoRepository.js";
+import MedicoRepository from "../domain/models/repositories/MedicoRepository.js";
 import AppError from "../shared/errors/AppError.js";
-import { Medico } from '../domain/models/entities/medico/Medico.js';
+import Medico from '../domain/models/entities/medico/Medico.js';
 export default class MedicoService {
     constructor({ medicoRepository = new MedicoRepository() } = {}) {
         this.medicoRepository = medicoRepository;
