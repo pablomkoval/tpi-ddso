@@ -36,6 +36,7 @@ export class Medico {
         if (!sedeValida) {
             throw new SedeNoAutorizadaError(`La sede "${disponibilidad.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
         }
+        
         this.disponibilidades.push(disponibilidad);
     }
 

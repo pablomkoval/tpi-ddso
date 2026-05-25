@@ -12,3 +12,6 @@ router.route('/')
 
 router.route('/:id')
     .get((req,res) => medicoController.findById(req,res))
+
+router.route('/:id/disponibilidad')
+    .get((req,res,next) => medicoController.obtenerDisponibilidades(req,res,next))
