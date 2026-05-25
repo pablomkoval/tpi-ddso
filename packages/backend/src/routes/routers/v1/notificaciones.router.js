@@ -1,14 +1,29 @@
 import express from "express";
 import { NotificacionesController } from "../../../controllers/notificaciones.controller.js";
 
-    const notificacionesRouter = express.Router();
 
-    // router.get("/leidas", (req, res) => {
-    //     controller.
-    // });
-    notificacionesRouter.get("/", (req, res, next) => {
-        NotificacionesController.findAll(req, res, next);
-    })
+const notificacionesRouter = express.Router();
 
+const controller = new NotificacionesController();
+
+notificacionesRouter.get("/", (req, res, next) => {
+    controller.findAll(req, res, next);
+});
+
+notificacionesRouter.get("/leidas", (req, res, next) => {
+    controller.obtenerLeidas(req, res, next);
+});
+
+notificacionesRouter.get("/no-leidas", (req, res, next) => {
+    controller.obtenerNoLeidas(req, res, next);
+});
+
+notificacionesRouter.patch("/:id/leer", (req, res, next) => {
+    controller.marcarComoLeida(req, res, next);
+});
+
+notificacionesRouter.put("/", (req, res, next) => {
+    controller.create(req, res, next);
+});
 
 export default notificacionesRouter;

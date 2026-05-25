@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Notificacion } from '../models/entities/turnos/Notificacion.js';
+import { Notificacion } from '../domain/models/entities/turnos/Notificacion.js';
 
 const notificacionSchema = new mongoose.Schema({
     destinatarioId: {
