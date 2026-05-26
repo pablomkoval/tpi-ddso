@@ -1,7 +1,7 @@
-import { DiaSemana } from "../../enum/DiaSemana.js";
-import { HorarioInvalidoError } from "../../errors/HorarioInvalidoError.js";
-import { RangoHorarioInvalidoError } from "../../errors/RangoHorarioInvalidoError.js";
-import { DiaSemanaInvalidoError } from "../../errors/DiaSemanaInvalidoError.js";
+import { DiaSemana } from "../../../enum/DiaSemana.js";
+import { HorarioInvalidoError } from "../../../errors/HorarioInvalidoError.js";
+import { RangoHorarioInvalidoError } from "../../../errors/RangoHorarioInvalidoError.js";
+import { DiaSemanaInvalidoError } from "../../../errors/DiaSemanaInvalidoError.js";
 
 export class DisponibilidadHoraria{
 
@@ -18,7 +18,7 @@ export class DisponibilidadHoraria{
     }
 
     validarDiaSemana(diaSemana) {
-        const diasValidos = Object.values(DiaSemana);
+        const diasValidos = Object.keys(DiaSemana);
         if (!diasValidos.includes(diaSemana)) {
             throw new DiaSemanaInvalidoError(`El día de semana "${diaSemana}" no es válido`);
         }
@@ -70,6 +70,19 @@ export class DisponibilidadHoraria{
         }
 
         return instantes;
+    }
+
+    seSolapaCon(otraDisponibilidad) {
+        if (this.diaSemana !== otraDisponibilidad.diaSemana) {
+            return false; // No se solapan si son en días diferentes
+        }
+
+        const thisDesde = this.obtenerHoraDesde();
+        const thisHasta = this.obtenerHoraHasta();
+        const otraDesde = otraDisponibilidad.obtenerHoraDesde();
+        const otraHasta = otraDisponibilidad.obtenerHoraHasta();
+
+        return (thisDesde < otraHasta) && (thisHasta > otraDesde);
     }
 
 }

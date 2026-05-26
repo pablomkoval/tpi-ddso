@@ -1,8 +1,9 @@
 import { SedeNoAutorizadaError } from "../../../errors/SedeNoAutorizadaError.js";
 import { ServicioNoPrestadoError } from "../../../errors/ServicioNoPrestadoError.js";
+import { DisponibilidadHoraria } from "./DisponibilidadHoraria.js";
 import { Turno } from "../turnos/Turno.js";
 
-export class Medico {
+export default class Medico {
 
     especialidades = [];
     practicas = [];
@@ -31,12 +32,28 @@ export class Medico {
     }
 
     definirDisponibilidad(disponibilidad) {
+        const nuevaDisponibilidad = new DisponibilidadHoraria(
+                disponibilidad.diaSemana,
+                disponibilidad.horaDesde,
+                disponibilidad.horaHasta,
+                disponibilidad.sede
+            );
+
         // Validar que la sede de la disponibilidad corresponde con las sedes del médico
-        const sedeValida = this.sedes.some(sede => sede.id === disponibilidad.sede.id);
+        const sedeValida = this.sedes.some(sede => sede.id === nuevaDisponibilidad.sede.id);
         if (!sedeValida) {
-            throw new SedeNoAutorizadaError(`La sede "${disponibilidad.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
+            throw new SedeNoAutorizadaError(`La sede "${nuevaDisponibilidad.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
         }
-        this.disponibilidades.push(disponibilidad);
+        // Validar que la nueva disponibilidad no se solape con las existentes
+        if (this.disponibilidades.some(d => {
+                const disponibilidadVieja = new DisponibilidadHoraria(d.diaSemana, d.horaDesde, d.horaHasta, d.sede);
+                return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
+            })
+        ) {
+            throw new Error("La disponibilidad se solapa con una existente")
+        }
+        console.log("Disponibilidad válida, agregando al médico...");
+        this.disponibilidades.push(nuevaDisponibilidad);
     }
 
     prestaServicio(servicio) {
