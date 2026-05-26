@@ -78,7 +78,15 @@ export default class MedicoService {
                 throw new Error('Médico no encontrado');
             }
 
-            medico.disponibilidades.push(...nuevasDisponibilidades);
+            nuevasDisponibilidades.forEach(d => {
+                const nuevaDisponibilidad = {
+                    diaSemana: d.diaSemana,
+                    horaDesde: d.horaDesde,
+                    horaHasta: d.horaHasta,
+                    sede: d.sede
+                }
+                medico.definirDisponibilidad(nuevaDisponibilidad);
+            });
 
             const medicoActualizado = await medico.save();
             return this.toDTO(medicoActualizado);
