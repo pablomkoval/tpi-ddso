@@ -55,7 +55,7 @@ export class Medico {
         const fechaInicio = new Date();
         const fechaFinal = new Date(fechaInicio);
         fechaFinal.setDate(fechaFinal.getDate() + diasACubrir);
-        const duracionTurnoEnMins = servicio.obtenerDuracionTurnoEnMins();
+        const duracionTurnoEnMins = servicio.duracionTurnoEnMins;
 
         const siguienteFechaParaDia = (fechaBase, diaSemana) => {
             const fecha = new Date(fechaBase);

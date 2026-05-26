@@ -1,18 +1,19 @@
-export class Practica{
+import { TipoServicio } from "../../../enum/TipoServicio";
 
-    constructor(codigo, nombre, duracionTurnoEnMins, costo){
+export class Practica {
+    id
+
+    constructor(codigo, nombre, duracionTurnoEnMins, costo) {
         this.id = "placeholder";
         this.codigo = codigo; //diferencia código, id y nombre?
         this.nombre = nombre;
         this.duracionTurnoEnMins = duracionTurnoEnMins;
         this.costo = costo;
+        this.tipoServicio = TipoServicio.PRACTICA
     }
 
-    obtenerDuracionTurnoEnMins(){
-        return this.duracionTurnoEnMins;
-    }
 
-    esMismoServicioQue(otroServicio){
+    esMismoServicioQue(otroServicio) {
         if (!otroServicio) {
             return false;
         }
