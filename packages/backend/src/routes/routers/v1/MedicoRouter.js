@@ -15,5 +15,6 @@ router.route('/:id')
     
 router.route('/:id/disponibilidad')
     .get((req,res,next) => medicoController.obtenerDisponibilidades(req,res,next))
+    .post((req,res,next) => medicoController.agregarDisponibilidades(req,res,next))
 
 export default router;

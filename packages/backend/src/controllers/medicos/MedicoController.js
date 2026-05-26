@@ -50,4 +50,16 @@ export default class MedicoController {
                 next(error);
             }
     }
+
+    async agregarDisponibilidades(req,res,next) {
+        const id = req.params.id;
+        const nuevasDisponibilidades = req.body.disponibilidades;
+
+        try {
+            const medicoActualizado = await this.medicoService.agregarDisponibilidades(id, nuevasDisponibilidades);
+            res.json(medicoActualizado);
+        } catch (error) {
+            next(error);
+        }
+    }
 }

@@ -58,9 +58,10 @@ export default class MedicoService {
 
         return this.toDTO(medico);
     }
+
     async obtenerDisponibilidades(id) {
         try {
-            const medico = await this.medicoRepository.model.findById(id).populate('disponibilidades');
+            const medico = await this.medicoRepository.model.findById(id);
             if (!medico) {
                 throw new Error('Médico no encontrado');
             }
@@ -68,5 +69,21 @@ export default class MedicoService {
         } catch (error) {
             throw new Error(`Error al obtener disponibilidades: ${error.message}`, { cause: error });
         } 
+    }
+
+    async agregarDisponibilidades(id, nuevasDisponibilidades) {
+        try {
+            const medico = await this.medicoRepository.model.findById(id);
+            if (!medico) {
+                throw new Error('Médico no encontrado');
+            }
+
+            medico.disponibilidades.push(...nuevasDisponibilidades);
+
+            const medicoActualizado = await medico.save();
+            return this.toDTO(medicoActualizado);
+        } catch (error) {
+            throw new Error(`Error al agregar disponibilidades: ${error.message}`, { cause: error });
+        }
     }
 }
