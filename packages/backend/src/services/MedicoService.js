@@ -1,6 +1,7 @@
 import MedicoRepository from "../domain/models/repositories/MedicoRepository.js";
 import AppError from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
+import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
 export default class MedicoService {
     constructor({ medicoRepository = new MedicoRepository() } = {}) {
         this.medicoRepository = medicoRepository;
@@ -21,13 +22,10 @@ export default class MedicoService {
     }
 
     async create(data) {
-        const { usuario, matricula, nombre } = data;
+        const { usuario, matricula, nombre, especialidades, practicas, sedes, disponibilidades } = data;
+        const disponibilidadesInstanciadas = disponibilidades.map(d => new DisponibilidadHoraria(d.diaSemana, d.horaDesde, d.horaHasta, d.sede));
 
-        if (!usuario || !matricula || !nombre) {
-            //error  de faltan campos obligatorias para registrar al medico :c
-        }
-
-        const nuevoMedico = new Medico(usuario, matricula, nombre);
+        const nuevoMedico = new Medico(usuario, matricula, nombre, especialidades, practicas, sedes, disponibilidadesInstanciadas);
         const medicoGuardado = await this.medicoRepository.save(nuevoMedico);
         return this.toDTO(medicoGuardado);
     }
@@ -78,15 +76,8 @@ export default class MedicoService {
                 throw new Error('Médico no encontrado');
             }
 
-            nuevasDisponibilidades.forEach(d => {
-                const nuevaDisponibilidad = {
-                    diaSemana: d.diaSemana,
-                    horaDesde: d.horaDesde,
-                    horaHasta: d.horaHasta,
-                    sede: d.sede
-                }
-                medico.definirDisponibilidad(nuevaDisponibilidad);
-            });
+            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => new DisponibilidadHoraria(d.diaSemana, d.horaDesde, d.horaHasta, d.sede));
+            medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
 
             const medicoActualizado = await medico.save();
             return this.toDTO(medicoActualizado);
