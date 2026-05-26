@@ -31,13 +31,14 @@ export default class Medico {
     }
 
     validarDisponibilidad(disponibilidad) {
-        const nuevaDisponibilidad = new DisponibilidadHoraria(
-            disponibilidad.diaSemana,
-            disponibilidad.horaDesde,
-            disponibilidad.horaHasta,
-            disponibilidad.sede
-        );
-
+        const nuevaDisponibilidad = new DisponibilidadHoraria({
+            id: disponibilidad.id,
+            diaSemana: disponibilidad.diaSemana,
+            horaDesde: disponibilidad.horaDesde,
+            horaHasta: disponibilidad.horaHasta,
+            sede: disponibilidad.sede
+        });
+    
         // Validar que la sede de la disponibilidad esté autorizada para el médico
         const sedeValida = this.sedes.some(sede => sede.id === nuevaDisponibilidad.sede.id);
         if (!sedeValida) {
@@ -46,7 +47,13 @@ export default class Medico {
 
         // Validar que la nueva disponibilidad no se solape con las existentes
         if (this.disponibilidades.some(d => {
-                const disponibilidadVieja = new DisponibilidadHoraria(d.diaSemana, d.horaDesde, d.horaHasta, d.sede);
+                const disponibilidadVieja = new DisponibilidadHoraria({
+                    id: d.id,
+                    diaSemana: d.diaSemana, 
+                    horaDesde: d.horaDesde,
+                    horaHasta: d.horaHasta, 
+                    sede: d.sede
+                });
                 return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
             })
         ) {
@@ -63,6 +70,25 @@ export default class Medico {
     agregarDisponibilidades(nuevasDisponibilidades) {
         const disponibilidadesValidadas = this.validarDisponibilidades(nuevasDisponibilidades);
         disponibilidadesValidadas.forEach(nuevaDisponibilidad => this.disponibilidades.push(nuevaDisponibilidad));
+    }
+
+    editarDisponibilidad(disponibilidadId, cambios) {
+        const index = this.disponibilidades.findIndex(d => d.id === disponibilidadId);
+        if (index === -1) {
+            throw new Error("No se encontró la disponibilidad a editar");
+        }
+
+        const disponibilidadExistente = this.disponibilidades[index];
+        const disponibilidadEditada = new DisponibilidadHoraria({
+            id: disponibilidadExistente.id,
+            diaSemana: cambios.diaSemana ?? disponibilidadExistente.diaSemana,
+            horaDesde: cambios.horaDesde ?? disponibilidadExistente.horaDesde,
+            horaHasta: cambios.horaHasta ?? disponibilidadExistente.horaHasta,
+            sede: cambios.sede ?? disponibilidadExistente.sede
+        });
+
+        const disponibilidadValidada = this.validarDisponibilidad(disponibilidadEditada);
+        this.disponibilidades[index] = disponibilidadValidada;
     }
 
     prestaServicio(servicio) {

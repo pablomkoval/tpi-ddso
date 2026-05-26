@@ -62,4 +62,25 @@ export default class MedicoController {
             next(error);
         }
     }
+
+    async editarDisponibilidad(req, res, next) {
+        try {
+            const { id, disponibilidadId } = req.params;
+            const medicoActualizado = await this.medicoService.editarDisponibilidad(id, disponibilidadId, req.body);
+            res.json(medicoActualizado);
+        } catch (error) {
+            next(error);
+        }
+    }
+    
+    async eliminarDisponibilidad(req, res, next) {
+        try {
+            const { id, disponibilidadId } = req.params;
+            const medicoActualizado = await this.medicoService.eliminarDisponibilidad(id, disponibilidadId);
+            res.json(medicoActualizado);
+        } catch (error) {
+            next(error);
+        }
+    }
+    
 }

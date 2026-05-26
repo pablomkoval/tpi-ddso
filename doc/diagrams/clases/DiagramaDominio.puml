@@ -71,6 +71,7 @@ class Medico {
 }
 
 class DisponibilidadHoraria {
+    - id: uuid
     - diaSemana: DiaSemana
     - horaDesde: String
     - horaHasta: String
