@@ -3,8 +3,6 @@ import { MongoDBClient } from "./config/database.js";
 
 const puerto =  3000;
 
-
-
 const start = async () => {
     try {
 

@@ -2,19 +2,14 @@ import mongoose from 'mongoose';
 import { Notificacion } from '../domain/models/entities/turnos/Notificacion.js';
 
 const notificacionSchema = new mongoose.Schema({
-    destinatarioId: {
-        type: String,
-        required: true
-    },
-    /*
     destinatario: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Usuario',
+        ref: "Usuario",
         required: true
-    } 
-    */
-    remitenteId: {
-        type: String,
+    },
+    remitente: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Usuario",
         required: true
     },
     mensaje: {
@@ -32,7 +27,15 @@ const notificacionSchema = new mongoose.Schema({
     fechaHoraLeida: {
         type: Date,
         default: null
+    },
+    eliminado: {
+        type: Boolean,
+        default: false
     }
+}, {
+    timestamps: true,
+    versionKey: false,
+    collection: 'notificaciones'
 });
 
 notificacionSchema.loadClass(Notificacion);

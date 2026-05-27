@@ -4,9 +4,25 @@ export class NotificacionesRepository {
     constructor() {
         this.model = NotificacionModel;
     }
-    
-    async findAll() {
-        return await this.model.find({eliminada: false});
+
+    async findAllPaginated(criterios = {}, page = 1, limit = 10) {
+        const skip = (page -1) * limit;
+
+        const filtros = { ...criterios, eliminado: false };
+
+        const notificaciones = await this.model
+            .find(filtros)
+            .skip(skip)
+            .limit(limit);
+
+        const total = await this.model.countDocuments(filtros);
+        
+        return {
+            notificaciones,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit)
+        }
     }
 
     async findById(id) {
@@ -26,8 +42,14 @@ export class NotificacionesRepository {
         );
     }
 
-    async delete(id) {
-        return await this.model.findByIdAndDelete(id);
+    async softDelete(id) {
+        return await this.model.findByIdAndUpdate( id,
+            {
+                eliminado: true
+            },
+            {
+                new: true
+            }
+        )
     }
-
 }

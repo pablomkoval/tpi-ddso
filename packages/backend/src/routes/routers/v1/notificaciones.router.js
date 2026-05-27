@@ -7,7 +7,7 @@ const notificacionesRouter = express.Router();
 const controller = new NotificacionesController();
 
 notificacionesRouter.get("/", (req, res, next) => {
-    controller.findAll(req, res, next);
+    controller.findAllPaginated(req, res, next);
 });
 
 notificacionesRouter.get("/leidas", (req, res, next) => {
@@ -22,8 +22,12 @@ notificacionesRouter.patch("/:id/leer", (req, res, next) => {
     controller.marcarComoLeida(req, res, next);
 });
 
-notificacionesRouter.put("/", (req, res, next) => {
+notificacionesRouter.post("/", (req, res, next) => {
     controller.create(req, res, next);
+});
+
+notificacionesRouter.delete("/:id", (req, res, next) => {
+    controller.softDelete(req, res, next);
 });
 
 export default notificacionesRouter;
