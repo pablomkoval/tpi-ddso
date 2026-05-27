@@ -1,13 +1,13 @@
-import { NotificacionesRepository } from '../domain/models/repositories/notificaciones.repository.js';
+//import { NotificacionesRepository } from '../domain/models/repositories/notificaciones.repository.js';
 import { Notificacion } from '../domain/models/entities/turnos/Notificacion.js'
 
 export class NotificacionesService {
-    // constructor(notificacionesRepository) {
-    //     this.notificacionesRepository = notificacionesRepository;
-    // }
-    constructor() {
-        this.notificacionesRepository = new NotificacionesRepository();
+    constructor(notificacionesRepository) {
+    this.notificacionesRepository = notificacionesRepository;
     }
+    // constructor() {
+    //     this.notificacionesRepository = new NotificacionesRepository();
+    // }
 
 
     toDTO(notificacion) {

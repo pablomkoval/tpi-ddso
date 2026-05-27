@@ -1,12 +1,12 @@
-import { NotificacionesService } from "../services/notificaciones.service.js";
+//import { NotificacionesService } from "../services/notificaciones.service.js";
 export class NotificacionesController {
-    // constructor(notificacionesService) {
-    //     this.notificacionesService = notificacionesService;
-    // }
-
-    constructor() {
-        this.notificacionesService = new NotificacionesService();
+    constructor(notificacionesService) {
+        this.notificacionesService = notificacionesService;
     }
+
+    // constructor() {
+    //     this.notificacionesService = new NotificacionesService();
+    // }
 
     async findAllPaginated(req, res, next) {
         try {

@@ -1,10 +1,12 @@
 import express from "express";
 import { NotificacionesController } from "../../../controllers/notificaciones.controller.js";
-
+import { NotificacionesService } from "../../../services/notificaciones.service.js";
+import { NotificacionesRepository } from "../../../domain/models/repositories/notificaciones.repository.js";
 
 const notificacionesRouter = express.Router();
-
-const controller = new NotificacionesController();
+const repository = new NotificacionesRepository();
+const service = new NotificacionesService(repository);
+const controller = new NotificacionesController(service);
 
 notificacionesRouter.get("/", (req, res, next) => {
     controller.findAllPaginated(req, res, next);
