@@ -6,9 +6,9 @@ import { sedeSchema } from "./SedeSchema.js";
 const medicoSchema = new mongoose.Schema(
     {
         usuario: {
-            type: Object,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Usuario",
             required: true,
-            trim: true
         },
         matricula: {
             type: String,
