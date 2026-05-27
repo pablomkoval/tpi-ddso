@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, jest } from "@jest/globals";
 import MedicoService from "../../../src/services/MedicoService.js";
+import { DiaSemana } from "../../../src/domain/enum/DiaSemana.js";
 
 describe("Servicios Médico", () => {
     let servicio;
@@ -47,7 +48,7 @@ describe("Servicios Médico", () => {
                 sedes: [sede],
                 disponibilidades: [
                     {
-                        diaSemana: "LUNES",
+                        diaSemana: DiaSemana.LUNES,
                         horaDesde: "09:00",
                         horaHasta: "17:00",
                         sede: sede
@@ -82,7 +83,7 @@ describe("Servicios Médico", () => {
                 sedes: [sede1],
                 disponibilidades: [
                     {
-                        diaSemana: "LUNES",
+                        diaSemana: DiaSemana.LUNES,
                         horaDesde: "09:00",
                         horaHasta: "17:00",
                         sede: sede1
@@ -98,7 +99,7 @@ describe("Servicios Médico", () => {
                 sedes: [sede2],
                 disponibilidades: [
                     {
-                        diaSemana: "MARTES",
+                        diaSemana: DiaSemana.MARTES,
                         horaDesde: "10:00",
                         horaHasta: "18:00",
                         sede: sede2
@@ -127,7 +128,7 @@ describe("Servicios Médico", () => {
                 sedes: [sede2],
                 disponibilidades: [
                     {
-                        diaSemana: "MARTES",
+                        diaSemana: DiaSemana.MARTES,
                         horaDesde: "10:00",
                         horaHasta: "18:00",
                         sede: sede2
@@ -163,7 +164,7 @@ describe("Servicios Médico", () => {
                 sedes: [sede1],
                 disponibilidades: [
                     {
-                        diaSemana: "LUNES",
+                        diaSemana: DiaSemana.LUNES,
                         horaDesde: "09:00",
                         horaHasta: "17:00",
                         sede: sede1
@@ -197,7 +198,7 @@ describe("Servicios Médico", () => {
                 sedes: [sede1],
                 disponibilidades: [
                     {
-                        diaSemana: "LUNES",
+                        diaSemana: DiaSemana.LUNES,
                         horaDesde: "09:00",
                         horaHasta: "17:00",
                         sede: sede1
@@ -207,7 +208,7 @@ describe("Servicios Médico", () => {
             
             const medicoCreado = await servicio.create(medicoDTO);
             const nuevaDisponibilidad = {
-                diaSemana: "MARTES",
+                diaSemana: DiaSemana.MARTES,
                 horaDesde: "10:00",
                 horaHasta: "18:00",
                 sede: sede1

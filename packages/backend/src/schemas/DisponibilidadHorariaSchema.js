@@ -24,6 +24,10 @@ export const disponibilidadHorariaSchema = new mongoose.Schema(
         sede: {
             type: sedeSchema,
             required: true
+        },
+        servicio: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true
         }
     },
     { _id: false }

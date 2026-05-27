@@ -1,0 +1,5 @@
+# Justificaciones de Diseño - Entrega 2: API + Persistencia
+## Generación de Turnos con job programado
+* Se implementó el método `generarTurnos()` en `TurnoService` para generar turnos automáticamente a partir de las disponibilidades de los médicos. Este método se ejecuta diariamente mediante un job programado (ej: con `node-cron`) para asegurar que siempre haya turnos disponibles para los próximos días sin necesidad de intervención manual.
+* La generación de turnos se basa en las disponibilidades definidas por cada médico, creando instancias de `Turno` para cada combinación de día, horario y sede autorizada. Esto garantiza que los turnos reflejen fielmente las reglas de disponibilidad y ubicación de cada médico.
+* Al centralizar la lógica de generación en `TurnoService`, se facilita la gestión de turnos y se mantiene una separación clara entre la lógica de dominio (en `Medico` y `DisponibilidadHoraria`) y la lógica de aplicación (en `TurnoService`), lo que mejora la mantenibilidad y escalabilidad del sistema.

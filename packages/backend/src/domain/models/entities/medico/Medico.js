@@ -36,7 +36,8 @@ export default class Medico {
             diaSemana: disponibilidad.diaSemana,
             horaDesde: disponibilidad.horaDesde,
             horaHasta: disponibilidad.horaHasta,
-            sede: disponibilidad.sede
+            sede: disponibilidad.sede,
+            servicioMedico: disponibilidad.servicioMedico
         });
     
         // Validar que la sede de la disponibilidad esté autorizada para el médico
@@ -52,7 +53,8 @@ export default class Medico {
                     diaSemana: d.diaSemana, 
                     horaDesde: d.horaDesde,
                     horaHasta: d.horaHasta, 
-                    sede: d.sede
+                    sede: d.sede,
+                    servicioMedico: d.servicioMedico
                 });
                 return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
             })
@@ -84,7 +86,8 @@ export default class Medico {
             diaSemana: cambios.diaSemana ?? disponibilidadExistente.diaSemana,
             horaDesde: cambios.horaDesde ?? disponibilidadExistente.horaDesde,
             horaHasta: cambios.horaHasta ?? disponibilidadExistente.horaHasta,
-            sede: cambios.sede ?? disponibilidadExistente.sede
+            sede: cambios.sede ?? disponibilidadExistente.sede,
+            servicioMedico: cambios.servicioMedico ?? disponibilidadExistente.servicioMedico
         });
 
         const disponibilidadValidada = this.validarDisponibilidad(disponibilidadEditada);
@@ -98,6 +101,13 @@ export default class Medico {
 
     tieneTurnoEn(fechaHora) {
         return this.turnos.some(turno => turno.fechaHora.getTime() === fechaHora.getTime());
+    }
+
+    generarTurnos(diasACubrir = 7) {
+        const servicios = [...this.especialidades, ...this.practicas]; // A falta de clase abstracta "Servicio"
+        servicios.forEach(s => {
+            this.generarTurnosPara(s, diasACubrir);
+        })
     }
 
     generarTurnosPara(servicio, diasACubrir = 7) {
@@ -118,7 +128,10 @@ export default class Medico {
         };
 
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
-        for (const disponibilidad of this.disponibilidades) {
+        this.disponibilidades.forEach(disponibilidad => {
+            if ( disponibilidad.servicioMedico.id !== servicio.id ) {
+                return;
+            }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
                 fechaActual <= fechaFinal;
                 fechaActual = new Date(fechaActual.getTime() + SEMANA_MS)) {
@@ -132,7 +145,7 @@ export default class Medico {
                     this.turnos.push(turno);
                 }
             }
-        }
+        })
     }
 
     obtenerTurnos() {
