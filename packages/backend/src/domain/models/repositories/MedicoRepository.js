@@ -15,14 +15,20 @@ export default class MedicoRepository {
     }
 
     async findById(id) {
-        return await this.model.findById(id);
+        return await this.model.findById(id)
+            .populate('especialidades')
+            .populate('practicas');
     }
 
     async 
 
     async findDisponibilidadesById(id) {
         try {
-            const medico = await this.model.findById(id).populate('disponibilidades');
+            const medico = await this.model.findById(id)
+                .populate('disponibilidades')
+                .populate('especialidades')
+                .populate('practicas');
+            
             if (!medico) {
                 throw new Error('Médico no encontrado');
             }

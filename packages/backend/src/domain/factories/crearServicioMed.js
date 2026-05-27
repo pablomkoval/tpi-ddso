@@ -1,8 +1,10 @@
+//POR AHORA, DEPRECADA
+
 import { Practica } from "../models/entities/medico/Practica";
 import { Especialidad } from "../models/entities/medico/Especialidad";
 import { TipoDeServicioInvalido } from "../errors/TipoDeServicioInvalido";
 
-export function crearServicio(datosServicioMed) {
+export function crearServicioMed(datosServicioMed) {
   if (datosServicioMed.tipoServicio === "especialidad") {
     return new Especialidad(
       datosServicioMed.nombre,

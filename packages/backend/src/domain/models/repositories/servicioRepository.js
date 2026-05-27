@@ -1,10 +1,10 @@
-import { ServicioMedModel } from "../../../schemas/servicioMedSchema";
+import { ServicioModel } from "../../../schemas/ServicioSchema";
 
-export class ServicioMedRepository {
+export class ServicioRepository {
 
 
     constructor() {
-        this.model = ServicioMedModel;
+        this.model = ServicioModel;
     }
 
     async findAll() {
@@ -19,12 +19,11 @@ export class ServicioMedRepository {
         return await this.model.findOne({ nombre });
     }
 
-    async save(servicioMed) {
-        const nuevoServicioMed = new this.model(servicioMed);
-        return await nuevoServicioMed.save(); // puede reducirse a un this.model.create(servicioMed)
+    async save(datosServicio) {
+        return await this.model.create(datosServicio)
     }
-    async update(id, servicioMedModificado) {
-        return await this.model.findByIdAndUpdate(id, servicioMedModificado, { new: true });
+    async update(id, servicioModificado) {
+        return await this.model.findByIdAndUpdate(id, servicioModificado, { new: true });
     }
 
     async delete(id) {
@@ -35,8 +34,8 @@ export class ServicioMedRepository {
         return this.model.countDocuments();
     }
 
-    async saveAll(listaServicioMeds) {
-        return await this.model.insertMany(listaServicioMeds)
+    async saveAll(listaServicios) {
+        return await this.model.insertMany(listaServicios)
     }
 
     // posibles filtros
@@ -52,7 +51,7 @@ export class ServicioMedRepository {
     async findAllPaginated(numeroPagina, limitePorPagina/* , filtros = {} */) {
         const skip = (numeroPagina - 1) * limitePorPagina
 
-        const servicioMeds =
+        const servicios =
             await this.model
                 .find({ eliminado: false })
                 .skip(skip)
@@ -66,7 +65,7 @@ export class ServicioMedRepository {
             })
 
         return {
-            servicioMeds,
+            servicios,
             total,
         }
     }

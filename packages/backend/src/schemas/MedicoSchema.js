@@ -19,14 +19,17 @@ const medicoSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
-        especialidades: {
-            type: Array,
+        especialidades: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ServicioMed',
             default: []
-        },
-        practicas: {
-            type: Array,
+        }],
+
+        practicas: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ServicioMed',
             default: []
-        },
+        }],
         sedes: {
             type: [sedeSchema],
             default: []

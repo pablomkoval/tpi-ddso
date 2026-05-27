@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ServicioMedModel } from './servicioMedSchema';
+import { ServicioMedModel } from './ServicioMedSchema';
 
 const especialidadSchema = new mongoose.Schema({});
 
