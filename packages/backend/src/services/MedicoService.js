@@ -22,7 +22,15 @@ export default class MedicoService {
     }
 
     async create(data) {
-        const { usuario, matricula, nombre, especialidades, practicas, sedes, disponibilidades } = data;
+        const { usuario, matricula, nombre, especialidades, practicas, sedes, disponibilidades = []} = data;
+
+        const usuarioEncontrado = await UsuarioModel.findOne({ nombre: usuario });
+        if (!usuarioEncontrado) {
+            throw new AppError("El usuario de login no existe", 404, "USUARIO_NO_ENCONTRADO");
+        }
+
+        const usuarioId = usuarioEncontrado._id;
+
         const disponibilidadesInstanciadas = disponibilidades.map(d => new DisponibilidadHoraria(
             {
                 diaSemana: d.diaSemana,
