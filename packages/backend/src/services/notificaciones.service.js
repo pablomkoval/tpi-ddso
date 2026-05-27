@@ -76,6 +76,6 @@ export class NotificacionesService {
     }
 
     async findAllPaginated(page, limit) {
-        return await this.notificacionesRepository.findAllPaginated(page, limit);
+        return await this.notificacionesRepository.findAllPaginated({}, page, limit);
     }
 }
