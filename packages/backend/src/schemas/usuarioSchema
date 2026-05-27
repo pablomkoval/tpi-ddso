@@ -4,7 +4,8 @@ import { Usuario } from '../domain/models/entities/Usuario.js';
 const usuarioSchema = new mongoose.Schema({
     nombre: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     contraseña: {
         type: String,
