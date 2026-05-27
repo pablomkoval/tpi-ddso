@@ -2,6 +2,7 @@ import { describe, test, expect } from "@jest/globals";
 import Medico from "../../../../src/domain/models/entities/medico/Medico";
 import { DisponibilidadHoraria } from "../../../../src/domain/models/entities/medico/DisponibilidadHoraria";
 import { Usuario } from "../../../../src/domain/models/entities/Usuario"
+import { DiaSemana} from "../../../../src/domain/enum/DiaSemana.js";
 
 describe("Medico", () => {
     describe("Creación de un médico", () => {
@@ -10,7 +11,7 @@ describe("Medico", () => {
             const usuario = new Usuario("medico1", "password123");
             const sede = { id: "sede1", nombre: "Sede Central" };
             const disponibilidad = new DisponibilidadHoraria({
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "09:00",
                 horaHasta: "17:00",
                 sede: sede
@@ -40,7 +41,7 @@ describe("Medico", () => {
             const usuario = new Usuario("medico1", "password123");
             const sede = { id: "sede1", nombre: "Sede Central" };
             const disponibilidad1 = new DisponibilidadHoraria({
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "09:00",
                 horaHasta: "17:00",
                 sede: sede
@@ -56,7 +57,7 @@ describe("Medico", () => {
             )
 
             const disponibilidad2 = new DisponibilidadHoraria({
-                diaSemana: "MARTES",
+                diaSemana: DiaSemana.MARTES,
                 horaDesde: "10:00",
                 horaHasta: "16:00",
                 sede: sede
@@ -71,7 +72,7 @@ describe("Medico", () => {
             const sede1 = { id: "sede1", nombre: "Sede Central" };
             const sede2 = { id: "sede2", nombre: "Sede Norte" };
             const disponibilidad1 = new DisponibilidadHoraria({
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "09:00",
                 horaHasta: "17:00",
                 sede: sede1
@@ -89,7 +90,7 @@ describe("Medico", () => {
             expect(medico.disponibilidades).toEqual([disponibilidad1]);
 
             const disponibilidad2 = new DisponibilidadHoraria({
-                diaSemana: "MARTES",
+                diaSemana: DiaSemana.MARTES,
                 horaDesde: "10:00",
                 horaHasta: "16:00",
                 sede: sede2 // La sede2 no está autorizada para el médico
@@ -107,7 +108,7 @@ describe("Medico", () => {
             const sede1 = { id: "sede1", nombre: "Sede Central" };
             const disponibilidad1 = new DisponibilidadHoraria({
                 id: "disp1",
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "09:00",
                 horaHasta: "17:00",
                 sede: sede1
@@ -124,7 +125,7 @@ describe("Medico", () => {
             )
 
             const disponibilidadEditada = {
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "08:00",
                 horaHasta: "16:00",
                 sede: sede1
@@ -142,7 +143,7 @@ describe("Medico", () => {
             const sede2 = { id: "sede2", nombre: "Sede Norte" };
             const disponibilidad1 = new DisponibilidadHoraria({
                 id: "disp1",
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "09:00",
                 horaHasta: "17:00",
                 sede: sede1
@@ -159,7 +160,7 @@ describe("Medico", () => {
             )
 
             const disponibilidadEditada = {
-                diaSemana: "LUNES",
+                diaSemana: DiaSemana.LUNES,
                 horaDesde: "08:00",
                 horaHasta: "16:00",
                 sede: sede2 // La sede2 no está autorizada para el médico

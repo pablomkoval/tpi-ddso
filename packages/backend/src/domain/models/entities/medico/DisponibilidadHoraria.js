@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export class DisponibilidadHoraria{
 
-    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede}){
+    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, servicioMedico}){
         this.validarDiaSemana(diaSemana);
         this.validarHorario(horaDesde);
         this.validarHorario(horaHasta);
@@ -17,10 +17,11 @@ export class DisponibilidadHoraria{
         this.horaDesde = horaDesde; //string de tipo "18:40"
         this.horaHasta = horaHasta;
         this.sede = sede;
+        this.servicioMedico = servicioMedico; // servicio que presta en ese horario
     }
 
     validarDiaSemana(diaSemana) {
-        const diasValidos = Object.keys(DiaSemana);
+        const diasValidos = Object.values(DiaSemana);
         if (!diasValidos.includes(diaSemana)) {
             throw new DiaSemanaInvalidoError(`El día de semana "${diaSemana}" no es válido`);
         }
