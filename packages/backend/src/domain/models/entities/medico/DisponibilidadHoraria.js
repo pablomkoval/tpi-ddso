@@ -2,23 +2,26 @@ import { DiaSemana } from "../../../enum/DiaSemana.js";
 import { HorarioInvalidoError } from "../../../errors/HorarioInvalidoError.js";
 import { RangoHorarioInvalidoError } from "../../../errors/RangoHorarioInvalidoError.js";
 import { DiaSemanaInvalidoError } from "../../../errors/DiaSemanaInvalidoError.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class DisponibilidadHoraria{
 
-    constructor(diaSemana, horaDesde, horaHasta, sede){
+    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, servicioMedico}){
         this.validarDiaSemana(diaSemana);
         this.validarHorario(horaDesde);
         this.validarHorario(horaHasta);
         this.validarRangoHorario(horaDesde, horaHasta);
 
+        this.id = id;
         this.diaSemana = diaSemana;
         this.horaDesde = horaDesde; //string de tipo "18:40"
         this.horaHasta = horaHasta;
         this.sede = sede;
+        this.servicioMedico = servicioMedico; // servicio que presta en ese horario
     }
 
     validarDiaSemana(diaSemana) {
-        const diasValidos = Object.keys(DiaSemana);
+        const diasValidos = Object.values(DiaSemana);
         if (!diasValidos.includes(diaSemana)) {
             throw new DiaSemanaInvalidoError(`El día de semana "${diaSemana}" no es válido`);
         }
@@ -75,6 +78,9 @@ export class DisponibilidadHoraria{
     seSolapaCon(otraDisponibilidad) {
         if (this.diaSemana !== otraDisponibilidad.diaSemana) {
             return false; // No se solapan si son en días diferentes
+        }
+        if(this.id === otraDisponibilidad.id){
+            return false; // No se solapan si son la misma disponibilidad (útil para edición)
         }
 
         const thisDesde = this.obtenerHoraDesde();

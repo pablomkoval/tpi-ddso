@@ -4,19 +4,18 @@ import { DisponibilidadHoraria } from "./DisponibilidadHoraria.js";
 import { Turno } from "../turnos/Turno.js";
 
 export default class Medico {
-
-    especialidades = [];
-    practicas = [];
-    sedes = [];
     disponibilidades = [];
     turnos = [];
 
-    constructor(usuario, matricula, nombre) {
+    constructor(usuario, matricula, nombre, especialidades = [], practicas = [], sedes = [], disponibilidades = []) {
         this.id = "placeholder";
         this.usuario = usuario;
         this.matricula = matricula;
         this.nombre = nombre;
-
+        this.especialidades = especialidades;
+        this.practicas = practicas;
+        this.sedes = sedes;
+        this.disponibilidades = this.validarDisponibilidades(disponibilidades);
     }
 
     agregarEspecialidad(nuevaEspecialidad) {
@@ -31,29 +30,68 @@ export default class Medico {
         this.sedes.push(nuevaSede);
     }
 
-    definirDisponibilidad(disponibilidad) {
-        const nuevaDisponibilidad = new DisponibilidadHoraria(
-                disponibilidad.diaSemana,
-                disponibilidad.horaDesde,
-                disponibilidad.horaHasta,
-                disponibilidad.sede
-            );
-
-        // Validar que la sede de la disponibilidad corresponde con las sedes del médico
+    validarDisponibilidad(disponibilidad) {
+        const nuevaDisponibilidad = new DisponibilidadHoraria({
+            id: disponibilidad.id,
+            diaSemana: disponibilidad.diaSemana,
+            horaDesde: disponibilidad.horaDesde,
+            horaHasta: disponibilidad.horaHasta,
+            sede: disponibilidad.sede,
+            servicioMedico: disponibilidad.servicioMedico
+        });
+    
+        // Validar que la sede de la disponibilidad esté autorizada para el médico
         const sedeValida = this.sedes.some(sede => sede.id === nuevaDisponibilidad.sede.id);
         if (!sedeValida) {
             throw new SedeNoAutorizadaError(`La sede "${nuevaDisponibilidad.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
         }
+
         // Validar que la nueva disponibilidad no se solape con las existentes
         if (this.disponibilidades.some(d => {
-                const disponibilidadVieja = new DisponibilidadHoraria(d.diaSemana, d.horaDesde, d.horaHasta, d.sede);
+                const disponibilidadVieja = new DisponibilidadHoraria({
+                    id: d.id,
+                    diaSemana: d.diaSemana, 
+                    horaDesde: d.horaDesde,
+                    horaHasta: d.horaHasta, 
+                    sede: d.sede,
+                    servicioMedico: d.servicioMedico
+                });
                 return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
             })
         ) {
-            throw new Error("La disponibilidad se solapa con una existente")
+            throw new Error("La disponibilidad se solapa con una existente");
         }
-        console.log("Disponibilidad válida, agregando al médico...");
-        this.disponibilidades.push(nuevaDisponibilidad);
+
+        return nuevaDisponibilidad;
+    }
+
+    validarDisponibilidades(disponibilidades) {
+        return disponibilidades.map(d => this.validarDisponibilidad(d));
+    }
+
+    agregarDisponibilidades(nuevasDisponibilidades) {
+        const disponibilidadesValidadas = this.validarDisponibilidades(nuevasDisponibilidades);
+        disponibilidadesValidadas.forEach(nuevaDisponibilidad => this.disponibilidades.push(nuevaDisponibilidad));
+    }
+
+    editarDisponibilidad(disponibilidadId, cambios) {
+        const index = this.disponibilidades.findIndex(d => d.id === disponibilidadId);
+        if (index === -1) {
+            throw new Error("No se encontró la disponibilidad a editar");
+        }
+
+        const disponibilidadExistente = this.disponibilidades[index];
+        const disponibilidadEditada = new DisponibilidadHoraria({
+            id: disponibilidadExistente.id,
+            diaSemana: cambios.diaSemana ?? disponibilidadExistente.diaSemana,
+            horaDesde: cambios.horaDesde ?? disponibilidadExistente.horaDesde,
+            horaHasta: cambios.horaHasta ?? disponibilidadExistente.horaHasta,
+            sede: cambios.sede ?? disponibilidadExistente.sede,
+            servicioMedico: cambios.servicioMedico ?? disponibilidadExistente.servicioMedico
+        });
+
+        const disponibilidadValidada = this.validarDisponibilidad(disponibilidadEditada);
+        this.disponibilidades[index] = disponibilidadValidada;
     }
 
     prestaServicio(servicio) {
@@ -63,6 +101,13 @@ export default class Medico {
 
     tieneTurnoEn(fechaHora) {
         return this.turnos.some(turno => turno.fechaHora.getTime() === fechaHora.getTime());
+    }
+
+    generarTurnos(diasACubrir = 7) {
+        const servicios = [...this.especialidades, ...this.practicas]; // A falta de clase abstracta "Servicio"
+        servicios.forEach(s => {
+            this.generarTurnosPara(s, diasACubrir);
+        })
     }
 
     generarTurnosPara(servicio, diasACubrir = 7) {
@@ -83,7 +128,10 @@ export default class Medico {
         };
 
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
-        for (const disponibilidad of this.disponibilidades) {
+        this.disponibilidades.forEach(disponibilidad => {
+            if ( disponibilidad.servicioMedico.id !== servicio.id ) {
+                return;
+            }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
                 fechaActual <= fechaFinal;
                 fechaActual = new Date(fechaActual.getTime() + SEMANA_MS)) {
@@ -97,7 +145,7 @@ export default class Medico {
                     this.turnos.push(turno);
                 }
             }
-        }
+        })
     }
 
     obtenerTurnos() {

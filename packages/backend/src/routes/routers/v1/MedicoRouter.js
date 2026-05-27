@@ -27,4 +27,8 @@ router.route('/:idMedico/servicios/:idServicio')
 	/* .delete((req, res, next) => medicoController.bajaServicioMed(req, res, next))
  */
 
+router.route("/:id/disponibilidad/:disponibilidadId")
+    .patch((req,res,next) => medicoController.editarDisponibilidad(req,res,next))
+    .delete((req,res,next) => medicoController.eliminarDisponibilidad(req,res,next))
+
 export default router;
