@@ -6,7 +6,7 @@ import { sedeSchema } from "./SedeSchema.js";
 const medicoSchema = new mongoose.Schema(
     {
         usuario: {
-            type: String,
+            type: Object,
             required: true,
             trim: true
         },

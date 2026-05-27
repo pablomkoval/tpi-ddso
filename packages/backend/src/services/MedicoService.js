@@ -66,7 +66,7 @@ export default class MedicoService {
 
     async obtenerDisponibilidades(id) {
         try {
-            const medico = await this.medicoRepository.model.findById(id);
+            const medico = await this.medicoRepository.findById(id);
             if (!medico) {
                 throw new Error('Médico no encontrado');
             }
