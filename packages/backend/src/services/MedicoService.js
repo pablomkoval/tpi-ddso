@@ -2,6 +2,8 @@ import MedicoRepository from "../domain/models/repositories/MedicoRepository.js"
 import AppError from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
+import { NotFoundError } from "../shared/errors/AppError.js"; // Ajustá los ../ según tu carpeta
+
 export default class MedicoService {
     constructor({ medicoRepository = new MedicoRepository() } = {}) {
         this.medicoRepository = medicoRepository;
@@ -49,7 +51,7 @@ export default class MedicoService {
         const medicoExistente = await this.medicoRepository.findById(id);
 
         if (!medicoExistente) {
-            // error de q no se encontro el medico
+            throw new NotFoundError("No se puede actualizar, médico con Id " + id + " no encontrado", "MEDICO_UPDATE_FAIL");
         }
 
         const actualizado = await this.medicoRepository.update(id, data);
@@ -65,8 +67,7 @@ export default class MedicoService {
         const medico = await this.medicoRepository.findById(id);
 
         if (!medico) {
-            //dsp fijarse errores con el error handler
-            throw new AppError("Medico de Id ${id} no encontrado", 404, "MEDICO_NO_ENCONTRADO");
+            throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
         }
 
         return this.toDTO(medico);
