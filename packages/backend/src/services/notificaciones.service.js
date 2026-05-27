@@ -1,13 +1,11 @@
-//import { NotificacionesRepository } from '../domain/models/repositories/notificaciones.repository.js';
+import { NotFoundError } from '../shared/errors/AppError.js';
+import { ValidationError } from '../shared/errors/AppError.js';
 import { Notificacion } from '../domain/models/entities/turnos/Notificacion.js'
 
 export class NotificacionesService {
     constructor(notificacionesRepository) {
     this.notificacionesRepository = notificacionesRepository;
     }
-    // constructor() {
-    //     this.notificacionesRepository = new NotificacionesRepository();
-    // }
 
 
     toDTO(notificacion) {
@@ -45,7 +43,7 @@ export class NotificacionesService {
         const {destinatario, remitente, mensaje} = data;
 
         if(!destinatario || !remitente || !mensaje) {
-            //throw new ValidationError("Los datos para la notificacion no son validos");
+            throw new ValidationError("Los datos para la notificacion no son validos");
         }
 
         const nueva = new Notificacion(destinatario, remitente, mensaje);
@@ -58,7 +56,7 @@ export class NotificacionesService {
         const notificacion = await this.notificacionesRepository.findById(notificacionId);
 
         if (!notificacion) {
-            //throw new NotFoundError("Notificacion no encontrada");
+            throw new NotFoundError("Notificacion no encontrada");
         }
 
         notificacion.marcarComoLeida();

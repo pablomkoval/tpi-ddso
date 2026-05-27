@@ -4,17 +4,13 @@ export class NotificacionesController {
         this.notificacionesService = notificacionesService;
     }
 
-    // constructor() {
-    //     this.notificacionesService = new NotificacionesService();
-    // }
-
     async findAllPaginated(req, res, next) {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
             const notificaciones = await this.notificacionesService.findAllPaginated(page, limit);
             res.json(notificaciones);
-        }  catch (error) {
+        } catch (error) {
             next(error);
         }
     }
@@ -26,7 +22,7 @@ export class NotificacionesController {
             const limit = Number(req.query.limit) || 5;
 
             if (!userId) {
-                return res.status(400).json({error: "Se requiere userId en los query params"});
+                return res.status(400).json({ error: "Se requiere userId en los query params" });
             }
 
             const notificaciones = await this.notificacionesService.obtenerLeidas(userId, page, limit);
@@ -43,7 +39,7 @@ export class NotificacionesController {
             const limit = Number(req.query.limit) || 5;
 
             if (!userId) {
-                return res.status(400).json({error: "Se requiere userId en los query params"});
+                return res.status(400).json({ error: "Se requiere userId en los query params" });
             }
 
             const notificaciones = await this.notificacionesService.obtenerNoLeidas(userId, page, limit);
@@ -89,7 +85,7 @@ export class NotificacionesController {
                 .softDelete(req.params.id);
 
             res.json(notificacion)
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     }

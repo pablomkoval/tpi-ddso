@@ -60,12 +60,11 @@ const swaggerOptions = {
   },
   // Especifica dónde buscar los comentarios JSDoc
   apis: [
-    './src/routes/*.js',
-    './src/controllers/*.js',
+    './packages/backend/src/routes/routers/**/*.js',
+    './packages/backend/src/controllers/*.js',
   ],
 };
 
 // Generar especificación de Swagger
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
 export default swaggerSpec;
