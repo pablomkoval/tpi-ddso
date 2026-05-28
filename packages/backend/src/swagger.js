@@ -213,5 +213,4 @@ const swaggerOptions = {
 
 // Generar especificación de Swagger
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
 export default swaggerSpec;

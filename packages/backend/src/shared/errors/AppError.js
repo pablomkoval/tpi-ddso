@@ -19,6 +19,12 @@ export class NotFoundError extends AppError {
     }
 }
 
+export class ValidationError extends AppError {
+  constructor(message = 'Datos de validación inválidos') {
+    super(message, 400);
+  }
+}
+
 export class ConflictError extends AppError {
     constructor(message, codigo = "CONFLICTO") {
         super(message, 409, codigo);

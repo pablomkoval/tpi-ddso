@@ -1,10 +1,13 @@
-import { Notificacion } from '../models/entities/Notificacion.js'
+import { NotFoundError } from '../shared/errors/AppError.js';
+import { ValidationError } from '../shared/errors/AppError.js';
+import { Notificacion } from '../domain/models/entities/turnos/Notificacion.js'
 
 export class NotificacionesService {
     constructor(notificacionesRepository) {
-        this.notificacionesRepository = notificacionesRepository;
+    this.notificacionesRepository = notificacionesRepository;
     }
-    
+
+
     toDTO(notificacion) {
         return {
             id: notificacion.id || notificacion._id,
@@ -16,29 +19,34 @@ export class NotificacionesService {
         };
     }
 
-    async findAll() {
-        const notificaciones = await this.notificacionesRepository.findAll();
-        return notificaciones.map(n => this.toDTO(n));
+    async obtenerLeidas (userId, page, limit) {
+        const criterios = { destinatario: userId, leida: true };
+        const resultado = await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
+        
+        return {
+            ...resultado,
+            notificaciones: resultado.notificaciones.map(n => this.toDTO(n))
+        };
     }
 
-    async obtenerLeidas (userId) {
-        const notificaciones = await this.notificacionesRepository.getLeidas(userId);
-        return notificaciones.map(n => this.toDTO(n));
-    }
-
-    async obtenerNoLeidas (userId) {
-        const notificaciones = await this.notificacionesRepository.getNoLeidas(userId);
-        return notificaciones.map(n => this.toDTO(n));
+    async obtenerNoLeidas (userId, page, limit) {
+        const criterios = { destinatario: userId, leida: false };
+        const resultado = await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
+        
+        return {
+            ...resultado,
+            notificaciones: resultado.notificaciones.map(n => this.toDTO(n))
+        };
     }
 
     async create(data) {
-        const {destinatario, remitente, mensaje, fechaHoraCreacion} = data;
+        const {destinatario, remitente, mensaje} = data;
 
-        if(!destinatario || !remitente || !mensaje || !fechaHoraCreacion) {
-            //throw new ValidationError('')
+        if(!destinatario || !remitente || !mensaje) {
+            throw new ValidationError("Los datos para la notificacion no son validos");
         }
 
-        const nueva = new Notificacion(destinatario, remitente, mensaje, fechaHoraCreacion);
+        const nueva = new Notificacion(destinatario, remitente, mensaje);
         const notificacionGuardada = await this.notificacionesRepository.save(nueva);
 
         return this.toDTO(notificacionGuardada);
@@ -48,7 +56,7 @@ export class NotificacionesService {
         const notificacion = await this.notificacionesRepository.findById(notificacionId);
 
         if (!notificacion) {
-            //throw new NotFoundError("Notificacion no encontrada");
+            throw new NotFoundError("Notificacion no encontrada");
         }
 
         notificacion.marcarComoLeida();
@@ -61,12 +69,11 @@ export class NotificacionesService {
         return this.toDTO(actualizada);
     }
 
-    async delete(notificacionId) {
-        const notificacion = await this.notificacionesRepository.findById(notificacionId);
-        if (!notificacion) {
-            //throw new NotFoundError("Notificacion no encontrada");
-        }
-        await this.notificacionesRepository.delete(notificacionId);
-        return this.toDTO(notificacion);
+    async softDelete(notificacionId) {
+        return await this.notificacionesRepository.softDelete(notificacionId);
+    }
+
+    async findAllPaginated(page, limit) {
+        return await this.notificacionesRepository.findAllPaginated({}, page, limit);
     }
 }
