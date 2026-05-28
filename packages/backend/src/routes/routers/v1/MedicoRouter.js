@@ -6,8 +6,6 @@ const medicoController = new MedicoController();
 
 medicoRouter.route('/')
     .get((req, res, next) => medicoController.findAll(req, res, next))
-
-medicoRouter.route('/')
     .post((req, res, next) => medicoController.create(req, res, next))
 
 medicoRouter.route('/:idMedico')
