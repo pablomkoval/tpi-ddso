@@ -2,7 +2,8 @@ import MedicoRepository from "../domain/models/repositories/MedicoRepository.js"
 import AppError from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
-import { NotFoundError } from "../shared/errors/AppError.js"; // Ajustá los ../ según tu carpeta
+import { NotFoundError } from "../shared/errors/AppError.js";
+import UsuarioModel from "../domain/models/repositories/UsuarioModel.js";
 
 export default class MedicoService {
     constructor({ medicoRepository = new MedicoRepository() } = {}) {
@@ -42,7 +43,7 @@ export default class MedicoService {
             }
         ));
 
-        const nuevoMedico = new Medico(usuario, matricula, nombre, especialidades, practicas, sedes, disponibilidadesInstanciadas);
+        const nuevoMedico = new Medico(usuarioId, matricula, nombre, especialidades, practicas, sedes, disponibilidadesInstanciadas);
         const medicoGuardado = await this.medicoRepository.save(nuevoMedico);
         return this.toDTO(medicoGuardado);
     }
