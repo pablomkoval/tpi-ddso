@@ -66,9 +66,11 @@ export class DisponibilidadHoraria{
         const instantes = [];
 
         for (let i = 0; i < cantidadTurnos; i++) {
-            const inicioMinutos = this.obtenerHoraDesde() + (i * duracionServicioMins);
+            const inicioTurno = this.obtenerHoraDesde() + (i * duracionServicioMins);
+            const horas = Math.floor(inicioTurno / 60);
+            const minutos = inicioTurno % 60;
             const fechaHora = new Date(fecha);
-            fechaHora.setHours(0, inicioMinutos, 0, 0);
+            fechaHora.setUTCHours(horas, minutos, 0, 0);
             instantes.push(fechaHora);
         }
 

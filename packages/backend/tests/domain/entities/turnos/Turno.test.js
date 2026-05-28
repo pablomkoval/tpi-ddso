@@ -110,16 +110,16 @@ describe("Turnos", () => {
 
             const disponibilidad1 = new DisponibilidadHoraria({
                 diaSemana: DiaSemana.LUNES,
-                horaDesde: "09:00",
-                horaHasta: "11:00",
+                horaDesde: "12:00",
+                horaHasta: "14:00",
                 sede: sede1,
                 servicioMedico: practica1
             })
 
             const disponibilidad2 = new DisponibilidadHoraria({
                 diaSemana: DiaSemana.MARTES,
-                horaDesde: "09:00",
-                horaHasta: "11:00",
+                horaDesde: "12:00",
+                horaHasta: "14:00",
                 sede: sede2,
                 servicioMedico: practica2
             })
@@ -135,13 +135,12 @@ describe("Turnos", () => {
             )
 
             medico.generarTurnos(7);
-            console.log("Turnos generados:", medico.turnos.length);
             
             expect(medico.turnos.length).toBe(4);
             expect(medico.turnos[0].servicio).toBe(practica1);
             expect(medico.turnos[1].servicio).toBe(practica1);
-            /* expect(medico.turnos[2].servicio).toBe(practica1);
-            expect(medico.turnos[3].servicio).toBe(practica1); */
+            expect(medico.turnos[2].servicio).toBe(practica2);
+            expect(medico.turnos[3].servicio).toBe(practica2); 
         })
     })
 })

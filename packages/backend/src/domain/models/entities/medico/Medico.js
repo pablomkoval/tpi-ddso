@@ -121,20 +121,22 @@ export default class Medico {
 
         const siguienteFechaParaDia = (fechaBase, diaSemana) => {
             const fecha = new Date(fechaBase);
-            const diff = (diaSemana - fecha.getDay() + 7) % 7;
-            fecha.setDate(fecha.getDate() + diff);
-            fecha.setHours(0, 0, 0, 0);
+            const diff = (diaSemana - fecha.getUTCDay() + 7) % 7;
+            fecha.setUTCDate(fecha.getUTCDate() + diff);
+            fecha.setUTCHours(0, 0, 0, 0);
             return fecha;
         };
 
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
         this.disponibilidades.forEach(disponibilidad => {
-            if ( disponibilidad.servicioMedico.id !== servicio.id ) {
+            // Acá debería ser un id no el código
+            if ( disponibilidad.servicioMedico.codigo !== servicio.codigo ) {
                 return;
             }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
                 fechaActual <= fechaFinal;
                 fechaActual = new Date(fechaActual.getTime() + SEMANA_MS)) {
+                    // me fijo todos los lunes hasta llegar al limite
 
                 const instantes = disponibilidad.generarInstantesTurnoParaFecha(fechaActual, duracionTurnoEnMins);
                 for (const fechaHoraTurno of instantes) {
