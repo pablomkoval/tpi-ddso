@@ -1,25 +1,25 @@
 import express from "express";
-import { ServiciosController } from "../../../controllers/serviciosController";
+import { ServiciosController } from "../../../controllers/serviciosController.js";
 
 
 const servicioController = new ServiciosController
 
-const servicioRouter = express.Router();
+const serviciosRouter = express.Router();
 
 
-servicioRouter.route('/')
+serviciosRouter.route('/')
     .get((req, res, next) => servicioController.findAll(req, res, next))
     .post((req, res, next) => servicioController.create(req, res, next))
 
-servicioRouter.route('/seed')
+serviciosRouter.route('/seed')
     .post((req, res, next) => servicioController.seed(req, res, next))
 
-servicioRouter.route('/:id')
+serviciosRouter.route('/:id')
     .get((req, res, next) => servicioController.findById(req, res, next))
     .put((req, res, next) => servicioController.update(req, res, next))
     .delete((req, res, next) => servicioController.delete(req, res, next))
 
-servicioRouter.route('/categorias')
+serviciosRouter.route('/categorias')
     .get((req, res, next) => servicioController.seed(req, res, next))
 
-export default servicioRouter;
+export default serviciosRouter;

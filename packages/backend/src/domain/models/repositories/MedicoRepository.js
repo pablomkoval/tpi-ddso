@@ -14,13 +14,17 @@ export default class MedicoRepository {
         return await this.model.find();
     }
 
-    async findById(id) {
+    async findById(id, session = null) {
         return await this.model.findById(id)
+            .session(session)
             .populate('especialidades')
             .populate('practicas');
     }
 
-    async 
+    async guardar(medico, session = null) {
+        return await medico.save({ session })
+    }
+
 
     async findDisponibilidadesById(id) {
         try {
@@ -28,7 +32,7 @@ export default class MedicoRepository {
                 .populate('disponibilidades')
                 .populate('especialidades')
                 .populate('practicas');
-            
+
             if (!medico) {
                 throw new Error('Médico no encontrado');
             }

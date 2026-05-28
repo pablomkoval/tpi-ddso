@@ -1,4 +1,4 @@
-import { ServicioModel } from "../../../schemas/ServicioSchema";
+import { ServicioModel } from "../../../schemas/ServicioSchema.js";
 
 export class ServicioRepository {
 
@@ -31,22 +31,15 @@ export class ServicioRepository {
     }
 
     async count() {
-        return this.model.countDocuments();
+        const contado = await this.model.countDocuments({ eliminado: false })
+        console.log("Conte " + contado + " servicios guardados")
+        return contado
     }
 
     async saveAll(listaServicios) {
         return await this.model.insertMany(listaServicios)
     }
 
-    // posibles filtros
-    /* async findByMinPrice(minPrice) {
-        return await this.model.find({ costo: { $gt: minPrice } });
-    }
-    async findByPriceRange(min, max) {
-    return await this.model.find({
-        costo: { $gt: min, $lt: max }
-    });
-    } */
 
     async findAllPaginated(numeroPagina, limitePorPagina/* , filtros = {} */) {
         const skip = (numeroPagina - 1) * limitePorPagina
@@ -58,15 +51,10 @@ export class ServicioRepository {
                 .limit(limitePorPagina)
 
         // logica de filtros si se necesitase
-
-        const total =
-            await this.model.countDocuments({
-                eliminado: false
-            })
-
+        const totalServicios = await this.count()
         return {
             servicios,
-            total,
+            totalServicios,
         }
     }
 

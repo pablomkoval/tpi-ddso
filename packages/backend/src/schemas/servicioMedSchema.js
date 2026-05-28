@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const servicioMedSchema = new mongoose.Schema({
-    nombre: {
+    servicioUnico: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Servicio',
         required: true,

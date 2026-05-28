@@ -1,7 +1,5 @@
-import {
-    BadRequestError,
-} from "../errors/AppError.js"
-import { ServicioService } from "../services/servicioService.js";
+import { BadRequestError } from "../shared/errors/AppError.js";
+import { servicioService } from "../services/servicioService.js";
 import { parsearId } from "../utils/parsearId.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js"
 //import { servicioMedSchema } from "../validators/servicioMed.schema.js";
@@ -10,8 +8,8 @@ import { TipoServicio } from "../domain/enum/TipoServicio.js";
 
 
 export class ServiciosController {
-    constructor({ servicioService = new ServicioService() } = {}) {
-        this.servicioService = servicioService;
+    constructor() {
+        this.servicioService = servicioService; // instancia unica, mas prolijo con 1 solo archivo centralizado "dependencies.js"
     }
 
 
@@ -23,7 +21,7 @@ export class ServiciosController {
 
             return res.status(200).json({
                 status: "success",
-                data: resultado.sevicioMeds,
+                data: resultado.serviciosFormateados,
                 paginacion: {
                     numeroPagina: resultado.numeroPagina,
                     limitePorPagina: resultado.limitePorPagina,
@@ -73,13 +71,13 @@ export class ServiciosController {
     seed = async (req, res, next) => { //datos hardcodeados
         const SERVICIOS_INICIALES = [
             { nombre: "Consulta Pediátrica", tipoServicio: TipoServicio.ESPECIALIDAD },
-            { nombre: "Control Cardiológico", tipoServicio:  TipoServicio.ESPECIALIDAD },
-            { nombre: "Consulta Dermatológica", tipoServicio:  TipoServicio.ESPECIALIDAD },
-            { nombre: "Consulta Endocrinológica", tipoServicio:  TipoServicio.ESPECIALIDAD },
+            { nombre: "Control Cardiológico", tipoServicio: TipoServicio.ESPECIALIDAD },
+            { nombre: "Consulta Dermatológica", tipoServicio: TipoServicio.ESPECIALIDAD },
+            { nombre: "Consulta Endocrinológica", tipoServicio: TipoServicio.ESPECIALIDAD },
             { nombre: "Vacunación", tipoServicio: TipoServicio.PRACTICA },
             { nombre: "Tomografía Computada", tipoServicio: TipoServicio.PRACTICA },
             { nombre: "Resonancia Magnética", tipoServicio: TipoServicio.PRACTICA },
-            { nombre: "Consulta Oncológica", tipoServicio:  TipoServicio.ESPECIALIDAD }
+            { nombre: "Consulta Oncológica", tipoServicio: TipoServicio.ESPECIALIDAD }
         ]
 
         try {
@@ -104,16 +102,16 @@ export class ServiciosController {
     }
 
     extraerYValidarBodyServicio(body) {
-    const resultado = servicioSchema.safeParse(body)
+        const resultado = servicioSchema.safeParse(body)
 
-    if (!resultado.success) {
-        throw new BadRequestError(
-            resultado.error.issues.map(i => i.message).join(", ")
-        )
+        if (!resultado.success) {
+            throw new BadRequestError(
+                resultado.error.issues.map(i => i.message).join(", ")
+            )
+        }
+
+        return resultado.data
     }
-
-    return resultado.data
-}
 
     /* extraerFiltros(query) { posibles filtros: por costo, por duracion (raro buscar servicios por su duracion) 
         const filtros = {}
@@ -151,3 +149,4 @@ export class ServiciosController {
         return { numeroPagina, limitePorPagina }
     }
 }
+

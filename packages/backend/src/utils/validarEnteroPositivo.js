@@ -1,6 +1,4 @@
-import {
-    BadRequestError,
-} from "../errors/AppError.js"
+import { BadRequestError } from "../shared/errors/AppError.js"
 
 export function validarEnteroPositivo(numero, parametro) {
     if (!Number.isInteger(numero) || numero <= 0) {

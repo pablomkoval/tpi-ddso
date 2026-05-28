@@ -18,13 +18,38 @@ export default class Medico {
         this.disponibilidades = this.validarDisponibilidades(disponibilidades);
     }
 
-    agregarEspecialidad(nuevaEspecialidad) {
-        this.especialidades.push(nuevaEspecialidad);
+    agregarServicio(servicio) {
+        if (servicio.tipoServicioMed === "practica") {
+            this.practicas.push(servicio)
+        }
+        else {
+            this.especialidades.push(servicio)
+        }
     }
 
-    agregarPractica(nuevaPractica) {
-        this.practicas.push(nuevaPractica);
+    quitarServicio(servicio) {
+        const id = servicio._id || servicio.id || servicio
+
+        if (servicio.tipoServicioMed === "practica") {
+
+            this.practicas =
+                this.practicas.filter(s => !s.equals(id))
+
+        } else {
+
+            this.especialidades =
+                this.especialidades.filter(s => !s.equals(id))
+        }
     }
+
+
+    /*     agregarEspecialidad(nuevaEspecialidad) {
+            this.especialidades.push(nuevaEspecialidad);
+        }
+    
+        agregarPractica(nuevaPractica) {
+            this.practicas.push(nuevaPractica);
+        } */
 
     agregarSede(nuevaSede) {
         this.sedes.push(nuevaSede);
@@ -39,7 +64,7 @@ export default class Medico {
             sede: disponibilidad.sede,
             servicioMedico: disponibilidad.servicioMedico
         });
-    
+
         // Validar que la sede de la disponibilidad esté autorizada para el médico
         const sedeValida = this.sedes.some(sede => sede.id === nuevaDisponibilidad.sede.id);
         if (!sedeValida) {
@@ -48,16 +73,16 @@ export default class Medico {
 
         // Validar que la nueva disponibilidad no se solape con las existentes
         if (this.disponibilidades.some(d => {
-                const disponibilidadVieja = new DisponibilidadHoraria({
-                    id: d.id,
-                    diaSemana: d.diaSemana, 
-                    horaDesde: d.horaDesde,
-                    horaHasta: d.horaHasta, 
-                    sede: d.sede,
-                    servicioMedico: d.servicioMedico
-                });
-                return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
-            })
+            const disponibilidadVieja = new DisponibilidadHoraria({
+                id: d.id,
+                diaSemana: d.diaSemana,
+                horaDesde: d.horaDesde,
+                horaHasta: d.horaHasta,
+                sede: d.sede,
+                servicioMedico: d.servicioMedico
+            });
+            return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
+        })
         ) {
             throw new Error("La disponibilidad se solapa con una existente");
         }
@@ -129,7 +154,7 @@ export default class Medico {
 
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
         this.disponibilidades.forEach(disponibilidad => {
-            if ( disponibilidad.servicioMedico.id !== servicio.id ) {
+            if (disponibilidad.servicioMedico.id !== servicio.id) {
                 return;
             }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
@@ -150,6 +175,11 @@ export default class Medico {
 
     obtenerTurnos() {
         return [...this.turnos];
+    }
+
+    serviciosMedTotales() {
+        //dependiendo de frontend, puede convenir hacer una tupla o similar
+        return [...this.especialidades, ...this.practicas]
     }
 
 }

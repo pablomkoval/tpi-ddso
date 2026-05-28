@@ -3,14 +3,18 @@ import {
     ConflictError,
     NotFoundError,
     UnprocessableEntityError
-} from "../errors/AppError.js"
-import { ServicioRepository } from "../repositories/servicioRepository.js";
+} from "../shared/errors/AppError.js"
+import { ServicioRepository } from "../domain/models/repositories/servicioRepository.js";
+import { ServicioMedRepository } from "../domain/models/repositories/servicioMedRepository.js";
 import { servicioSchema } from "../validators/servicio.schema.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js";
 
-export class ServicioService {
-    constructor({ servicioRepository = new ServicioRepository() } = {}) {
+class ServicioService {
+    constructor({
+        servicioRepository = new ServicioRepository(),
+        servicioMedRepository = new ServicioMedRepository() } = {}) {
         this.servicioRepository = servicioRepository;
+        this.servicioMedRepository = servicioMedRepository;
     }
 
 
@@ -72,13 +76,13 @@ export class ServicioService {
             throw new BadRequestError("Debe enviar una lista de servicios no vacía")
         }
 
-        const datosServicios = listaDatosServicios.forEach((datos) => {
+        listaDatosServicios.forEach((datos) => {
             this.validarDatosServicio(datos)
             this.validarNombreDisponible(datos.nombre)
         })
-
-        const serviciosGuardados = await this.servicioRepository.saveAll(datosServicios)
-
+        console.error("llegue bien antes del repo")
+        const serviciosGuardados = await this.servicioRepository.saveAll(listaDatosServicios)
+        console.error("sobrevivi el repo")
         return serviciosGuardados.map(s => this.toDTO(s))
     }
 
@@ -151,4 +155,52 @@ export class ServicioService {
         validarEnteroPositivo(limitePorPagina, "Límite por página")
     }
 
+    ////////////////////// SERVICIOS MED ////////////////////////
+
+    async findServicioMedById(idServicioMed, session = null) {
+        validarEnteroPositivo(idServicioMed, "Id")
+
+        const servicioMed = await this.servicioMedRepository.findById(idServicioMed, session)
+
+        if (!servicioMed) {
+            throw new NotFoundError("Servicio no encontrado")
+        }
+
+        return servicioMed //no toTDO porque: 1. Otro formato, 2. Lo hace medicoService
+    }
+
+    async createServicioMed(datosServicioMed, session = null) {
+        //this.validarDatosServicioMed(datosServicioMed)
+
+        const servicioMedGuardado = await this.servicioMedRepository.save(datosServicioMed, session)
+
+        return servicioMedGuardado
+    }
+
+    async deleteServicioMed(servicioMed, session = null) {
+        await this.servicioMedRepository.softDelete(servicioMed.id, session)
+    }
+
+    async updateServicioMed(idServicioMed, datosServicioMed, session = null) {
+        return await this.servicioMedRepository.update(idServicioMed, datosServicioMed, session)
+    }
+
+    /* validarDatosServicioMed(datosServicioMed) { //deberia venir parseado desde medicoController 
+        const resultado = servicioMedSchema.safeParse(datosServicioMed)
+
+        if (!resultado.success) {
+            throw new UnprocessableEntityError(
+                resultado.error.issues
+                    .map(issue => issue.message)
+                    .join(", ")
+            )
+        }
+
+        return resultado.data
+    }
+ */
+
 }
+
+export const servicioService = new ServicioService()
+// exporto como singleton por ser usado en serviciosController y medicoService

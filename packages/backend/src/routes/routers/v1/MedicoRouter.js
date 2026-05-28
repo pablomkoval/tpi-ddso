@@ -1,34 +1,34 @@
 import express from "express";
 import MedicoController from "../../../controllers/medicos/MedicoController.js";
 
-const router = express.Router();
+const medicoRouter = express.Router();
 const medicoController = new MedicoController();
 
-router.route('/')
+medicoRouter.route('/')
     .get((req, res, next) => medicoController.findAll(req, res, next))
 
-router.route('/')
+medicoRouter.route('/')
     .post((req, res, next) => medicoController.create(req, res, next))
 
-router.route('/:id')
+medicoRouter.route('/:id')
     .get((req, res, next) => medicoController.findById(req, res, next))
 
-router.route('/:idMedico/disponibilidad')
+medicoRouter.route('/:idMedico/disponibilidad')
     .get((req, res, next) => medicoController.obtenerDisponibilidades(req, res, next))
     .post((req, res, next) => medicoController.agregarDisponibilidades(req, res, next))
 
-/* router.route('/:idMedico/servicios')
+medicoRouter.route("/:id/disponibilidad/:disponibilidadId")
+    .patch((req, res, next) => medicoController.editarDisponibilidad(req, res, next))
+    .delete((req, res, next) => medicoController.eliminarDisponibilidad(req, res, next))
+
+medicoRouter.route('/:idMedico/servicios')
     .get((req, res, next) => medicoController.obtenerServicioMeds(req, res, next))
     .post((req, res, next) => medicoController.altaServicioMed(req, res, next))
 
-router.route('/:idMedico/servicios/:idServicio')
-    .get((req, res, next) => medicoController.obtenerServicioMedPorId(req, res, next)) */
-	/* .put((req, res, next) => medicoController.actualizarServicioMed(req, res, next))  */ /* esto implica que un medico pueda cambiar el costo de servicios que dan otros medicos */
-	/* .delete((req, res, next) => medicoController.bajaServicioMed(req, res, next))
- */
+medicoRouter.route('/:idMedico/servicios/:idServicio')
+    .get((req, res, next) => medicoController.obtenerServicioMedPorId(req, res, next))
+    .patch((req, res, next) => medicoController.editarServicioMed(req, res, next))
+    .delete((req, res, next) => medicoController.bajaServicioMed(req, res, next))
 
-router.route("/:id/disponibilidad/:disponibilidadId")
-    .patch((req,res,next) => medicoController.editarDisponibilidad(req,res,next))
-    .delete((req,res,next) => medicoController.eliminarDisponibilidad(req,res,next))
 
-export default router;
+export default medicoRouter;
