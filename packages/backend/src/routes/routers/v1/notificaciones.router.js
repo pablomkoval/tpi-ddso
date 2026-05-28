@@ -13,12 +13,14 @@ const controller = new NotificacionesController(service);
  * /v1/notificaciones:
  *   get:
  *     summary: Obtiene todas las notificaciones paginadas
+ *     tags: [Notificaciones]
  *     responses:
  *       200:
  *         description: Lista de notificaciones
  * 
  *   post:
  *     summary: Crea una nueva notificación
+ *     tags: [Notificaciones]
  *     requestBody:
  *       required: true
  *       content:
@@ -44,6 +46,7 @@ notificacionesRouter.post("/", (req, res, next) => { controller.create(req, res,
  * /v1/notificaciones/leidas:
  *   get:
  *     summary: Obtiene notificaciones leídas
+ *     tags: [Notificaciones]
  *     responses:
  *       200:
  *         description: Lista de notificaciones leídas
@@ -57,6 +60,7 @@ notificacionesRouter.get("/leidas", (req, res, next) => {
  * /v1/notificaciones/no-leidas:
  *   get:
  *     summary: Obtiene notificaciones no leídas
+ *     tags: [Notificaciones]
  *     parameters:
  *       - in: query
  *         name: userId
@@ -75,6 +79,7 @@ notificacionesRouter.get("/no-leidas", (req, res, next) => {
  * /v1/notificaciones/{id}/leer:
  *   patch:
  *     summary: Marca una notificación como leída
+ *     tags: [Notificaciones]
  *     parameters:
  *       - in: path
  *         name: id
@@ -94,6 +99,7 @@ notificacionesRouter.patch("/:id/leer", (req, res, next) => {
  * /v1/notificaciones/{id}:
  *   delete:
  *     summary: Realiza un borrado lógico de una notificación
+ *     tags: [Notificaciones]
  *     parameters:
  *       - in: path
  *         name: id
