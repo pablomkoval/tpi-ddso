@@ -18,8 +18,6 @@ export default class MedicoRepository {
         return await this.model.findById(id);
     }
 
-    async 
-
     async findDisponibilidadesById(id) {
         try {
             const medico = await this.model.findById(id).populate('disponibilidades');
