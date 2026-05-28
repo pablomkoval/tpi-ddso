@@ -1,5 +1,5 @@
 import express from "express";
-import TurnoController from "../../controllers/turnos/TurnoController.js";
+import TurnoController from "../../../controllers/turnos/TurnoController.js";
 
 const router = express.Router();
 const turnoController = new TurnoController();

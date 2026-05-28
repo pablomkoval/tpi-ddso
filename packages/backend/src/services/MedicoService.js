@@ -3,7 +3,7 @@ import AppError from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
 import { NotFoundError } from "../shared/errors/AppError.js";
-import UsuarioModel from "../domain/models/repositories/UsuarioModel.js";
+import UsuarioModel from "../domain/models/repositories/UsuarioRepository.js";
 
 export default class MedicoService {
     constructor({ medicoRepository = new MedicoRepository() } = {}) {

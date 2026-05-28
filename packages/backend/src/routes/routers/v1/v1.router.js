@@ -1,7 +1,7 @@
 import express from "express";
 import healthcheckRouter from "./healthcheck.router.js";
 import MedicoRouter from "./MedicoRouter.js";
-import TurnoRouter from "./turnos/TurnoRouter.js";
+import TurnoRouter from "./TurnoRouter.js";
 
 const v1Router = express.Router();
 
