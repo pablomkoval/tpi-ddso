@@ -25,7 +25,7 @@ export const disponibilidadHorariaSchema = new mongoose.Schema(
             type: sedeSchema,
             required: true
         },
-        servicio: {
+        servicioMedico: {
             type: mongoose.Schema.Types.ObjectId,
             required: true
         }

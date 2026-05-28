@@ -5,6 +5,7 @@ import { DiaSemana } from "../../../src/domain/enum/DiaSemana.js";
 describe("Servicios Médico", () => {
     let servicio;
     let medicoRepositoryMock;
+    let usuarioRepositoryMock;
 
     beforeEach(() => {
         const medicos = [];
@@ -32,8 +33,14 @@ describe("Servicios Médico", () => {
                 }
             )
         };
+        
+        usuarioRepositoryMock = {
+            findOne: jest.fn().mockImplementation(
+                (usuario) => Promise.resolve({ _id: "usuario1", ...usuario })
+            )
+        };
 
-        servicio = new MedicoService({ medicoRepository: medicoRepositoryMock });
+        servicio = new MedicoService({ medicoRepository: medicoRepositoryMock }, { usuarioRepository: usuarioRepositoryMock } );
     });
 
     describe("Creación de un médico", () => {

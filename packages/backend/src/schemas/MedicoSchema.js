@@ -5,10 +5,14 @@ import { sedeSchema } from "./SedeSchema.js";
 
 const medicoSchema = new mongoose.Schema(
     {
-        usuario: {
+        /* usuario: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Usuario",
             required: true,
+        }, */ // Así es como debería ir
+        usuario: {
+            type: String, // Referencia al ID del usuario
+            required: true
         },
         matricula: {
             type: String,
@@ -36,7 +40,10 @@ const medicoSchema = new mongoose.Schema(
             default: []
         },
         turnos: {
-            type: Array,
+            type: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Turno"
+            }],
             default: []
         }
     },

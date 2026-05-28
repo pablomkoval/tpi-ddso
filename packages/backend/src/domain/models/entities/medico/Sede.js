@@ -1,6 +1,6 @@
-export class Sede{
+export class Sede {
 
-    constructor(nombre, direccion){
+    constructor(nombre, direccion) {
         this.id = "placeholder";
         this.nombre = nombre;
         this.direccion = direccion;
