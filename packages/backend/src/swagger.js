@@ -200,6 +200,97 @@ const swaggerOptions = {
             200: { description: 'Disponibilidad eliminada correctamente' }
           }
         }
+      },
+
+      '/v1/medicos/{idMedico}/servicios': {
+        get: {
+          summary: 'Obtener los servicios médicos que ofrece un médico específico',
+          tags: ['Medicos - Servicios'],
+          parameters: [
+            { name: 'idMedico', in: 'path', required: true, schema: { type: 'string' }, description: 'ID del médico' }
+          ],
+          responses: {
+            200: { description: 'Lista de servicios prestados por el médico obtenidas correctamente' }
+          }
+        },
+
+        post: {
+          summary: 'Dar de alta un servicio médico (Especialidad/Práctica) para un médico',
+          tags: ['Medicos - Servicios'],
+          parameters: [
+            { name: 'idMedico', in: 'path', required: true, schema: { type: 'string' }, description: 'ID del médico' }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    servicioId: { type: 'string', example: '6a17cd9d1186e98d0058747e', description: 'ID único del servicio médico a asociar' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            201: { description: 'Servicio asociado al médico exitosamente' },
+            400: { description: 'Error en los datos provistos o servicio ya asociado' }
+          }
+        }
+      },
+
+      '/v1/medicos/{idMedico}/servicios/{idServicio}': {
+        get: {
+          summary: 'Obtener la información de un servicio específico prestado por el médico',
+          tags: ['Medicos - Servicios'],
+          parameters: [
+            { name: 'idMedico', in: 'path', required: true, schema: { type: 'string' }, description: 'ID del médico' },
+            { name: 'idServicio', in: 'path', required: true, schema: { type: 'string' }, description: 'ID del servicio médico' }
+          ],
+          responses: {
+            200: { description: 'Información del servicio obtenida correctamente' },
+            404: { description: 'El médico no presta el servicio solicitado' }
+          }
+        },
+
+        patch: {
+          summary: 'Modificar servicio de un médico en especifico',
+          tags: ['Medicos - Servicios'],
+          parameters: [
+            { name: 'idMedico', in: 'path', required: true, schema: { type: 'string' }, description: 'Id del médico' },
+            { name: 'idServicio', in: 'path', required: true, schema: { type: 'string' }, description: 'Id del servicio médico' }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    activo: { type: 'boolean', example: true }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Servicio del médico actualizado correctamente' }
+          }
+        },
+
+        delete: {
+          summary: 'Dar de baja un servicio específico de la lista de un médico',
+          tags: ['Medicos - Servicios'],
+          parameters: [
+            { name: 'idMedico', in: 'path', required: true, schema: { type: 'string' }, description: 'Id del médico' },
+            { name: 'idServicio', in: 'path', required: true, schema: { type: 'string' }, description: 'Id del servicio médico' }
+          ],
+          responses: {
+            200: { description: 'Servicio eliminado del médico correctamente' },
+            404: { description: 'Médico o servicio no encontrado' }
+          }
+        }
       }
     }
   },
