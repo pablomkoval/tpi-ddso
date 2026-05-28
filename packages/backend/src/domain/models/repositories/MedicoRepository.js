@@ -25,7 +25,6 @@ export default class MedicoRepository {
         return await medico.save({ session })
     }
 
-
     async findDisponibilidadesById(id) {
         try {
             const medico = await this.model.findById(id)

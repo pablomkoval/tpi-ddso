@@ -3,15 +3,21 @@ import AppError, { BadRequestError } from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
 import { NotFoundError } from "../shared/errors/AppError.js"; // Ajustá los ../ según tu carpeta
-import { UsuarioModel } from "../schemas/UsuarioSchema.js"
 import { servicioService } from "./servicioService.js";
+import UsuarioRepository from "../domain/models/repositories/UsuarioRepository.js";
 import mongoose from 'mongoose'
 
 
+
+
+const toObjectId = (value) =>
+    value ? new mongoose.Types.ObjectId(value) : value;
+
 export default class MedicoService {
-    constructor({ medicoRepository = new MedicoRepository() } = {}) {
+    constructor({ medicoRepository = new MedicoRepository() } = {}, { usuarioRepository = new UsuarioRepository() } = {}) {
         this.medicoRepository = medicoRepository;
         this.servicioService = servicioService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     toDTO(medico) {
@@ -40,9 +46,9 @@ export default class MedicoService {
     }
 
     async create(data) {
-        const { usuario, matricula, nombre, especialidades, practicas, sedes, disponibilidades = [] } = data;
+        const { usuario, matricula, nombre, especialidades, practicas, sedes } = data;
 
-        const usuarioEncontrado = await UsuarioModel.findOne({ nombre: usuario });
+        /* const usuarioEncontrado = await this.usuarioRepository.findOne(usuario);
         if (!usuarioEncontrado) {
             throw new AppError("El usuario de login no existe", 404, "USUARIO_NO_ENCONTRADO");
         }
@@ -59,6 +65,9 @@ export default class MedicoService {
         ));
 
         const nuevoMedico = new Medico(usuarioId, matricula, nombre, especialidades, practicas, sedes, disponibilidadesInstanciadas);
+        } */
+
+        const nuevoMedico = new Medico(usuario, matricula, nombre, especialidades, practicas, sedes);
         const medicoGuardado = await this.medicoRepository.save(nuevoMedico);
         return this.toDTO(medicoGuardado);
     }
@@ -108,14 +117,13 @@ export default class MedicoService {
                 throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => new DisponibilidadHoraria(
-                {
-                    diaSemana: d.diaSemana,
-                    horaDesde: d.horaDesde,
-                    horaHasta: d.horaHasta,
-                    sede: d.sede
-                }
-            ));
+            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => new DisponibilidadHoraria({
+                diaSemana: d.diaSemana,
+                horaDesde: d.horaDesde,
+                horaHasta: d.horaHasta,
+                sede: d.sede,
+                servicioMedico: toObjectId(d.servicioMedico)
+            }));
             medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
 
             const medicoActualizado = await medico.save();
