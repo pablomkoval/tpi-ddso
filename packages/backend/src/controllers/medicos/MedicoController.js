@@ -16,8 +16,8 @@ export default class MedicoController {
 
     async update(req, res, next) {
         try {
-            const medico = await this.medicoService.update(req.params.id, req.body);
-            res.json(medico);
+            const medicoActualizado = await this.medicoService.update(req.params.id, req.body);
+            res.status(200).json(medicoActualizado);
         } catch (error) {
             next(error);
         }
@@ -26,7 +26,7 @@ export default class MedicoController {
     async findAll(req, res, next) {
         try {
             const medicos = await this.medicoService.findAll();
-            res.json(medicos);
+            res.status(200).json(medicos);
         } catch (error) {
             next(error);
         }
@@ -35,7 +35,7 @@ export default class MedicoController {
     async findById(req, res, next) {
         try {
             const medico = await this.medicoService.findById(req.params.id);
-            res.json(medico);
+            res.status(200).json(medico);
         } catch (error) {
             next(error);
         }
@@ -44,7 +44,7 @@ export default class MedicoController {
         const id = req.params.id;
             try {
                 const disponibilidades = await this.medicoService.obtenerDisponibilidades(id);
-                res.json(disponibilidades);
+                res.status(200).json(disponibilidades);
             }
             catch (error) {
                 next(error);
@@ -57,7 +57,7 @@ export default class MedicoController {
 
         try {
             const medicoActualizado = await this.medicoService.agregarDisponibilidades(id, nuevasDisponibilidades);
-            res.json(medicoActualizado);
+            res.status(200).json(medicoActualizado);
         } catch (error) {
             next(error);
         }
@@ -67,7 +67,7 @@ export default class MedicoController {
         try {
             const { id, disponibilidadId } = req.params;
             const medicoActualizado = await this.medicoService.editarDisponibilidad(id, disponibilidadId, req.body);
-            res.json(medicoActualizado);
+            res.status(200).json(medicoActualizado);
         } catch (error) {
             next(error);
         }
@@ -77,7 +77,7 @@ export default class MedicoController {
         try {
             const { id, disponibilidadId } = req.params;
             const medicoActualizado = await this.medicoService.eliminarDisponibilidad(id, disponibilidadId);
-            res.json(medicoActualizado);
+            res.status(200).json(medicoActualizado);
         } catch (error) {
             next(error);
         }
