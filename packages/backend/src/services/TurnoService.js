@@ -19,8 +19,8 @@ const obtenerCostoBase = (turno) => {
   if (Number.isFinite(turno?.practica?.costo)) {
     return turno.practica.costo;
   }
-  if (Number.isFinite(turno?.especialidad?.costoConsulta)) {
-    return turno.especialidad.costoConsulta;
+  if (Number.isFinite(turno?.servicioMed?.costo)) {
+    return turno.servicioMed.costo;
   }
   return 0;
 };
@@ -41,13 +41,13 @@ const obtenerNivelCobertura = (turno, plan) => {
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
 
-  const idEspecialidad = obtenerId(turno?.especialidad);
+  const idEspecialidad = obtenerId(turno?.servicioMed);
   if (idEspecialidad) {
     const coberturasEspecialidad = Array.isArray(plan.coberturasEspecialidad)
       ? plan.coberturasEspecialidad
       : [];
     const cobertura = coberturasEspecialidad.find(
-      (item) => String(obtenerId(item.especialidad)) === String(idEspecialidad),
+      (item) => String(obtenerId(item.servicioMed)) === String(idEspecialidad),
     );
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
@@ -72,8 +72,7 @@ const calcularCostoPaciente = (costoBase, nivelCobertura) => {
 class TurnoService {
   async buscarDisponibles(params) {
     const {
-      especialidad,
-      practica,
+      servicioMed,
       profesional,
       sede,
       fechaDesde,
@@ -85,7 +84,7 @@ class TurnoService {
       sortOrder = "asc",
     } = params;
 
-    if (!especialidad && !practica) {
+    if (!servicioMedId/*  && !practica */) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
         400,
@@ -93,16 +92,15 @@ class TurnoService {
       );
     }
 
-    if (especialidad) {
-      const especialidadExistente =
-        await especialidadRepository.findById(especialidad);
-      if (!especialidadExistente) {
-        throw new AppError(
-          "La especialidad especificada no existe",
-          404,
-          "ESPECIALIDAD_NO_ENCONTRADA",
-        );
-      }
+    const servicioMedExistente = await servicioMedRepository.findById(servicioMedId);
+  
+      
+    if (!servicioMedExistente) {
+      throw new AppError(
+        "La especialidad especificada no existe",
+        404,
+        "ESPECIALIDAD_NO_ENCONTRADA",
+      );
     }
 
     if (profesional) {
@@ -177,7 +175,7 @@ class TurnoService {
       fechaHasta: fechaHasta || null,
     };
 
-    const { turnos, total } = await turnoRepository.buscarDisponibles(filtros, {
+    const { turnos, total } = await this.turnoRepository.buscarDisponibles(filtros, {
       skip,
       limit: limitNum,
       sort,
@@ -212,7 +210,7 @@ class TurnoService {
   }
 
   async obtenerPorId(id) {
-    const turno = await turnoRepository.findById(id);
+    const turno = await this.turnoRepository.findById(id);
     if (!turno) {
       throw new AppError("Turno no encontrado", 404, "TURNO_NO_ENCONTRADO");
     }
