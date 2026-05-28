@@ -1,4 +1,4 @@
-import MedicoModel from '../persistence/schemas/MedicoSchema.js';
+/* import MedicoModel from '../persistence/schemas/MedicoSchema.js';
 
 class MedicoRepository {
 
@@ -16,10 +16,10 @@ class MedicoRepository {
             .populate('practicas', 'nombre')
             .populate('sedes', 'nombre direccion')
             .lean();
-    }
+    } */
 
     
-
+/* 
     async create(data) {
         const medico = new MedicoModel(data);
         return await medico.save();
@@ -34,3 +34,4 @@ class MedicoRepository {
 }
 
 export default new MedicoRepository();
+ */

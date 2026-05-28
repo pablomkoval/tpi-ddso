@@ -15,10 +15,14 @@ export default class MedicoRepository {
     }
 
     async findById(id, session = null) {
-        return await this.model.findById(id)
-            .session(session)
+        console.error("voy a hacer findbyid y populate")
+        const query = await this.model.findById(id)
             .populate('especialidades')
             .populate('practicas');
+
+        console.error("sobrevivi findById y populate")
+
+        return session ? query.session(session) : query;
     }
 
     async guardar(medico, session = null) {

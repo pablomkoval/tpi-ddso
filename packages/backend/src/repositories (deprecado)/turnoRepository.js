@@ -1,4 +1,4 @@
-import TurnoModel from "../persistence/schemas/TurnoSchema.js";
+/* import TurnoModel from "../persistence/schemas/TurnoSchema.js";
 
 class TurnoRepository {
   async buscarDisponibles(filtros, opciones) {
@@ -78,3 +78,4 @@ class TurnoRepository {
   }
 }
 export default new TurnoRepository();
+ */

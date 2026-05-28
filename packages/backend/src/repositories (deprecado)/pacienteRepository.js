@@ -1,12 +1,13 @@
-import PacienteModel from '../persistence/schemas/PacienteSchema.js';
+/* import PacienteModel from '../persistence/schemas/PacienteSchema.js';
 
-class PacienteRepository {
+class PacienteRepository { */
     /**
      * Busca un paciente por su ID
      */
-    async findById(id) {
+/*     async findById(id) {
         return await PacienteModel.findById(id).lean();
     }
 }
 
 export default new PacienteRepository();
+ */

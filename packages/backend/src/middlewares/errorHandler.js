@@ -1,6 +1,6 @@
 import AppError from "../shared/errors/AppError.js"
 
-export function errorHandler(err, req, res, next) {
+export default function errorHandler(err, req, res, next) {
     if (res.headersSent) {
         return next(err)
     }

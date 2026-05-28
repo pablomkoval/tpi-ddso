@@ -1,9 +1,9 @@
-import { validarEnteroPositivo } from "./validarEnteroPositivo.js"
+//import { validarEnteroPositivo } from "./validarEnteroPositivo.js"
 
 export function parsearId(idParam) {
         const id = Number(idParam)
 
-        validarEnteroPositivo(id, "id")
+        //validarEnteroPositivo(id, "id")
 
         return id
 }

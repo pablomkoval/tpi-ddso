@@ -1,9 +1,9 @@
-import turnoRepository from "../repositories (deprecado)/turnoRepository.js";
+/* import turnoRepository from "../repositories (deprecado)/turnoRepository.js";
 import especialidadRepository from "../repositories (deprecado)/especialidadRepository.js";
 import medicoRepository from "../repositories (deprecado)/medicoRepository.js";
-import pacienteRepository from "../repositories (deprecado)/pacienteRepository.js";
+import pacienteRepository from "../repositories (deprecado)/pacienteRepository.js"; */
 import { NivelCobertura } from "../domain/enum/NivelCobertura.js";
-import { AppError } from "../shared/errors/AppError.js";
+import AppError  from "../shared/errors/AppError.js";
 // enviar a un .env
 const PORCENTAJE_PAGO_PARCIAL = 0.5;
 

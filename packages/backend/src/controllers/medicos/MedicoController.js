@@ -120,6 +120,9 @@ export default class MedicoController {
             const servicioMed = this.extraerYValidarBodyServicioMed(req.body)
 
             const servicioMedCreado = await this.medicoService.altaServicioMed(idMedico, servicioMed);
+            
+            console.error("sobrevivi medicoService")
+           
             return res.status(201).json({ status: "success", data: servicioMedCreado })
         } catch (error) {
             return next(error)
@@ -145,6 +148,7 @@ export default class MedicoController {
             const idServicioMed = parsearId(req.param.idServicioMed)
             const datosServicioMed = this.extraerYValidarBodyServicioMed(req.body)
             const servicioMedActualizado = await this.medicoService.actualizarServicioMed(idMedico, idServicioMed, datosServicioMed);
+
             return res.status(200).json({ status: "success", data: servicioMedActualizado })
         } catch (error) {
             return next(error)
@@ -154,13 +158,12 @@ export default class MedicoController {
 
     extraerYValidarBodyServicioMed(body) {
         const resultado = servicioMedSchema.safeParse(body)
-
         if (!resultado.success) {
             throw new BadRequestError(
                 resultado.error.issues.map(i => i.message).join(", ")
             )
         }
-
+        console.error("sobrevivi zod")
         return resultado.data
     }
 

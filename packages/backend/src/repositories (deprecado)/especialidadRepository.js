@@ -1,4 +1,4 @@
-import EspecialidadModel from '../persistence/schemas/EspecialidadSchema.js';
+/* import EspecialidadModel from '../persistence/schemas/EspecialidadSchema.js';
 
 class EspecialidadRepository {
 
@@ -24,3 +24,4 @@ class EspecialidadRepository {
 }
 
 export default new EspecialidadRepository();
+ */
