@@ -291,6 +291,121 @@ const swaggerOptions = {
             404: { description: 'Médico o servicio no encontrado' }
           }
         }
+      },
+
+      '/v1/servicios': {
+        get: {
+          summary: 'Obtener el catálogo completo de servicios médicos',
+          description: 'Devuelve un listado de todas las especialidades y prácticas médicas registradas en el sistema.',
+          tags: ['Catálogo Servicios'],
+          responses: {
+            200: { description: 'Catálogo de servicios obtenido correctamente.' }
+          }
+        },
+
+        post: {
+          summary: 'Crear un nuevo servicio médico en el catálogo',
+          description: 'Registra una nueva especialidad o práctica.',
+          tags: ['Catálogo Servicios'],
+          requestBody: {
+            required: true,
+            content: {
+              'json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    codigo: { type: 'string', example: 'TRAUMA-01', description: 'Código único de identificación interna' },
+                    nombre: { type: 'string', example: 'Traumatología', description: 'Nombre formal del servicio' },
+                    duracionTurno: { type: 'number', example: 30, description: 'Duración estándar en minutos para los bloques de turnos' }
+                  },
+                  required: ['codigo', 'nombre', 'duracionTurno']
+                }
+              }
+            }
+          },
+          responses: {
+            201: { description: 'Servicio creado con éxito en el catálogo general.' },
+            400: { description: 'Datos inválidos o el código de servicio ya existe.' }
+          }
+        }
+      },
+
+      '/v1/servicios/seed': {
+        post: {
+          summary: 'Poblar la base de datos con servicios médicos iniciales',
+          description: 'Inserta un lote predefinido de especialidades y prácticas básicas para facilitar las pruebas en desarrollo.',
+          tags: ['Catálogo Servicios'],
+          responses: {
+            201: { description: 'Base de datos poblada de manera exitosa con los servicios iniciales.' }
+          }
+        }
+      },
+
+      '/v1/servicios/categorias': {
+        get: {
+          summary: 'Obtener las categorías de los servicios médicos',
+          description: 'Devuelve las categorías o agrupaciones disponibles para clasificar los servicios.',
+          tags: ['Catálogo Servicios'],
+          responses: {
+            200: { description: 'Categorías obtenidas correctamente.' }
+          }
+        }
+      },
+
+      '/v1/servicios/{id}': {
+        get: {
+          summary: 'Obtener un servicio médico específico del catálogo',
+          tags: ['Catálogo Servicios'],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Id único del documento del servicio en MongoDB' }
+          ],
+          responses: {
+            200: { description: 'Servicio encontrado y retornado de forma correcta.' },
+            404: { description: 'El servicio con el Id provisto no existe.' }
+          }
+        },
+
+        put: {
+          summary: 'Actualizar por completo un servicio médico existente',
+          description: 'Reemplaza todos los campos del servicio médico seleccionado en base a su Id.',
+          tags: ['Catálogo Servicios'],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Id único del servicio médico a modificar' }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    codigo: { type: 'string', example: 'TRAUMA-01' },
+                    nombre: { type: 'string', example: 'Traumatología Avanzada' },
+                    duracionTurno: { type: 'number', example: 45 }
+                  },
+                  required: ['codigo', 'nombre', 'duracionTurno']
+                }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Servicio médico actualizado exitosamente.' },
+            404: { description: 'No se encontró un servicio asociado al Id ingresado.' }
+          }
+        },
+
+        delete: {
+          summary: 'Eliminar un servicio médico del catálogo general',
+          description: 'Remueve físicamente el servicio de la base de datos.',
+          tags: ['Catálogo Servicios'],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Id único del servicio médico a dar de baja' }
+          ],
+          responses: {
+            200: { description: 'Servicio médico removido del catálogo de forma correcta.' },
+            404: { description: 'Servicio no encontrado.' }
+          }
+        }
       }
     }
   },
