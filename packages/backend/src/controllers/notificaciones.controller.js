@@ -1,4 +1,5 @@
-//import { NotificacionesService } from "../services/notificaciones.service.js";
+import { createNotificacionSchema } from "../validators/notificacion.schema.js";
+
 export class NotificacionesController {
     constructor(notificacionesService) {
         this.notificacionesService = notificacionesService;
@@ -51,7 +52,10 @@ export class NotificacionesController {
 
     async create(req, res, next) {
         try {
-            const notificacion = await this.notificacionesService.create(req.body);
+            const validatedData = createNotificacionSchema.parse(req.body);
+
+            const notificacion = await this.notificacionesService.create(validatedData);
+
             res.status(201).json(notificacion);
         } catch (error) {
             next(error);
