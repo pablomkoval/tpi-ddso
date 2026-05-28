@@ -406,6 +406,124 @@ const swaggerOptions = {
             404: { description: 'Servicio no encontrado.' }
           }
         }
+      },
+
+      '/v1/turnos/disponibles': {
+        get: {
+          summary: 'Obtener el listado de todos los turnos disponibles',
+          description: 'Devuelve una lista con todos los turnos generados por el sistema cuyo estado actual es "DISPONIBLE".',
+          tags: ['Turnos'],
+          responses: {
+            200: { 
+              description: 'Lista de turnos disponibles obtenida de manera correcta.' 
+            }
+          }
+        }
+      },
+
+      '/v1/turnos/{idTurno}': {
+        get: {
+          summary: 'Obtener un turno médico específico por Id',
+          description: 'Recupera los detalles completos de un turno individual.',
+          tags: ['Turnos'],
+          parameters: [
+            { 
+              name: 'idTurno', 
+              in: 'path', 
+              required: true, 
+              schema: { type: 'string' }, 
+              description: 'Id único del turno en MongoDB' 
+            }
+          ],
+          responses: {
+            200: { description: 'Turno encontrado y devuelto correctamente.' },
+            404: { description: 'El turno solicitado con ese Id no existe.' }
+          }
+        }
+      },
+
+      '/v1/turnos/{idTurno}/reservar': {
+        post: {
+          summary: 'Reservar un turno disponible para un paciente',
+          description: 'Cambia el estado del turno de "DISPONIBLE" a "RESERVADO" asociándolo a un paciente específico.',
+          tags: ['Turnos'],
+          parameters: [
+            { 
+              name: 'idTurno', 
+              in: 'path', 
+              required: true, 
+              schema: { type: 'string' }, 
+              description: 'Id único del turno que se desea reservar' 
+            }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    paciente: { 
+                      type: 'string', 
+                      example: 'Manucho Estebanquito', 
+                      description: 'Referencia o identificador del paciente que reserva el turno.' 
+                    }
+                  },
+                  required: ['paciente']
+                }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Turno reservado exitosamente, el estado pasa a RESERVADO.' },
+            400: { description: 'Error en la solicitud: El turno ya no se encuentra DISPONIBLE o los datos son incorrectos.' },
+            404: { description: 'No se encontró el turno con el Id ingresado.' }
+          }
+        }
+      },
+
+      '/v1/turnos/{idTurno}/cancelar': {
+        post: {
+          summary: 'Cancelar un turno previamente agendado',
+          description: 'Cambia el estado del turno a "CANCELADO" registrando el usuario que operó el cambio y el motivo correspondiente.',
+          tags: ['Turnos'],
+          parameters: [
+            { 
+              name: 'idTurno', 
+              in: 'path', 
+              required: true, 
+              schema: { type: 'string' }, 
+              description: 'Id único del turno que se va a cancelar' 
+            }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    usuario: { 
+                      type: 'string', 
+                      example: 'leoC', 
+                      description: 'Identificador del usuario que realiza la cancelación' 
+                    },
+                    motivoCambio: { 
+                      type: 'string', 
+                      example: 'Habia 2x1 en empanadas de cheeseburger', 
+                      description: 'Explicación obligatoria de por qué se cancela el turno para el historialEstados' 
+                    }
+                  },
+                  required: ['usuario', 'motivoCambio']
+                }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Turno cancelado de manera correcta. El horario vuelve a liberarse o queda desestimado según la lógica de negocio.' },
+            404: { description: 'No se encontró el turno que se intenta cancelar.' }
+          }
+        }
       }
     }
   },
