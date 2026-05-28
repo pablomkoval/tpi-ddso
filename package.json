@@ -17,8 +17,8 @@
   "scripts": {
     "start": "node packages/backend/src/server.js",
     "dev": "node --watch packages/backend/src/server.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test-windows": "set NODE_OPTIONS=--experimental-vm-modules && jest --runInBand --verbose"
+    "test": "set NODE_OPTIONS=--experimental-vm-modules && jest --runInBand --verbose",
+    "test-windows": "NODE_OPTIONS=--experimental-vm-modules jest"
 
   },
   "dependencies": {

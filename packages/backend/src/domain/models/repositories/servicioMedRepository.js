@@ -20,7 +20,8 @@ export class ServicioMedRepository {
     } */
 
     async save(datosServicioMed, session = null) {
-        return await this.model.create([datosServicioMed], { session })
+        console.error("voy a hacer el create con session")
+        return await this.model.create([datosServicioMed])
     }
     async update(id, ServicioMedModificado, session = null) {
         return await this.model.findByIdAndUpdate(id, ServicioMedModificado, { new: true, session }).populate('servicioUnico');

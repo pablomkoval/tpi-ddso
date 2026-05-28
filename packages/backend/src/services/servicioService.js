@@ -87,7 +87,6 @@ class ServicioService {
     }
 
     async update(id, datosServicio) {
-        validarEnteroPositivo(id, "Id")
         this.validarDatosServicio(datosServicio)
         this.validarNombreDisponible(datosServicio.nombre, id)
         /* const servicioExistente = this.findById(id)
@@ -171,9 +170,9 @@ class ServicioService {
 
     async createServicioMed(datosServicioMed, session = null) {
         //this.validarDatosServicioMed(datosServicioMed)
-
+        console.error("voy a entrar a servicioMedRepository")
         const servicioMedGuardado = await this.servicioMedRepository.save(datosServicioMed, session)
-
+        console.error("sobrevivi servicioMedRepository")
         return servicioMedGuardado
     }
 

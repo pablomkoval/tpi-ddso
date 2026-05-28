@@ -34,16 +34,20 @@ export default class MedicoService {
         };
     }
 
-    servicioMedToDTO(servicioMed) {
-        return {
+    /* servicioMedToDTO(servicioMed) {
+        console.error("voy a hacer ServicioMedToDTO")
+        console.error("servicio: " + servicioMed)
+        const servMedDto = {
             id: servicioMed._id,
             nombre: servicioMed.servicioUnico.nombre,
             duracionTurnoEnMins: servicioMed.duracionTurnoEnMins,
             costo: servicioMed.costo,
             tipoServicio: servicioMed.tipoServicio,
-            codigo: servicioMed.tipoServicio === "practica" ? servicioMed.codigo : undefined,
+            codigo: servicioMed.tipoServicioMed === "practica" ? servicioMed.codigo : undefined,
         }
-    }
+        console.error("sobrevivi servicioMedtoDTo")
+        return servMedDto
+    } */
 
     async create(data) {
         const { usuario, matricula, nombre, especialidades, practicas, sedes } = data;
@@ -163,7 +167,8 @@ export default class MedicoService {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
             const servicioMeds = medico.serviciosTotales();
-            return servicioMeds.map(s => this.servicioMedToDTO(s));
+            return servicioMeds
+            /* return servicioMeds.map(s => this.servicioMedToDTO(s)); */
         } catch (error) {
             throw new Error(`Error al obtener servicios de medico: ${error.message}`, { cause: error });
         }
@@ -185,7 +190,7 @@ export default class MedicoService {
                 throw new BadRequestError("El Médico de id " + idMedico + " no presta el servicioMed de id " + idServicioMed, "MEDICO_NO_PRESTASERVICIO")
             }
 
-            return this.servicioMedToDTO(servicioMed);
+            return /* this.servicioMedToDTO( */servicioMed/* ) */;
         } catch (error) {
             throw new Error(`Error al obtener servicio medico por id: ${error.message}`, { cause: error });
         }
@@ -193,52 +198,55 @@ export default class MedicoService {
 
     async altaServicioMed(idMedico, datosServicioMed) {
         console.error("voy a empezar session")
-        const session = await mongoose.startSession()
+        //const session = await mongoose.startSession()
         
-        session.startTransaction()
+        //session.startTransaction()
         console.error("empecé seción")
         try {
-            const medico = await this.medicoRepository.findById(idMedico, session);
+            const medico = await this.medicoRepository.findById(idMedico/* , session */);
             console.error("sobrevivi medicorepository")
 
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
             console.error("sobrevivi if !medico")
-            const servicioMed = await this.servicioService.createServicioMed(datosServicioMed, session)
+            console.log(datosServicioMed)
+            const servicioMed = await this.servicioService.createServicioMed(datosServicioMed/* , session */)
             console.error("sobrevivi servicioService")
+            console.log(servicioMed)
             medico.agregarServicio(servicioMed)
 
             await this.medicoRepository.guardar(medico)
             console.error("sobrevivi medicoRepository")
-            await session.commitTransaction()
+            console.log(servicioMed)
+            //await session.commitTransaction()
 
-            return this.servicioMedToDTO(servicioMed);
+            return/*  this.servicioMedToDTO( */servicioMed/* ); */
         } catch (error) {
 
-            await session.abortTransaction()
+            //await session.abortTransaction()
 
             throw new Error(`Error al dar de alta un servicioMed ${error.message}`, { cause: error });
         }
         finally {
 
-            session.endSession()
+            //session.endSession()
         }
     }
 
     async bajaServicioMed(idMedico, idServicioMed) {
 
-        const session = await mongoose.startSession()
+        //const session = await mongoose.startSession()
 
-        session.startTransaction()
+        //session.startTransaction()
 
         try {
-            const medico = await this.medicoRepository.findById(idMedico, session);
+            const medico = await this.medicoRepository.findById(idMedico/* , session */);
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const servicioMedABorrar = await this.servicioService.findServicioMedById(idServicioMed, session)
+            const servicioMedABorrar = await this.servicioService.findServicioMedById(idServicioMed/* , session */)
 
             if (!servicioMedABorrar) {
                 throw new NotFoundError("ServicioMed con Id " + idServicioMed + " de Medico con Id " + idMedico + " no encontrado", "SERVICIOMED_NO_ENCONTRADO");
@@ -251,40 +259,40 @@ export default class MedicoService {
 
             medico.quitarServicio(servicioMedABorrar)
 
-            await this.servicioService.deleteServicioMed(servicioMedABorrar, session)
+            await this.servicioService.deleteServicioMed(servicioMedABorrar/* , session */)
 
-            await this.medicoRepository.guardar(medico, session)
+            await this.medicoRepository.guardar(medico/* , session */)
 
 
-            await session.commitTransaction()
+            //await session.commitTransaction()
 
-            return this.servicioMedToDTO(servicioMedABorrar);
+            return /* this.servicioMedToDTO */(servicioMedABorrar);
 
         } catch (error) {
 
-            await session.abortTransaction()
+            //await session.abortTransaction()
 
             throw new Error(`Error al dar de baja un servicioMed: ${error.message}`, { cause: error });
         }
         finally {
 
-            session.endSession()
+            //session.endSession()
         }
     }
 
 
     async actualizarServicioMed(idMedico, idServicioMed, datosServicioMed) {
-        const session = await mongoose.startSession()
+        //const session = await mongoose.startSession()
 
-        session.startTransaction()
+        //session.startTransaction()
 
         try {
-            const medico = await this.medicoRepository.findById(idMedico, session);
+            const medico = await this.medicoRepository.findById(idMedico/* , session */);
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const servicioMedAActualizar = await this.servicioService.findServicioMedById(idServicioMed, session)
+            const servicioMedAActualizar = await this.servicioService.findServicioMedById(idServicioMed/* , session */)
 
             if (!servicioMedAActualizar) {
                 throw new NotFoundError("ServicioMed con Id " + idServicioMed + " de Medico con Id " + idMedico + " no encontrado", "SERVICIOMED_NO_ENCONTRADO");
@@ -295,20 +303,20 @@ export default class MedicoService {
             }
 
 
-            const servicioMedActualizado = await this.servicioService.updateServicioMed(idServicioMed, datosServicioMed, session)
+            const servicioMedActualizado = await this.servicioService.updateServicioMed(idServicioMed, datosServicioMed/* , session */)
 
-            await session.commitTransaction()
+            //await session.commitTransaction()
 
-            return this.servicioMedToDTO(servicioMedActualizado);
+            return /* this.servicioMedToDTO( */servicioMedActualizado/* ); */
         } catch (error) {
 
-            await session.abortTransaction()
+            //await session.abortTransaction()
 
             throw new Error(`Error al actualizar un servicioMed ${error.message}`, { cause: error });
         }
         finally {
 
-            session.endSession()
+            //session.endSession()
         }
     }
 
