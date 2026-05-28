@@ -7,6 +7,6 @@ const v1Router = express.Router();
 v1Router.use("/healthcheck", healthcheckRouter);
 
 // Acá es donde vamos a definir las rutas...
-v1Router.use("/medicos",MedicoRouter)
+v1Router.use("/medicos", MedicoRouter)
 
 export default v1Router;
