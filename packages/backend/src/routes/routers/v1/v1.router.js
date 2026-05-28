@@ -4,6 +4,7 @@ import notificacionesRouter from "./notificaciones.router.js";
 import serviciosRouter from "./serviciosRouter.js";
 import medicoRouter from "./medicoRouter.js";
 import turnoRouter from "./turnoRouter.js";
+//import turnoRouter from "./turno.router.js";
 
 const v1Router = express.Router();
 

@@ -40,4 +40,15 @@ export default class MedicoRepository {
             throw new Error(`Error al obtener disponibilidades: ${error.message}`, { cause: error });
         }
     }
+
+   /*  async findByServicio(especialidadId) {
+            return await MedicoModel.find({
+                activo: true,
+                especialidades: especialidadId
+            })
+                .populate('especialidades', 'nombre')
+                .lean();
+        } */
+
+
 }
