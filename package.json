@@ -19,7 +19,6 @@
     "dev": "node --watch packages/backend/src/server.js",
     "test": "set NODE_OPTIONS=--experimental-vm-modules && jest --runInBand --verbose",
     "test-windows": "NODE_OPTIONS=--experimental-vm-modules jest"
-
   },
   "dependencies": {
     "cors": "^2.8.6",
