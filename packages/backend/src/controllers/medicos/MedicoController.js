@@ -120,9 +120,7 @@ export default class MedicoController {
             const servicioMed = this.extraerYValidarBodyServicioMed(req.body)
 
             const servicioMedCreado = await this.medicoService.altaServicioMed(idMedico, servicioMed);
-            
-            console.error("sobrevivi medicoService")
-           
+                   
             return res.status(201).json({ status: "success", data: servicioMedCreado })
         } catch (error) {
             return next(error)
@@ -163,7 +161,6 @@ export default class MedicoController {
                 resultado.error.issues.map(i => i.message).join(", ")
             )
         }
-        console.error("sobrevivi zod")
         return resultado.data
     }
 

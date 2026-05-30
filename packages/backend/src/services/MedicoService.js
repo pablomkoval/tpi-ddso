@@ -197,28 +197,19 @@ export default class MedicoService {
     }
 
     async altaServicioMed(idMedico, datosServicioMed) {
-        console.error("voy a empezar session")
         //const session = await mongoose.startSession()
         
         //session.startTransaction()
-        console.error("empecé seción")
         try {
             const medico = await this.medicoRepository.findById(idMedico/* , session */);
-            console.error("sobrevivi medicorepository")
 
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
-            console.error("sobrevivi if !medico")
-            console.log(datosServicioMed)
             const servicioMed = await this.servicioService.createServicioMed(datosServicioMed/* , session */)
-            console.error("sobrevivi servicioService")
-            console.log(servicioMed)
             medico.agregarServicio(servicioMed)
 
             await this.medicoRepository.guardar(medico)
-            console.error("sobrevivi medicoRepository")
-            console.log(servicioMed)
             //await session.commitTransaction()
 
             return/*  this.servicioMedToDTO( */servicioMed/* ); */

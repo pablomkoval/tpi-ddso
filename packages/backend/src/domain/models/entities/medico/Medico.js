@@ -85,8 +85,6 @@ export default class Medico {
         ) {
             throw new Error("La disponibilidad se solapa con una existente");
         }
-
-        console.log("Disponibilidad:", nuevaDisponibilidad);
         return nuevaDisponibilidad;
     }
 

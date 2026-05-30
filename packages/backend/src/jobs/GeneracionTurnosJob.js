@@ -10,7 +10,6 @@ nodeCron.schedule(cronExpression, async () => {
     const turnoService = new TurnoService();
     try {
         await turnoService.generarTurnos();
-        console.log("Turnos generados exitosamente");
     } catch (error) {
         console.error("Error al generar turnos:", error);
     }

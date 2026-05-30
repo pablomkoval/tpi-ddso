@@ -80,9 +80,7 @@ class ServicioService {
             this.validarDatosServicio(datos)
             this.validarNombreDisponible(datos.nombre)
         })
-        console.error("llegue bien antes del repo")
         const serviciosGuardados = await this.servicioRepository.saveAll(listaDatosServicios)
-        console.error("sobrevivi el repo")
         return serviciosGuardados.map(s => this.toDTO(s))
     }
 
@@ -170,9 +168,7 @@ class ServicioService {
 
     async createServicioMed(datosServicioMed, session = null) {
         //this.validarDatosServicioMed(datosServicioMed)
-        console.error("voy a entrar a servicioMedRepository")
         const servicioMedGuardado = await this.servicioMedRepository.save(datosServicioMed, session)
-        console.error("sobrevivi servicioMedRepository")
         return servicioMedGuardado
     }
 

@@ -32,7 +32,6 @@ export class ServicioRepository {
 
     async count() {
         const contado = await this.model.countDocuments({ eliminado: false })
-        console.log("Conte " + contado + " servicios guardados")
         return contado
     }
 
