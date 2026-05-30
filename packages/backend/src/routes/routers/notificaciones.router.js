@@ -1,7 +1,7 @@
 import express from "express";
-import { NotificacionesController } from "../../../controllers/notificaciones.controller.js";
-import { NotificacionesService } from "../../../services/notificaciones.service.js";
-import { NotificacionesRepository } from "../../../domain/models/repositories/notificaciones.repository.js";
+import { NotificacionesController } from "../../controllers/notificaciones.controller.js";
+import { NotificacionesService } from "../../services/notificaciones.service.js";
+import { NotificacionesRepository } from "../../domain/models/repositories/notificaciones.repository.js";
 
 const notificacionesRouter = express.Router();
 const repository = new NotificacionesRepository();
