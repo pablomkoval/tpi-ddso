@@ -1,5 +1,5 @@
 import express from "express";
-import MedicoController from "../../controllers/medicos/MedicoController.js";
+import MedicoController from "../../controllers/medico.controller.js";
 
 const medicoRouter = express.Router();
 const medicoController = new MedicoController();

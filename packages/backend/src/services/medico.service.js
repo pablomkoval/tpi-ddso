@@ -1,10 +1,10 @@
-import MedicoRepository from "../domain/models/repositories/MedicoRepository.js";
+import MedicoRepository from "../domain/models/repositories/medico.repository.js";
 import AppError, { BadRequestError } from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
-import { NotFoundError } from "../shared/errors/AppError.js"; // Ajustá los ../ según tu carpeta
-import { servicioService } from "./servicioService.js";
-import UsuarioRepository from "../domain/models/repositories/UsuarioRepository.js";
+import { NotFoundError } from "../shared/errors/AppError.js";
+import { servicioService } from "./servicio.service.js";
+import UsuarioRepository from "../domain/models/repositories/usuario.repository.js";
 import mongoose from 'mongoose'
 
 
@@ -20,19 +20,19 @@ export default class MedicoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    toDTO(medico) {
-        return {
-            id: medico.id || medico._id,
-            usuario: medico.usuario,
-            matricula: medico.matricula,
-            nombre: medico.nombre,
-            especialidades: medico.especialidades,
-            practicas: medico.practicas,
-            sedes: medico.sedes,
-            disponibilidades: medico.disponibilidades,
-            turnos: medico.turnos
-        };
-    }
+    // toDTO(medico) {
+    //     return {
+    //         id: medico.id || medico._id,
+    //         usuario: medico.usuario,
+    //         matricula: medico.matricula,
+    //         nombre: medico.nombre,
+    //         especialidades: medico.especialidades,
+    //         practicas: medico.practicas,
+    //         sedes: medico.sedes,
+    //         disponibilidades: medico.disponibilidades,
+    //         turnos: medico.turnos
+    //     };
+    // }
 
     /* servicioMedToDTO(servicioMed) {
         console.error("voy a hacer ServicioMedToDTO")
@@ -73,7 +73,7 @@ export default class MedicoService {
 
         const nuevoMedico = new Medico(usuario, matricula, nombre, especialidades, practicas, sedes);
         const medicoGuardado = await this.medicoRepository.save(nuevoMedico);
-        return this.toDTO(medicoGuardado);
+        return medicoGuardado;
     }
 
     async update(id, data) {
@@ -84,12 +84,12 @@ export default class MedicoService {
         }
 
         const actualizado = await this.medicoRepository.update(id, data);
-        return this.toDTO(actualizado);
+        return actualizado;
     }
 
     async findAll() {
         const medicos = await this.medicoRepository.findAll();
-        return medicos.map(medico => this.toDTO(medico));
+        return medicos;
     }
 
     async findById(id) {
@@ -99,7 +99,7 @@ export default class MedicoService {
             throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
         }
 
-        return this.toDTO(medico);
+        return medico;
     }
 
     async obtenerDisponibilidades(id) {
@@ -131,7 +131,7 @@ export default class MedicoService {
             medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
 
             const medicoActualizado = await medico.save();
-            return this.toDTO(medicoActualizado);
+            return medicoActualizado;
         } catch (error) {
             throw new Error(`Error al agregar disponibilidades: ${error.message}`, { cause: error });
         }
@@ -145,7 +145,7 @@ export default class MedicoService {
 
         await medico.save();
 
-        return this.toDTO(medico);
+        return medico;
     }
 
     async eliminarDisponibilidad(id, disponibilidadId) {
@@ -157,7 +157,7 @@ export default class MedicoService {
         );
 
         await medico.save();
-        return this.toDTO(medico);
+        return medico;
     }
 
     async obtenerServicioMeds(idMedico) {

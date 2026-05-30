@@ -1,4 +1,4 @@
-import { UsuarioModel } from "../../../schemas/UsuarioSchema.js";
+import { UsuarioModel } from "../../../schemas/usuario.schema.js";
 
 export default class UsuarioRepository {
     constructor() {

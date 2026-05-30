@@ -4,8 +4,8 @@ import {
     NotFoundError,
     UnprocessableEntityError
 } from "../shared/errors/AppError.js"
-import { ServicioRepository } from "../domain/models/repositories/servicioRepository.js";
-import { ServicioMedRepository } from "../domain/models/repositories/servicioMedRepository.js";
+import { ServicioRepository } from "../domain/models/repositories/servicio.repository.js";
+import { ServicioMedRepository } from "../domain/models/repositories/servicioMed.repository.js";
 import { servicioSchema } from "../validators/servicio.schema.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js";
 

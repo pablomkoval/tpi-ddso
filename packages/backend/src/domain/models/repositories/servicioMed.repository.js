@@ -1,4 +1,4 @@
-import { ServicioMedModel } from "../../../schemas/ServicioMedSchema.js";
+import { ServicioMedModel } from "../../../schemas/servicioMed.schema.js";
 
 export class ServicioMedRepository {
 

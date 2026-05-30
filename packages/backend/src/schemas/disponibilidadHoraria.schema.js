@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { sedeSchema } from "./SedeSchema.js";
+import { sedeSchema } from "./sede.schema.js";
 
 export const disponibilidadHorariaSchema = new mongoose.Schema(
     {

@@ -1,4 +1,4 @@
-import { ServicioModel } from "../../../schemas/ServicioSchema.js";
+import { ServicioModel } from "../../../schemas/servicio.schema.js";
 
 export class ServicioRepository {
 
