@@ -1,5 +1,5 @@
 import express from "express";
-import { ServiciosController } from "../../../controllers/serviciosController.js";
+import { ServiciosController } from "../../controllers/serviciosController.js";
 
 
 const servicioController = new ServiciosController
