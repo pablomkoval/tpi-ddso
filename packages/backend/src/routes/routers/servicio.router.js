@@ -1,11 +1,9 @@
 import express from "express";
 import { ServiciosController } from "../../controllers/serviciosController.js";
 
-
 const servicioController = new ServiciosController
 
 const serviciosRouter = express.Router();
-
 
 serviciosRouter.route('/')
     .get((req, res, next) => servicioController.findAll(req, res, next))

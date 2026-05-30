@@ -2,7 +2,7 @@ import express from "express";
 import healthcheckRouter from "./routers/healthcheck.router.js";
 import notificacionesRouter from "./routers/notificaciones.router.js";
 import serviciosRouter from "./routers/servicio.router.js";
-import medicoRouter from ".//routers/medico.router.js";
+import medicoRouter from "./routers/medico.router.js";
 import turnoRouter from "./routers/turno.router.js";
 
 const router = express.Router();
