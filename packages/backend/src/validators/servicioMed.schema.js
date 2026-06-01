@@ -16,12 +16,12 @@ const baseSchema = {
 }
 
 export const servicioMedSchema =
-    z.discriminatedUnion("tipoServicioMed", [
+    z.discriminatedUnion("tipoServicio", [
 
         z.object({
             ...baseSchema,
 
-            tipoServicioMed: z.literal("practica"),
+            tipoServicio: z.literal("practica"),
 
             codigo: z
                 .string()
@@ -33,7 +33,7 @@ export const servicioMedSchema =
         z.object({
             ...baseSchema,
 
-            tipoServicioMed: z.literal("especialidad")
+            tipoServicio: z.literal("especialidad")
 
         }).strict()
     ])

@@ -9,15 +9,13 @@ serviciosRouter.route('/')
     .get((req, res, next) => servicioController.findAll(req, res, next))
     .post((req, res, next) => servicioController.create(req, res, next))
 
-serviciosRouter.route('/seed')
-    .post((req, res, next) => servicioController.seed(req, res, next))
 
 serviciosRouter.route('/:id')
     .get((req, res, next) => servicioController.findById(req, res, next))
     .put((req, res, next) => servicioController.update(req, res, next))
     .delete((req, res, next) => servicioController.delete(req, res, next))
 
-serviciosRouter.route('/categorias')
+/* serviciosRouter.route('/categorias')
     .get((req, res, next) => servicioController.seed(req, res, next))
-
+ */
 export default serviciosRouter;

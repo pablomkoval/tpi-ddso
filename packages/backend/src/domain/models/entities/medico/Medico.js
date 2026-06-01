@@ -18,26 +18,25 @@ export default class Medico {
     }
 
     agregarServicio(servicio) {
-        if (servicio.tipoServicioMed === "practica") {
-            this.practicas.push(servicio)
-        }
-        else {
-            this.especialidades.push(servicio)
+
+        if (servicio.tipoServicio === "practica") {
+            this.practicas.push(servicio._id);
+        } else {
+            this.especialidades.push(servicio._id);
         }
     }
 
     quitarServicio(servicio) {
-        const id = servicio._id || servicio.id || servicio
 
-        if (servicio.tipoServicioMed === "practica") {
+        if (servicio.tipoServicio === "practica") {
 
             this.practicas =
-                this.practicas.filter(s => !s.equals(id))
+                this.practicas.filter(s => !s.equals(servicio._id))
 
         } else {
 
             this.especialidades =
-                this.especialidades.filter(s => !s.equals(id))
+                this.especialidades.filter(s => !s.equals(servicio._id))
         }
     }
 
@@ -120,6 +119,11 @@ export default class Medico {
     prestaServicio(servicio) {
         return this.especialidades.some(especialidad => especialidad.esMismoServicioQue(servicio))
             || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
+    }
+
+    prestaServicioPorId(servicio) {
+        return this.especialidades.some(esp => esp._id.equals(servicio._id))
+            || this.practicas.some(prac => prac._id.equals(servicio._id));
     }
 
     tieneTurnoEn(fechaHora) {

@@ -23,7 +23,7 @@ medicoRouter.route('/:idMedico/servicios')
     .get((req, res, next) => medicoController.obtenerServicioMeds(req, res, next))
     .post((req, res, next) => medicoController.altaServicioMed(req, res, next))
 
-medicoRouter.route('/:idMedico/servicios/:idServicio')
+medicoRouter.route('/:idMedico/servicios/:idServicioMed')
     .get((req, res, next) => medicoController.obtenerServicioMedPorId(req, res, next))
     .patch((req, res, next) => medicoController.editarServicioMed(req, res, next))
     .delete((req, res, next) => medicoController.bajaServicioMed(req, res, next))

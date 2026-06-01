@@ -1,46 +1,54 @@
-import { ServicioMedModel } from "../../../schemas/servicioMedSchema.js";
+import { PracticaModel } from "../../../schemas/practicaSchema.js"
+import { EspecialidadModel } from "../../../schemas/especialidadSchema.js"
+import { ServicioMedModel } from "../../../schemas/ServicioMedSchema.js"
 
 export class ServicioMedRepository {
 
 
     constructor() {
-        this.model = ServicioMedModel;
+        this.models = {
+            practica: PracticaModel,
+            especialidad: EspecialidadModel,
+            servicioMed: ServicioMedModel
+        }
     }
 
     async findAll() {
-        return await this.model.find({ eliminado: false }).populate('servicioUnico');
+        return await this.models["servicioMed"].find({ eliminado: false }).populate('servicioUnico')
     }
 
     async findById(id, session = null) {
-        return await this.model.findById(id).session(session).populate('servicioUnico');
+        console.error("ola 4: origins")
+        return await this.models["servicioMed"].findById(id).populate('servicioUnico')
     }
 
     /* async findByName(nombre) {
-        return await this.model.findOne({ nombre }).populate('servicioUnico');
+        return await this.model.findOne({ nombre }).populate('servicioUnico')
     } */
 
     async save(datosServicioMed, session = null) {
-        return await this.model.create([datosServicioMed])
+        const servicioMedCreado = await this.models[datosServicioMed.tipoServicio].create(datosServicioMed)
+        return servicioMedCreado
     }
     async update(id, ServicioMedModificado, session = null) {
-        return await this.model.findByIdAndUpdate(id, ServicioMedModificado, { new: true, session }).populate('servicioUnico');
+        return await this.models[ServicioMedModificado.tipoServicio].findByIdAndUpdate(id, ServicioMedModificado, { new: true/* , session */ }).populate('servicioUnico')
     }
 
     async delete(id, session = null) {
-        return await this.model.findByIdAndDelete(id).session(session);
+        return await this.models["servicioMed"].findByIdAndDelete(id).session(session)
     }
 
     async count() {
-        return this.model.countDocuments();
+        return this.model.countDocuments()
     }
 
-    async saveAll(listaServicioMeds) {
+    /* async saveAll(listaServicioMeds) {
         return await this.model.insertMany(listaServicioMeds)
-    }
+    } */
 
     // posibles filtros
     /* async findByMinPrice(minPrice) {
-        return await this.model.find({ costo: { $gt: minPrice } });
+        return await this.model.find({ costo: { $gt: minPrice } })
     }
     async findByPriceRange(min, max) {
     return await this.model.find({
@@ -60,7 +68,7 @@ export class ServicioMedRepository {
         // logica de filtros si se necesitase
 
         const total =
-            await this.model.countDocuments({
+            await this.models["servicioMed"].countDocuments({
                 eliminado: false
             })
 
@@ -71,7 +79,7 @@ export class ServicioMedRepository {
     }
 
     async softDelete(id, session = null) {
-        return await this.model.findByIdAndUpdate(id,
+        return await this.models["servicioMed"].findByIdAndUpdate(id,
             {
                 eliminado: true
             },

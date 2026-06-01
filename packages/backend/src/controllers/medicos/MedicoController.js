@@ -90,24 +90,38 @@ export default class MedicoController {
         }
     }
 
+    // Servicio Por Medico ///////////////////////////////////////////////////////////////////
 
-    obternerServicioMeds = async (req, res, next) => {
+    servicioMedToDTO(servicioMed) {
+        const servMedDto = {
+            id: servicioMed._id,
+            nombre: servicioMed.servicioUnico.nombre,
+            duracionTurnoEnMins: servicioMed.duracionTurnoEnMins,
+            costo: servicioMed.costo,
+            tipoServicio: servicioMed.tipoServicio,
+            codigo: servicioMed.tipoServicio === "practica" ? servicioMed.codigo : undefined,
+        }
+        return servMedDto
+    }
+
+
+    obtenerServicioMeds = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
             const servicioMeds = await this.medicoService.obtenerServicioMeds(idMedico)
-            res.json(servicioMeds)
+            res.json(servicioMeds.map(s => this.servicioMedToDTO(s)))
         } catch (error) {
             return next(error)
         }
 
     }
 
-    obternerServicioMedsPorId = async (req, res, next) => {
+    obtenerServicioMedPorId = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const idServicioMed = parsearId(req.param.idServicioMed)
+            const idServicioMed = parsearId(req.params.idServicioMed)
             const servicioMed = await this.medicoService.obtenerServicioMedPorId(idMedico, idServicioMed)
-            res.json(servicioMed)
+            res.status(201).json({ status: "success", data: this.servicioMedToDTO(servicioMed) })
         } catch (error) {
             return next(error)
         }
@@ -120,8 +134,8 @@ export default class MedicoController {
             const servicioMed = this.extraerYValidarBodyServicioMed(req.body)
 
             const servicioMedCreado = await this.medicoService.altaServicioMed(idMedico, servicioMed);
-                   
-            return res.status(201).json({ status: "success", data: servicioMedCreado })
+
+            return res.status(201).json({ status: "success", data: this.servicioMedToDTO(servicioMedCreado) })
         } catch (error) {
             return next(error)
         }
@@ -131,10 +145,10 @@ export default class MedicoController {
     bajaServicioMed = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const idServicioMed = parsearId(req.param.idServicioMed)
+            const idServicioMed = parsearId(req.params.idServicioMed)
 
             const servicioMedEliminado = await this.medicoService.bajaServicioMed(idMedico, idServicioMed);
-            return res.status(201).json({ status: "success", data: servicioMedEliminado })
+            return res.status(201).json({ status: "success", data: this.servicioMedToDTO(servicioMedEliminado) })
         } catch (error) {
             return next(error)
         }
@@ -143,11 +157,10 @@ export default class MedicoController {
     editarServicioMed = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const idServicioMed = parsearId(req.param.idServicioMed)
+            const idServicioMed = parsearId(req.params.idServicioMed)
             const datosServicioMed = this.extraerYValidarBodyServicioMed(req.body)
             const servicioMedActualizado = await this.medicoService.actualizarServicioMed(idMedico, idServicioMed, datosServicioMed);
-
-            return res.status(200).json({ status: "success", data: servicioMedActualizado })
+            return res.status(200).json({ status: "success", data: this.servicioMedToDTO(servicioMedActualizado) })
         } catch (error) {
             return next(error)
         }

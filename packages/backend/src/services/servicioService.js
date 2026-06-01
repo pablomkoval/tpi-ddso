@@ -155,10 +155,8 @@ class ServicioService {
     ////////////////////// SERVICIOS MED ////////////////////////
 
     async findServicioMedById(idServicioMed, session = null) {
-        validarEnteroPositivo(idServicioMed, "Id")
-
+        //validarEnteroPositivo(idServicioMed, "Id")
         const servicioMed = await this.servicioMedRepository.findById(idServicioMed, session)
-
         if (!servicioMed) {
             throw new NotFoundError("Servicio no encontrado")
         }
@@ -168,6 +166,7 @@ class ServicioService {
 
     async createServicioMed(datosServicioMed, session = null) {
         //this.validarDatosServicioMed(datosServicioMed)
+        //buscar si el servicioUnico es existente, sino crearlo, caso practica ver que se hace con el codigo
         const servicioMedGuardado = await this.servicioMedRepository.save(datosServicioMed, session)
         return servicioMedGuardado
     }

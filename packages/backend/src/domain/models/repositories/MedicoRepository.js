@@ -1,5 +1,6 @@
 import { MedicoModel } from "../../../schemas/MedicoSchema.js";
 
+
 export default class MedicoRepository {
     constructor() {
         this.model = MedicoModel;
@@ -15,22 +16,17 @@ export default class MedicoRepository {
     }
 
     async findById(id, session = null) { // implementar session despues
-        /* const query = await this.model.findById(id)
-            .populate('especialidades')
-            .populate('practicas'); */
-        const medico = await this.model.findById(id);
-        if(!medico){
-            return null
+        const medico = await this.model.findById(id)
+        if (!medico) {
+            return null // lanzar error?
         }
-
         await medico.populate('especialidades');
         await medico.populate('practicas');
-
         return medico;
     }
 
     async guardar(medico, session = null) {
-        return await medico.save({ session })
+        return await medico.save(/* { session } */)
     }
 
     async findDisponibilidadesById(id) {
@@ -49,14 +45,14 @@ export default class MedicoRepository {
         }
     }
 
-   /*  async findByServicio(especialidadId) {
-            return await MedicoModel.find({
-                activo: true,
-                especialidades: especialidadId
-            })
-                .populate('especialidades', 'nombre')
-                .lean();
-        } */
+    /*  async findByServicio(especialidadId) {
+             return await MedicoModel.find({
+                 activo: true,
+                 especialidades: especialidadId
+             })
+                 .populate('especialidades', 'nombre')
+                 .lean();
+         } */
 
 
 }

@@ -68,8 +68,8 @@ export class ServiciosController {
         }
     }
 
-    seed = async (req, res, next) => { //datos hardcodeados
-        const SERVICIOS_INICIALES = [
+    /* async seed() { //datos hardcodeados
+        const serviciosIniciales = [
             { nombre: "Consulta Pediátrica", tipoServicio: TipoServicio.ESPECIALIDAD },
             { nombre: "Control Cardiológico", tipoServicio: TipoServicio.ESPECIALIDAD },
             { nombre: "Consulta Dermatológica", tipoServicio: TipoServicio.ESPECIALIDAD },
@@ -81,14 +81,13 @@ export class ServiciosController {
         ]
 
         try {
-            const listaServicios = Array.isArray(req.body) && req.body.length > 0 ? req.body : SERVICIOS_INICIALES
-            const serviciosCreados = await this.servicioService.createSeveral(listaServicios)
+            
+            await this.servicioService.createSeveral(serviciosIniciales)
 
-            return res.status(201).json({ status: "success", data: serviciosCreados })
         } catch (error) {
-            return next(error)
+            throw new Error("Error al intentar levantar datos", {cause: error})
         }
-    }
+    } */
 
     delete = async (req, res, next) => {
         try {
