@@ -1,6 +1,6 @@
-import { PracticaModel } from "../../../schemas/practicaSchema.js"
-import { EspecialidadModel } from "../../../schemas/especialidadSchema.js"
-import { ServicioMedModel } from "../../../schemas/ServicioMedSchema.js"
+import { PracticaModel } from "../../../schemas/practica.schema.js"
+import { EspecialidadModel } from "../../../schemas/especialidad.schema.js"
+import { ServicioMedModel } from "../../../schemas/ServicioMed.schema.js"
 
 export class ServicioMedRepository {
 

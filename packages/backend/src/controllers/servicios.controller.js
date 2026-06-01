@@ -1,5 +1,5 @@
 import { BadRequestError } from "../shared/errors/AppError.js";
-import { servicioService } from "../services/servicioService.js";
+import { servicioService } from "../services/servicio.service.js";
 import { parsearId } from "../utils/parsearId.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js"
 //import { servicioMedSchema } from "../validators/servicioMed.schema.js";

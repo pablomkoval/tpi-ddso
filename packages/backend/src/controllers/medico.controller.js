@@ -1,17 +1,31 @@
-import MedicoService from "../../services/MedicoService.js";
-import { parsearId } from "../../utils/parsearId.js";
-import { BadRequestError } from "../../shared/errors/AppError.js";
-import { servicioMedSchema } from "../../validators/servicioMed.schema.js";
+import MedicoService from "../services/medico.service.js";
+import { parsearId } from "../utils/parsearId.js";
+import { BadRequestError } from "../shared/errors/AppError.js";
+import { servicioMedSchema } from "../validators/servicioMed.schema.js";
 
 export default class MedicoController {
     constructor({ medicoService = new MedicoService() } = {}) {
         this.medicoService = medicoService;
     }
 
+    toDTO(medico) {
+        return {
+            id: medico.id || medico._id,
+            usuario: medico.usuario,
+            matricula: medico.matricula,
+            nombre: medico.nombre,
+            especialidades: medico.especialidades,
+            practicas: medico.practicas,
+            sedes: medico.sedes,
+            disponibilidades: medico.disponibilidades,
+            turnos: medico.turnos
+        };
+    }
+
     async create(req, res, next) {
         try {
             const medico = await this.medicoService.create(req.body);
-            res.status(201).json(medico);
+            res.status(201).json(this.toDTO(medico));
         } catch (error) {
             return next(error);
         }
@@ -20,7 +34,7 @@ export default class MedicoController {
     async update(req, res, next) {
         try {
             const medicoActualizado = await this.medicoService.update(req.params.idMedico, req.body);
-            res.status(200).json(medicoActualizado);
+            res.status(200).json(this.toDTO(medicoActualizado));
         } catch (error) {
             return next(error);
         }
@@ -29,7 +43,8 @@ export default class MedicoController {
     async findAll(req, res, next) {
         try {
             const medicos = await this.medicoService.findAll();
-            res.status(200).json(medicos);
+            const medicosDTO = medicos.map(medico => this.toDTO(medico));
+            res.status(200).json(medicosDTO);
         } catch (error) {
             return next(error);
         }
@@ -39,7 +54,7 @@ export default class MedicoController {
         try {
             const id = parsearId(req.params.idMedico)
             const medico = await this.medicoService.findById(id);
-            res.status(200).json(medico);
+            res.status(200).json(this.toDTO(medico));
         } catch (error) {
             return next(error);
         }
@@ -63,7 +78,7 @@ export default class MedicoController {
         try {
             const idMedico = parsearId(req.params.idMedico)
             const medicoActualizado = await this.medicoService.agregarDisponibilidades(idMedico, nuevasDisponibilidades);
-            res.status(200).json(medicoActualizado);
+            res.status(200).json(this.toDTO(medicoActualizado));
         } catch (error) {
             return next(error);
         }
@@ -74,7 +89,7 @@ export default class MedicoController {
         try {
             const { idMedico, disponibilidadId } = req.params;
             const medicoActualizado = await this.medicoService.editarDisponibilidad(idMedico, disponibilidadId, req.body);
-            res.status(200).json(medicoActualizado);
+            res.status(200).json(this.toDTO(medicoActualizado));
         } catch (error) {
             next(error);
         }
@@ -84,7 +99,7 @@ export default class MedicoController {
         try {
             const { idMedico, disponibilidadId } = req.params;
             const medicoActualizado = await this.medicoService.eliminarDisponibilidad(idMedico, disponibilidadId);
-            res.status(200).json(medicoActualizado);
+            res.status(200).json(this.toDTO(medicoActualizado));
         } catch (error) {
             next(error);
         }
