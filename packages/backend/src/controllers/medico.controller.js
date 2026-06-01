@@ -1,7 +1,8 @@
 import MedicoService from "../services/medico.service.js";
 import { parsearId } from "../utils/parsearId.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
-import { servicioMedSchema } from "../validators/servicioMed.schema.js";
+import { createServicioMedSchema } from "../validators/servicioMed.schema.zod.js";
+import { createMedicoSchema } from "../validators/medico.schema.zod.js";
 
 export default class MedicoController {
     constructor({ medicoService = new MedicoService() } = {}) {
@@ -24,7 +25,8 @@ export default class MedicoController {
 
     async create(req, res, next) {
         try {
-            const medico = await this.medicoService.create(req.body);
+            const datosMedico = this.extraerYValidarBodyMedico(req.body)
+            const medico = await this.medicoService.create(datosMedico);
             res.status(201).json(this.toDTO(medico));
         } catch (error) {
             return next(error);
@@ -33,7 +35,9 @@ export default class MedicoController {
 
     async update(req, res, next) {
         try {
-            const medicoActualizado = await this.medicoService.update(req.params.idMedico, req.body);
+            const idMedico = parsearId(req.params.idMedico)
+            const dataMedico = this.extraerYValidarBodyMedico(req.body)
+            const medicoActualizado = await this.medicoService.update(idMedico, dataMedico);
             res.status(200).json(this.toDTO(medicoActualizado));
         } catch (error) {
             return next(error);
@@ -52,8 +56,8 @@ export default class MedicoController {
 
     async findById(req, res, next) {
         try {
-            const id = parsearId(req.params.idMedico)
-            const medico = await this.medicoService.findById(id);
+            const idMedico = parsearId(req.params.idMedico)
+            const medico = await this.medicoService.findById(idMedico);
             res.status(200).json(this.toDTO(medico));
         } catch (error) {
             return next(error);
@@ -62,8 +66,8 @@ export default class MedicoController {
 
     async obtenerDisponibilidades(req, res, next) {
         try {
-            const id = parsearId(req.params.idMedico)
-            const disponibilidades = await this.medicoService.obtenerDisponibilidades(id);
+            const idMedico = parsearId(req.params.idMedico)
+            const disponibilidades = await this.medicoService.obtenerDisponibilidades(idMedico);
             res.status(200).json(disponibilidades);
         }
         catch (error) {
@@ -183,7 +187,17 @@ export default class MedicoController {
     }
 
     extraerYValidarBodyServicioMed(body) {
-        const resultado = servicioMedSchema.safeParse(body)
+        const resultado = createServicioMedSchema.safeParse(body)
+        if (!resultado.success) {
+            throw new BadRequestError(
+                resultado.error.issues.map(i => i.message).join(", ")
+            )
+        }
+        return resultado.data
+    }
+
+    extraerYValidarBodyMedico(body) {
+        const resultado = createMedicoSchema.safeParse(body)
         if (!resultado.success) {
             throw new BadRequestError(
                 resultado.error.issues.map(i => i.message).join(", ")

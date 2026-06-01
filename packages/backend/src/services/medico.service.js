@@ -61,14 +61,14 @@ export default class MedicoService {
         return medicoGuardado;
     }
 
-    async update(id, data) {
-        const medicoExistente = await this.medicoRepository.findById(id);
+    async update(idMedico, data) {
+        const medicoExistente = await this.medicoRepository.findById(idMedico);
 
         if (!medicoExistente) {
             throw new NotFoundError("No se puede actualizar, médico con Id " + id + " no encontrado", "MEDICO_UPDATE_FAIL");
         }
 
-        const actualizado = await this.medicoRepository.update(id, data);
+        const actualizado = await this.medicoRepository.update(idMedico, data);
         return actualizado;
     }
 
@@ -77,8 +77,8 @@ export default class MedicoService {
         return medicos;
     }
 
-    async findById(id) {
-        const medico = await this.medicoRepository.findById(id);
+    async findById(idMedico) {
+        const medico = await this.medicoRepository.findById(idMedico);
 
         if (!medico) {
             throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
@@ -87,9 +87,9 @@ export default class MedicoService {
         return medico;
     }
 
-    async obtenerDisponibilidades(id) {
+    async obtenerDisponibilidades(idMedico) {
         try {
-            const medico = await this.medicoRepository.findById(id);
+            const medico = await this.medicoRepository.findById(idMedico);
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
@@ -99,9 +99,9 @@ export default class MedicoService {
         }
     }
 
-    async agregarDisponibilidades(id, nuevasDisponibilidades) {
+    async agregarDisponibilidades(idMedico, nuevasDisponibilidades) {
         try {
-            const medico = await this.medicoRepository.model.findById(id);
+            const medico = await this.medicoRepository.findById(idMedico);
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
@@ -122,8 +122,8 @@ export default class MedicoService {
         }
     }
 
-    async editarDisponibilidad(id, disponibilidadId, cambios) {
-        const medico = await this.medicoRepository.model.findById(id);
+    async editarDisponibilidad(idMedico, disponibilidadId, cambios) {
+        const medico = await this.medicoRepository.findById(idMedico);
         if (!medico) throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
 
         medico.editarDisponibilidad(disponibilidadId, cambios);
@@ -133,8 +133,8 @@ export default class MedicoService {
         return medico;
     }
 
-    async eliminarDisponibilidad(id, disponibilidadId) {
-        const medico = await this.medicoRepository.model.findById(id);
+    async eliminarDisponibilidad(idMedico, disponibilidadId) {
+        const medico = await this.medicoRepository.findById(idMedico);
         if (!medico) throw new AppError("Médico no encontrado", 404, "MEDICO_NO_ENCONTRADO");
 
         medico.disponibilidades = medico.disponibilidades.filter(

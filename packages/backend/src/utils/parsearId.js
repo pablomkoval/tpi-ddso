@@ -1,9 +1,12 @@
-//import { validarEnteroPositivo } from "./validarEnteroPositivo.js"
+import { createIdMongoSchema } from "../validators/id.schema.zod.js"
+import { BadRequestError } from "../shared/errors/AppError.js"
 
-export function parsearId(idParam) {
-        //const id = Number(idParam)
-
-        //validarEnteroPositivo(id, "id")
-
-        return idParam
+export function parsearId(id) {
+        const resultado = createIdMongoSchema.safeParse(id)
+        if (!resultado.success) {
+                throw new BadRequestError(
+                        resultado.error.issues.map(i => i.message).join(", ")
+                )
+        }
+        return resultado.data
 }

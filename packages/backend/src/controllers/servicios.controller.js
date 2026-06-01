@@ -2,9 +2,8 @@ import { BadRequestError } from "../shared/errors/AppError.js";
 import { servicioService } from "../services/servicio.service.js";
 import { parsearId } from "../utils/parsearId.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js"
-//import { servicioMedSchema } from "../validators/servicioMed.schema.js";
-import { servicioSchema } from "../validators/servicio.schema.js";
-import { TipoServicio } from "../domain/enum/TipoServicio.js";
+//import { createServicioMedSchema } from "../validators/servicioMed.schema.js";
+import { createServicioSchema } from "../validators/servicio.schema.zod.js";
 
 
 export class ServiciosController {
@@ -101,7 +100,7 @@ export class ServiciosController {
     }
 
     extraerYValidarBodyServicio(body) {
-        const resultado = servicioSchema.safeParse(body)
+        const resultado = createServicioSchema.safeParse(body)
 
         if (!resultado.success) {
             throw new BadRequestError(

@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { createIdMongoSchema } from "./id.schema.zod.js";
 
 export const createNotificacionSchema = z.object({
-    destinatario: z.string().trim().length(24, "El ID debe tener 24 caracteres"),
-    remitente: z.string().trim().length(24, "El ID debe tener 24 caracteres"),
+    destinatario: createIdMongoSchema,
+    remitente: createIdMongoSchema,
     mensaje: z.string().trim().min(1, "El mensaje es obligatorio"),
     leida: z.boolean().optional().default(false)
 });

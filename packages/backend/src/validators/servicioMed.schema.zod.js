@@ -1,9 +1,8 @@
 import { z } from "zod"
+import { createIdMongoSchema } from "./id.schema.zod.js"
 
 const baseSchema = {
-    servicioUnico: z
-        .string()
-        .regex(/^[0-9a-fA-F]{24}$/, "Id inválido"), //formato de un id mongo
+    servicioUnico: createIdMongoSchema,
 
     costo: z
         .number()
@@ -15,7 +14,7 @@ const baseSchema = {
         .positive()
 }
 
-export const servicioMedSchema =
+export const createServicioMedSchema =
     z.discriminatedUnion("tipoServicio", [
 
         z.object({

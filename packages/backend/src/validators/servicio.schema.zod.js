@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const servicioSchema = z.object({
+export const createServicioSchema = z.object({
     nombre: z
         .string()
         .trim()

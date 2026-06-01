@@ -6,7 +6,7 @@ import {
 } from "../shared/errors/AppError.js"
 import { ServicioRepository } from "../domain/models/repositories/servicio.repository.js";
 import { ServicioMedRepository } from "../domain/models/repositories/servicioMed.repository.js";
-import { servicioSchema } from "../validators/servicio.schema.js";
+import { createServicioSchema } from "../validators/servicio.schema.zod.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js";
 
 class ServicioService {
@@ -110,7 +110,7 @@ class ServicioService {
     }
 
     validarDatosServicio(datosServicio) {
-        const resultado = servicioSchema.safeParse(datosServicio)
+        const resultado = createServicioSchema.safeParse(datosServicio)
 
         if (!resultado.success) {
             throw new UnprocessableEntityError(
@@ -180,7 +180,7 @@ class ServicioService {
     }
 
     /* validarDatosServicioMed(datosServicioMed) { //deberia venir parseado desde medicoController 
-        const resultado = servicioMedSchema.safeParse(datosServicioMed)
+        const resultado = createServicioMedSchema.safeParse(datosServicioMed)
 
         if (!resultado.success) {
             throw new UnprocessableEntityError(

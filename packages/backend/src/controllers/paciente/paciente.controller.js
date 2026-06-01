@@ -1,8 +1,8 @@
 
 import { parsearId } from "../../utils/parsearId.js";
 import { BadRequestError } from "../../shared/errors/AppError.js";
-import { servicioMedSchema } from "../../validators/Paciente.schema.js"; 
-import MedicoService from "../../services/PacienteService.js";
+import { createServicioMedSchema } from "../../validators/Paciente.schema.js";
+import MedicoService from "../../services/PacienteService.js"; // en teoria y si es necesario, el paciente service se comunica con el medico service, no el paciente controller
 
 
 export default class PacienteController {
@@ -12,6 +12,7 @@ export default class PacienteController {
 
     async create(req, res, next) {
         try {
+            //schema de zod para parsear el body
             const paciente = await this.PacienteService.create(req.body);
             res.status(201).json(paciente);
         } catch (error) {
@@ -21,8 +22,10 @@ export default class PacienteController {
 
     async update(req, res, next) {
         try {
-            const pacienteActualizado = await this.PacienteService.update(req.params.idPaciente, req.body);
-            res.status(200).json(medicoActualizado);
+            const idPaciente = parsearId(req.params.idPaciente)
+            //schema de zod para parsear el body 
+            const pacienteActualizado = await this.PacienteService.update(idPaciente, req.body);
+            res.status(200).json(pacienteActualizado);
         } catch (error) {
             return next(error);
         }

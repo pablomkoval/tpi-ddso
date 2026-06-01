@@ -16,7 +16,7 @@ export default class Medico {
         this.practicas = practicas;
         this.sedes = sedes;
     }
-
+    ////////////////////////////    Servicios   /////////////////////////////////////////////////////
     agregarServicio(servicio) {
 
         if (servicio.tipoServicio === "practica") {
@@ -40,19 +40,28 @@ export default class Medico {
         }
     }
 
+    prestaServicio(servicio) {
+        return this.especialidades.some(especialidad => especialidad.esMismoServicioQue(servicio))
+            || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
+    }
 
-    /*     agregarEspecialidad(nuevaEspecialidad) {
-            this.especialidades.push(nuevaEspecialidad);
-        }
-    
-        agregarPractica(nuevaPractica) {
-            this.practicas.push(nuevaPractica);
-        } */
+    prestaServicioPorId(servicio) {
+        return this.especialidades.some(esp => esp._id.equals(servicio._id))
+            || this.practicas.some(prac => prac._id.equals(servicio._id));
+    }
+
+    serviciosMedTotales() {
+        //dependiendo de frontend, puede convenir hacer una tupla o similar
+        return [...this.especialidades, ...this.practicas]
+    }
+
+    ////////////////////////////    Sedes   /////////////////////////////////////////////////////
 
     agregarSede(nuevaSede) {
         this.sedes.push(nuevaSede);
     }
 
+    ////////////////////////////    Disponibilidades   /////////////////////////////////////////////////////
     validarDisponibilidad(disponibilidad) {
         const nuevaDisponibilidad = new DisponibilidadHoraria({
             id: disponibilidad.id,
@@ -115,16 +124,7 @@ export default class Medico {
         const disponibilidadValidada = this.validarDisponibilidad(disponibilidadEditada);
         this.disponibilidades[index] = disponibilidadValidada;
     }
-
-    prestaServicio(servicio) {
-        return this.especialidades.some(especialidad => especialidad.esMismoServicioQue(servicio))
-            || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
-    }
-
-    prestaServicioPorId(servicio) {
-        return this.especialidades.some(esp => esp._id.equals(servicio._id))
-            || this.practicas.some(prac => prac._id.equals(servicio._id));
-    }
+    ////////////////////////////    Turnos   /////////////////////////////////////////////////////
 
     tieneTurnoEn(fechaHora) {
         return this.turnos.some(turno => turno.fechaHora.getTime() === fechaHora.getTime());
@@ -181,9 +181,5 @@ export default class Medico {
         return [...this.turnos];
     }
 
-    serviciosMedTotales() {
-        //dependiendo de frontend, puede convenir hacer una tupla o similar
-        return [...this.especialidades, ...this.practicas]
-    }
 
 }

@@ -1,4 +1,4 @@
-import { createNotificacionSchema } from "../validators/notificacion.schema.js";
+import { createNotificacionSchema } from "../validators/notificacion.schema.zod.js";
 
 export class NotificacionesController {
     constructor(notificacionesService) {
