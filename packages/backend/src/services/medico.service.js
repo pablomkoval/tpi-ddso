@@ -139,8 +139,11 @@ export default class MedicoService {
         };
 
         medico.editarDisponibilidad(disponibilidadId, cambiosConvertidos);
-
-        await medico.save();
+        
+        const medicoGuardado = await medico.save();
+        if(!medicoGuardado) {
+            throw new AppError("No se pudo editar la disponibilidad", 500, "DISPONIBILIDAD_EDITAR_FAIL");
+        }
 
         return medico;
     }
