@@ -18,7 +18,7 @@ export default class MedicoController {
             especialidades: medico.especialidades,
             practicas: medico.practicas,
             sedes: medico.sedes,
-            disponibilidades: medico.disponibilidades,
+            disponibilidades: medico.disponibilidades.map(d => this.disponibilidadToDTO(d)),
             turnos: medico.turnos
         };
     }
@@ -64,11 +64,25 @@ export default class MedicoController {
         }
     }
 
+    // Disponibilidades ///////////////////////////////////////////////////////////////////
+
+    disponibilidadToDTO(disponibilidad) {
+    return {
+        id: disponibilidad._id,
+        diaSemana: disponibilidad.diaSemana,
+        horaDesde: disponibilidad.horaDesde,
+        horaHasta: disponibilidad.horaHasta,
+        sede: disponibilidad.sede,
+        servicioMedico: disponibilidad.servicioMedico
+    }
+}
+
     async obtenerDisponibilidades(req, res, next) {
         try {
             const idMedico = parsearId(req.params.idMedico)
             const disponibilidades = await this.medicoService.obtenerDisponibilidades(idMedico);
-            res.status(200).json(disponibilidades);
+            const disponibilidadesDTO = disponibilidades.map(d => this.disponibilidadToDTO(d))
+            res.status(200).json(disponibilidadesDTO);
         }
         catch (error) {
             return next(error);

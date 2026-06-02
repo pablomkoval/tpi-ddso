@@ -3,11 +3,11 @@ import { sedeSchema } from "./sede.schema.js";
 
 export const disponibilidadHorariaSchema = new mongoose.Schema(
     {
-        id: {
+        /* id: {
             type: String,
             required: true,
             unique: false
-        },
+        }, */
         diaSemana: {
             type: String,
             required: true,
@@ -30,5 +30,7 @@ export const disponibilidadHorariaSchema = new mongoose.Schema(
             required: true
         }
     },
-    { _id: false }
+    {
+        _id: true
+    }
 )
