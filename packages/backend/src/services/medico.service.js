@@ -65,10 +65,14 @@ export default class MedicoService {
         const medicoExistente = await this.medicoRepository.findById(idMedico);
 
         if (!medicoExistente) {
-            throw new NotFoundError("No se puede actualizar, médico con Id " + id + " no encontrado", "MEDICO_UPDATE_FAIL");
+            throw new NotFoundError("No se puede actualizar, médico con Id " + idMedico + " no encontrado", "MEDICO_UPDATE_FAIL");
         }
 
         const actualizado = await this.medicoRepository.update(idMedico, data);
+        if(!actualizado) {
+            throw new AppError("No se pudo actualizar el médico", 500, "MEDICO_UPDATE_FAIL");
+        }
+
         return actualizado;
     }
 
@@ -81,7 +85,7 @@ export default class MedicoService {
         const medico = await this.medicoRepository.findById(idMedico);
 
         if (!medico) {
-            throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
+            throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
         }
 
         return medico;
@@ -91,11 +95,11 @@ export default class MedicoService {
         try {
             const medico = await this.medicoRepository.findById(idMedico);
             if (!medico) {
-                throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
+                throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
             return medico.disponibilidades;
         } catch (error) {
-            throw new Error(`Error al obtener disponibilidades: ${error.message}`, { cause: error });
+            throw new AppError(`Error al obtener disponibilidades: ${error.message}`, 500, "DISPONIBILIDADES_OBTENER_FAIL");
         }
     }
 
@@ -103,30 +107,38 @@ export default class MedicoService {
         try {
             const medico = await this.medicoRepository.findById(idMedico);
             if (!medico) {
-                throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
+                throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => new DisponibilidadHoraria({
-                diaSemana: d.diaSemana,
-                horaDesde: d.horaDesde,
-                horaHasta: d.horaHasta,
-                sede: d.sede,
-                servicioMedico: toObjectId(d.servicioMedico)
-            }));
-            medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
+            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => 
+                new DisponibilidadHoraria({
+                    diaSemana: d.diaSemana,  // ← Llega como string, el constructor lo convierte
+                    horaDesde: d.horaDesde,
+                    horaHasta: d.horaHasta,
+                    sede: d.sede,
+                    servicioMedico: toObjectId(d.servicioMedico)
+                })
+            );
 
+            medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
             const medicoActualizado = await medico.save();
             return medicoActualizado;
         } catch (error) {
-            throw new Error(`Error al agregar disponibilidades: ${error.message}`, { cause: error });
+            if (error instanceof AppError) throw error;
+            throw new AppError(`Error al agregar disponibilidades: ${error.message}`, 500, "DISPONIBILIDADES_AGREGAR_FAIL");
         }
     }
 
     async editarDisponibilidad(idMedico, disponibilidadId, cambios) {
         const medico = await this.medicoRepository.findById(idMedico);
-        if (!medico) throw new NotFoundError("Médico con Id " + id + " no encontrado", "MEDICO_NO_ENCONTRADO");
+        if (!medico) throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
 
-        medico.editarDisponibilidad(disponibilidadId, cambios);
+        const cambiosConvertidos = {
+            ...cambios,
+            diaSemana: cambios.diaSemana ? Number(cambios.diaSemana) : undefined
+        };
+
+        medico.editarDisponibilidad(disponibilidadId, cambiosConvertidos);
 
         await medico.save();
 

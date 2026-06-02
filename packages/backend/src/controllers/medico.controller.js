@@ -96,6 +96,9 @@ export default class MedicoController {
         try {
             const idMedico = parsearId(req.params.idMedico)
             const medicoActualizado = await this.medicoService.agregarDisponibilidades(idMedico, nuevasDisponibilidades);
+            if(!medicoActualizado) {
+                throw new BadRequestError("No se pudo agregar las disponibilidades al médico")
+            }
             res.status(200).json(this.toDTO(medicoActualizado));
         } catch (error) {
             return next(error);

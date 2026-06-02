@@ -15,7 +15,7 @@ export default class MedicoRepository {
         return await this.model.find();
     }
 
-    async findById(id, session = null) { // implementar session despues
+    async findById(id,) { // implementar session despues
         const medico = await this.model.findById(id)
         if (!medico) {
             return null // lanzar error?
@@ -25,7 +25,7 @@ export default class MedicoRepository {
         return medico;
     }
 
-    async guardar(medico, session = null) {
+    async guardar(medico) {
         return await medico.save(/* { session } */)
     }
 
