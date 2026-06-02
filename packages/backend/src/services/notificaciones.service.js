@@ -8,24 +8,13 @@ export class NotificacionesService {
     }
 
 
-    toDTO(notificacion) {
-        return {
-            id: notificacion.id || notificacion._id,
-            destinatario: notificacion.destinatario,
-            remitente: notificacion.remitente,
-            mensaje: notificacion.mensaje,
-            leida: notificacion.leida,
-            fechaHoraCreacion: notificacion.fechaHoraCreacion
-        };
-    }
-
     async obtenerLeidas (userId, page, limit) {
         const criterios = { destinatario: userId, leida: true };
         const resultado = await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
         
         return {
             ...resultado,
-            notificaciones: resultado.notificaciones.map(n => this.toDTO(n))
+            notificaciones: resultado.notificaciones
         };
     }
 
@@ -35,7 +24,7 @@ export class NotificacionesService {
         
         return {
             ...resultado,
-            notificaciones: resultado.notificaciones.map(n => this.toDTO(n))
+            notificaciones: resultado.notificaciones
         };
     }
 
@@ -49,7 +38,7 @@ export class NotificacionesService {
         const nueva = new Notificacion(destinatario, remitente, mensaje);
         const notificacionGuardada = await this.notificacionesRepository.save(nueva);
 
-        return this.toDTO(notificacionGuardada);
+        return notificacionGuardada;
     }
 
     async marcarComoLeida(notificacionId) {
@@ -66,7 +55,7 @@ export class NotificacionesService {
             fechaHoraLeida: notificacion.fechaHoraLeida
         });
 
-        return this.toDTO(actualizada);
+        return actualizada;
     }
 
     async softDelete(notificacionId) {

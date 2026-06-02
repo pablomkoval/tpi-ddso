@@ -5,12 +5,23 @@ export class NotificacionesController {
         this.notificacionesService = notificacionesService;
     }
 
+    notificacionToDTO(notificacion) {
+        return {
+            id: notificacion.id || notificacion._id,
+            destinatario: notificacion.destinatario,
+            remitente: notificacion.remitente,
+            mensaje: notificacion.mensaje,
+            leida: notificacion.leida,
+            fechaHoraCreacion: notificacion.fechaHoraCreacion
+        };
+    }
+
     async findAllPaginated(req, res, next) {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
             const notificaciones = await this.notificacionesService.findAllPaginated(page, limit);
-            res.json(notificaciones);
+            res.json(notificaciones.map(n => this.notificacionToDTO(n)));
         } catch (error) {
             next(error);
         }
@@ -27,7 +38,7 @@ export class NotificacionesController {
             }
 
             const notificaciones = await this.notificacionesService.obtenerLeidas(userId, page, limit);
-            res.json(notificaciones);
+            res.json(notificaciones.map(n => this.notificacionToDTO(n)));
         } catch (error) {
             next(error);
         }
@@ -44,7 +55,7 @@ export class NotificacionesController {
             }
 
             const notificaciones = await this.notificacionesService.obtenerNoLeidas(userId, page, limit);
-            res.json(notificaciones);
+            res.json(notificaciones.map(n => this.notificacionToDTO(n)));
         } catch (error) {
             next(error);
         }
@@ -56,7 +67,7 @@ export class NotificacionesController {
 
             const notificacion = await this.notificacionesService.create(validatedData);
 
-            res.status(201).json(notificacion);
+            res.status(201).json(this.notificacionToDTO(notificacion));
         } catch (error) {
             next(error);
         }
@@ -66,7 +77,7 @@ export class NotificacionesController {
         try {
             const notificacion = await this.notificacionesService
                 .findById(req.params.id);
-            res.json(notificacion);
+            res.json(this.notificacionToDTO(notificacion));
         } catch (error) {
             next(error);
         }
@@ -77,7 +88,7 @@ export class NotificacionesController {
             const notificacion = await this.notificacionesService
                 .marcarComoLeida(req.params.id);
 
-            res.json(notificacion);
+            res.json(this.notificacionToDTO(notificacion));
         } catch (error) {
             next(error);
         }
@@ -88,7 +99,7 @@ export class NotificacionesController {
             const notificacion = await this.notificacionesService
                 .softDelete(req.params.id);
 
-            res.json(notificacion)
+            res.json(this.notificacionToDTO(notificacion))
         } catch (error) {
             next(error)
         }

@@ -8,7 +8,7 @@ export class MedicoController {
         this.medicoService = medicoService;
     }
 
-    toDTO(medico) {
+    medicoToDTO(medico) {
         return {
             id: medico.id || medico._id,
             usuario: medico.usuario,
@@ -26,7 +26,7 @@ export class MedicoController {
         try {
             const datosMedico = this.extraerYValidarBodyMedico(req.body)
             const medico = await this.medicoService.create(datosMedico);
-            res.status(201).json(this.toDTO(medico));
+            res.status(201).json(this.medicoToDTO(medico));
         } catch (error) {
             return next(error);
         }
@@ -37,7 +37,7 @@ export class MedicoController {
             const idMedico = parsearId(req.params.idMedico)
             const dataMedico = this.extraerYValidarBodyMedico(req.body)
             const medicoActualizado = await this.medicoService.update(idMedico, dataMedico);
-            res.status(200).json(this.toDTO(medicoActualizado));
+            res.status(200).json(this.medicoToDTO(medicoActualizado));
         } catch (error) {
             return next(error);
         }
@@ -46,7 +46,7 @@ export class MedicoController {
     async findAll(req, res, next) {
         try {
             const medicos = await this.medicoService.findAll();
-            const medicosDTO = medicos.map(medico => this.toDTO(medico));
+            const medicosDTO = medicos.map(medico => this.medicoToDTO(medico));
             res.status(200).json(medicosDTO);
         } catch (error) {
             return next(error);
@@ -57,7 +57,7 @@ export class MedicoController {
         try {
             const idMedico = parsearId(req.params.idMedico)
             const medico = await this.medicoService.findById(idMedico);
-            res.status(200).json(this.toDTO(medico));
+            res.status(200).json(this.medicoToDTO(medico));
         } catch (error) {
             return next(error);
         }
@@ -98,7 +98,7 @@ export class MedicoController {
             if(!medicoActualizado) {
                 throw new BadRequestError("No se pudo agregar las disponibilidades al médico")
             }
-            res.status(200).json(this.toDTO(medicoActualizado));
+            res.status(200).json(this.medicoToDTO(medicoActualizado));
         } catch (error) {
             return next(error);
         }
@@ -109,7 +109,7 @@ export class MedicoController {
         try {
             const { idMedico, disponibilidadId } = req.params;
             const medicoActualizado = await this.medicoService.editarDisponibilidad(idMedico, disponibilidadId, req.body);
-            res.status(200).json(this.toDTO(medicoActualizado));
+            res.status(200).json(this.medicoToDTO(medicoActualizado));
         } catch (error) {
             next(error);
         }
@@ -119,7 +119,7 @@ export class MedicoController {
         try {
             const { idMedico, disponibilidadId } = req.params;
             const medicoActualizado = await this.medicoService.eliminarDisponibilidad(idMedico, disponibilidadId);
-            res.status(200).json(this.toDTO(medicoActualizado));
+            res.status(200).json(this.medicoToDTO(medicoActualizado));
         } catch (error) {
             next(error);
         }

@@ -27,10 +27,9 @@ export class ServicioService {
 
         const totalPaginas = totalServicios === 0 ? 0 : Math.ceil(totalServicios / limitePorPagina)
 
-        const serviciosFormateados = servicios.map(s => this.toDTO(s))
 
         return {
-            serviciosFormateados,
+            servicios,
             numeroPagina,
             limitePorPagina,
             totalPaginas,
