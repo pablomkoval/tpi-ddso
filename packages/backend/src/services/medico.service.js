@@ -66,6 +66,10 @@ export class MedicoService {
         }
 
         const actualizado = await this.medicoRepository.update(idMedico, data);
+        if(!actualizado) {
+            throw new AppError("No se pudo actualizar el médico", 500, "MEDICO_UPDATE_FAIL");
+        }
+
         return actualizado;
     }
 
@@ -92,7 +96,7 @@ export class MedicoService {
             }
             return medico.disponibilidades;
         } catch (error) {
-            throw new Error(`Error al obtener disponibilidades: ${error.message}`, { cause: error });
+            throw new AppError(`Error al obtener disponibilidades: ${error.message}`, 500, "DISPONIBILIDADES_OBTENER_FAIL");
         }
     }
 
@@ -103,19 +107,22 @@ export class MedicoService {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => new DisponibilidadHoraria({
-                diaSemana: d.diaSemana,
-                horaDesde: d.horaDesde,
-                horaHasta: d.horaHasta,
-                sede: d.sede,
-                servicioMedico: toObjectId(d.servicioMedico)
-            }));
-            medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
+            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => 
+                new DisponibilidadHoraria({
+                    diaSemana: d.diaSemana,  // ← Llega como string, el constructor lo convierte
+                    horaDesde: d.horaDesde,
+                    horaHasta: d.horaHasta,
+                    sede: d.sede,
+                    servicioMedico: toObjectId(d.servicioMedico)
+                })
+            );
 
+            medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
             const medicoActualizado = await medico.save();
             return medicoActualizado;
         } catch (error) {
-            throw new Error(`Error al agregar disponibilidades: ${error.message}`, { cause: error });
+            if (error instanceof AppError) throw error;
+            throw new AppError(`Error al agregar disponibilidades: ${error.message}`, 500, "DISPONIBILIDADES_AGREGAR_FAIL");
         }
     }
 
@@ -123,9 +130,17 @@ export class MedicoService {
         const medico = await this.medicoRepository.findById(idMedico);
         if (!medico) throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
 
-        medico.editarDisponibilidad(disponibilidadId, cambios);
+        const cambiosConvertidos = {
+            ...cambios,
+            diaSemana: cambios.diaSemana ? Number(cambios.diaSemana) : undefined
+        };
 
-        await medico.save();
+        medico.editarDisponibilidad(disponibilidadId, cambiosConvertidos);
+        
+        const medicoGuardado = await medico.save();
+        if(!medicoGuardado) {
+            throw new AppError("No se pudo editar la disponibilidad", 500, "DISPONIBILIDAD_EDITAR_FAIL");
+        }
 
         return medico;
     }

@@ -13,16 +13,18 @@ export class DisponibilidadHoraria{
         this.validarRangoHorario(horaDesde, horaHasta);
 
         this.id = id;
-        this.diaSemana = diaSemana;
-        this.horaDesde = horaDesde; //string de tipo "18:40"
+        this.diaSemana = Number(diaSemana);  // ← Convierte a número aquí
+        this.horaDesde = horaDesde;
         this.horaHasta = horaHasta;
         this.sede = sede;
-        this.servicioMedico = servicioMedico; // servicio que presta en ese horario
+        this.servicioMedico = servicioMedico;
     }
 
     validarDiaSemana(diaSemana) {
         const diasValidos = Object.values(DiaSemana);
-        if (!diasValidos.includes(diaSemana)) {
+        const diaSemanaNum = Number(diaSemana);
+        
+        if (isNaN(diaSemanaNum) || !diasValidos.includes(diaSemanaNum)) {
             throw new DiaSemanaInvalidoError(`El día de semana "${diaSemana}" no es válido`);
         }
     }

@@ -106,23 +106,16 @@ export default class Medico {
     }
 
     editarDisponibilidad(disponibilidadId, cambios) {
-        const index = this.disponibilidades.findIndex(d => d.id === disponibilidadId);
-        if (index === -1) {
-            throw new Error("No se encontró la disponibilidad a editar");
+        const disponibilidad = this.disponibilidades.find(d => String(d.id) === String(disponibilidadId) || String(d._id) === String(disponibilidadId));
+        if (!disponibilidad) {
+            throw new Error("Disponibilidad no encontrada");
         }
 
-        const disponibilidadExistente = this.disponibilidades[index];
-        const disponibilidadEditada = new DisponibilidadHoraria({
-            id: disponibilidadExistente.id,
-            diaSemana: cambios.diaSemana ?? disponibilidadExistente.diaSemana,
-            horaDesde: cambios.horaDesde ?? disponibilidadExistente.horaDesde,
-            horaHasta: cambios.horaHasta ?? disponibilidadExistente.horaHasta,
-            sede: cambios.sede ?? disponibilidadExistente.sede,
-            servicioMedico: cambios.servicioMedico ?? disponibilidadExistente.servicioMedico
-        });
-
-        const disponibilidadValidada = this.validarDisponibilidad(disponibilidadEditada);
-        this.disponibilidades[index] = disponibilidadValidada;
+        disponibilidad.diaSemana = cambios.diaSemana ?? disponibilidad.diaSemana;
+        disponibilidad.horaDesde = cambios.horaDesde ?? disponibilidad.horaDesde;
+        disponibilidad.horaHasta = cambios.horaHasta ?? disponibilidad.horaHasta;
+        disponibilidad.sede = cambios.sede ?? disponibilidad.sede;
+        disponibilidad.servicioMedico = cambios.servicioMedico ?? disponibilidad.servicioMedico;
     }
     ////////////////////////////    Turnos   /////////////////////////////////////////////////////
 
