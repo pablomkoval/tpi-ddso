@@ -1,6 +1,6 @@
-import { TurnoModel } from "../../../schemas/TurnoSchema.js";
+import { TurnoModel } from "../../../schemas/turno.schema.js";
 
-export default class TurnoRepository {
+export class TurnoRepository {
     constructor() {
         this.model = TurnoModel;
     }

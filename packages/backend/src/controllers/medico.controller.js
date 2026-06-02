@@ -1,11 +1,10 @@
-import MedicoService from "../services/medico.service.js";
 import { parsearId } from "../utils/parsearId.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
 import { createServicioMedSchema } from "../validators/servicioMed.schema.zod.js";
 import { createMedicoSchema } from "../validators/medico.schema.zod.js";
 
-export default class MedicoController {
-    constructor({ medicoService = new MedicoService() } = {}) {
+export class MedicoController {
+    constructor(medicoService) {
         this.medicoService = medicoService;
     }
 
@@ -67,15 +66,15 @@ export default class MedicoController {
     // Disponibilidades ///////////////////////////////////////////////////////////////////
 
     disponibilidadToDTO(disponibilidad) {
-    return {
-        id: disponibilidad._id,
-        diaSemana: disponibilidad.diaSemana,
-        horaDesde: disponibilidad.horaDesde,
-        horaHasta: disponibilidad.horaHasta,
-        sede: disponibilidad.sede,
-        servicioMedico: disponibilidad.servicioMedico
+        return {
+            id: disponibilidad._id,
+            diaSemana: disponibilidad.diaSemana,
+            horaDesde: disponibilidad.horaDesde,
+            horaHasta: disponibilidad.horaHasta,
+            sede: disponibilidad.sede,
+            servicioMedico: disponibilidad.servicioMedico
+        }
     }
-}
 
     async obtenerDisponibilidades(req, res, next) {
         try {

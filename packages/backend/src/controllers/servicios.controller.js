@@ -1,5 +1,4 @@
 import { BadRequestError } from "../shared/errors/AppError.js";
-import { servicioService } from "../services/servicio.service.js";
 import { parsearId } from "../utils/parsearId.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js"
 //import { createServicioMedSchema } from "../validators/servicioMed.schema.js";
@@ -7,8 +6,16 @@ import { createServicioSchema } from "../validators/servicio.schema.zod.js";
 
 
 export class ServiciosController {
-    constructor() {
-        this.servicioService = servicioService; // instancia unica, mas prolijo con 1 solo archivo centralizado "dependencies.js"
+    constructor(servicioService) {
+        this.servicioService = servicioService;
+    }
+
+    servicioToDTO(servicio) {
+        return {
+            id: servicio.id || servicio._id,
+            nombre: servicio.nombre,
+            tipoServicio: servicio.tipoServicio //puede no ser necesario dependiendo de los Endpoints
+        }
     }
 
 
@@ -25,7 +32,7 @@ export class ServiciosController {
                     numeroPagina: resultado.numeroPagina,
                     limitePorPagina: resultado.limitePorPagina,
                     totalPaginas: resultado.totalPaginas,
-                    totalServicios: resultado.totalServicios
+                    totalServicios: resultado.totalServicios.map(s => this.servicioToDTO(s))
                 }
             })
         } catch (error) {
@@ -38,7 +45,7 @@ export class ServiciosController {
             const datosServicio = this.extraerYValidarBodyServicio(req.body)
             const servicioCreado = await this.servicioService.create(datosServicio)
 
-            return res.status(201).json({ status: "success", data: servicioCreado })
+            return res.status(201).json({ status: "success", data: this.servicioToDTO(servicioCreado) })
         } catch (error) {
             return next(error)
         }
@@ -49,7 +56,7 @@ export class ServiciosController {
             const id = parsearId(req.params.id)
             const servicio = await this.servicioService.findById(id)
 
-            return res.status(200).json({ status: "success", data: servicio })
+            return res.status(200).json({ status: "success", data: this.servicioToDTO(servicio) })
         } catch (error) {
             return next(error)
         }
@@ -61,7 +68,7 @@ export class ServiciosController {
             const datosServicio = this.extraerYValidarBodyServicio(req.body)
             const servicioActualizado = await this.servicioService.update(id, datosServicio)
 
-            return res.status(200).json({ status: "success", data: servicioActualizado })
+            return res.status(200).json({ status: "success", data: this.servicioToDTO(servicioActualizado) })
         } catch (error) {
             return next(error)
         }
@@ -93,7 +100,7 @@ export class ServiciosController {
             const id = parsearId(req.params.id)
             const servicioEliminado = await this.servicioService.delete(id)
 
-            return res.status(200).json({ status: "success", data: servicioEliminado })
+            return res.status(200).json({ status: "success", data: this.servicioToDTO(servicioEliminado) })
         } catch (error) {
             return next(error)
         }

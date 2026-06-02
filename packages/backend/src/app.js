@@ -4,7 +4,8 @@ import router from './routes/router.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import errorHandler from './middlewares/errorHandler.js';
-import initNotificaciones from './notificaciones.dependencies.js';
+import inyectarDependenciasYRouter from './dependencies.js';
+
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-initNotificaciones();
+inyectarDependenciasYRouter(router);
 
 // Rutas
 app.use(router);

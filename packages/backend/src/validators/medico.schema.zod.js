@@ -7,6 +7,16 @@ const sedeSchema = z.object({
     direccion: z.string().min(1)
 });
 
+const disponibilidadSchema = z.object({
+    diaSemana: z.string(),
+    horaDesde: z.string(),
+    horaHasta: z.string(),
+    sede: sedeSchema,
+    servicioMedico: createIdMongoSchema
+
+})
+
+
 export const createMedicoSchema = z.object({
     usuario: z.string().min(1),
 
@@ -21,5 +31,8 @@ export const createMedicoSchema = z.object({
         .default([]),
 
     sedes: z.array(sedeSchema)
+        .default([]),
+
+    disponibilidades: z.array(disponibilidadSchema)
         .default([])
 });

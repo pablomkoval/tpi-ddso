@@ -27,6 +27,7 @@ export const disponibilidadHorariaSchema = new mongoose.Schema(
         },
         servicioMedico: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'ServicioMed',
             required: true
         }
     },

@@ -1,7 +1,7 @@
 import { MedicoModel } from "../../../schemas/medico.schema.js";
 
 
-export default class MedicoRepository {
+export class MedicoRepository {
     constructor() {
         this.model = MedicoModel;
     }

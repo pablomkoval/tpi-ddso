@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import Turno from "../domain/models/entities/turnos/Turno.js";
+import { Turno } from "../domain/models/entities/turnos/Turno.js";
 
 const turnoSchema = new mongoose.Schema(
-    {   
+    {
         paciente: {
             type: String, // Referencia al ID del paciente
             default: null
@@ -41,7 +41,7 @@ const turnoSchema = new mongoose.Schema(
                 usuario: String,
                 motivoCambio: String
             }
-        ], 
+        ],
     },
     {
         timestamps: true,

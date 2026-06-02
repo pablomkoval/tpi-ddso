@@ -1,6 +1,6 @@
 import { UsuarioModel } from "../../../schemas/usuario.schema.js";
 
-export default class UsuarioRepository {
+export class UsuarioRepository {
     constructor() {
         this.model = UsuarioModel;
     }

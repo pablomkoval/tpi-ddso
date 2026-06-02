@@ -4,27 +4,15 @@ import {
     NotFoundError,
     UnprocessableEntityError
 } from "../shared/errors/AppError.js"
-import { ServicioRepository } from "../domain/models/repositories/servicio.repository.js";
-import { ServicioMedRepository } from "../domain/models/repositories/servicioMed.repository.js";
 import { createServicioSchema } from "../validators/servicio.schema.zod.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js";
 
-class ServicioService {
-    constructor({
-        servicioRepository = new ServicioRepository(),
-        servicioMedRepository = new ServicioMedRepository() } = {}) {
+export class ServicioService {
+    constructor(servicioRepository, servicioMedRepository) {
         this.servicioRepository = servicioRepository;
         this.servicioMedRepository = servicioMedRepository;
     }
 
-
-    toDTO(servicio) {
-        return {
-            id: servicio.id || servicio._id,
-            nombre: servicio.nombre,
-            tipoServicio: servicio.tipoServicio //puede no ser necesario dependiendo de los Endpoints
-        }
-    }
 
     // Numero y limite, si no están 1 o 10 respectivamente. Sin paginacion, findAll normal
     async findAll({ numeroPagina = 1, limitePorPagina = 10/* , filtros = {}  */ } = {}) {
@@ -59,7 +47,7 @@ class ServicioService {
             throw new NotFoundError("Servicio no encontrado")
         }
 
-        return this.toDTO(servicio)
+        return servicio
     }
 
     async create(datosServicio) {
@@ -68,7 +56,7 @@ class ServicioService {
 
         const servicioGuardado = await this.servicioRepository.save(datosServicio)
 
-        return this.toDTO(servicioGuardado)
+        return servicioGuardado
     }
 
     async createSeveral(listaDatosServicios) {
@@ -81,7 +69,7 @@ class ServicioService {
             this.validarNombreDisponible(datos.nombre)
         })
         const serviciosGuardados = await this.servicioRepository.saveAll(listaDatosServicios)
-        return serviciosGuardados.map(s => this.toDTO(s))
+        return serviciosGuardados
     }
 
     async update(id, datosServicio) {
@@ -94,7 +82,7 @@ class ServicioService {
 
         servicioActualizado.id = servicioExistente.id */
         const servicioActualizado = await this.servicioRepository.update(id, datosServicio)
-        return this.toDTO(servicioActualizado)
+        return servicioActualizado
     }
 
     async delete(id) {
@@ -106,7 +94,7 @@ class ServicioService {
         }
         await this.servicioRepository.softDelete(id) //por default borrado logico
 
-        return this.toDTO(servicioABorrar)
+        return servicioABorrar
     }
 
     validarDatosServicio(datosServicio) {
@@ -172,7 +160,7 @@ class ServicioService {
     }
 
     async deleteServicioMed(servicioMed, session = null) {
-        await this.servicioMedRepository.softDelete(servicioMed.id, session)
+        return await this.servicioMedRepository.softDelete(servicioMed.id, session)
     }
 
     async updateServicioMed(idServicioMed, datosServicioMed, session = null) {
@@ -195,6 +183,3 @@ class ServicioService {
  */
 
 }
-
-export const servicioService = new ServicioService()
-// exporto como singleton por ser usado en serviciosController y medicoService

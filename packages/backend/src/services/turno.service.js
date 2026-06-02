@@ -3,7 +3,7 @@ import especialidadRepository from "../repositories (deprecado)/especialidadRepo
 import medicoRepository from "../repositories (deprecado)/medicoRepository.js";
 import pacienteRepository from "../repositories (deprecado)/pacienteRepository.js"; */
 import { NivelCobertura } from "../domain/enum/NivelCobertura.js";
-import AppError  from "../shared/errors/AppError.js";
+import AppError from "../shared/errors/AppError.js";
 // enviar a un .env
 const PORCENTAJE_PAGO_PARCIAL = 0.5;
 
@@ -69,7 +69,14 @@ const calcularCostoPaciente = (costoBase, nivelCobertura) => {
   }
 };
 
-class TurnoService {
+export class TurnoService {
+  constructor(turnoRepository, medicoService, pacienteService, servicioService) {
+    this.turnoRepository = turnoRepository,
+      this.medicoService = medicoService,
+      this.pacienteService = pacienteService,
+      this.servicioService = servicioService
+  }
+
   async buscarDisponibles(params) {
     const {
       servicioMed,
@@ -92,9 +99,9 @@ class TurnoService {
       );
     }
 
-    const servicioMedExistente = await servicioMedRepository.findById(servicioMedId);
-  
-      
+    const servicioMedExistente = await this.servicioService.findServicioMedById(servicioMedId);
+
+
     if (!servicioMedExistente) {
       throw new AppError(
         "La especialidad especificada no existe",
@@ -104,7 +111,7 @@ class TurnoService {
     }
 
     if (profesional) {
-      const medicoExistente = await medicoRepository.findById(profesional);
+      const medicoExistente = await this.medicoService.findById(profesional);
       if (!medicoExistente) {
         throw new AppError(
           "El profesional especificado no existe",
@@ -146,7 +153,7 @@ class TurnoService {
       );
     }
 
-    const pacienteExistente = await pacienteRepository.findById(paciente);
+    const pacienteExistente = await this.pacienteService.findById(paciente);
     if (!pacienteExistente) {
       throw new AppError(
         "El paciente especificado no existe",
@@ -239,9 +246,6 @@ class TurnoService {
 
 
 }
-
-
-export default TurnoService
 
 
 

@@ -1,4 +1,9 @@
-export default class PacienteService {
+export class PacienteService {
+    constructor(pacienteRepository, usuarioRepository) {
+        this.pacienteRepository = pacienteRepository
+        this.usuarioRepository = usuarioRepository //igual que medico, definir si es necesario
+    }
+
     async create(data) {
         return {
             message: "Paciente creado",
