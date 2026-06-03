@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const servicioMedSchema = new mongoose.Schema({
+const prestacionSchema = new mongoose.Schema({
     servicioUnico: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Servicio',
@@ -27,14 +27,14 @@ const servicioMedSchema = new mongoose.Schema({
     timestamps: true,
     versionKey: false,
     discriminatorKey: "tipoServicio",
-    collection: 'serviciosPorMedico'
+    collection: 'prestaciones'
 },
 
 );
 
 
 
-//servicioMedSchema.loadClass(ServicioMed); no existe una clase padre "servicio", quiza a futuro
+//prestacionSchema.loadClass(Prestacion); no existe una clase padre "servicio", quiza a futuro
 
 
-export const ServicioMedModel = mongoose.model('ServicioMed', servicioMedSchema);
+export const PrestacionModel = mongoose.model('Prestacion', prestacionSchema);

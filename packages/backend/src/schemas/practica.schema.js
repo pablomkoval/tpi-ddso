@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ServicioMedModel } from './servicioMed.schema.js';
+import { PrestacionModel } from './prestacion.schema.js';
 
 const practicaSchema = new mongoose.Schema({
   codigo: {
@@ -10,7 +10,7 @@ const practicaSchema = new mongoose.Schema({
 }); // código es único de la práctica o cada práctica x médico tendra un código diferente?
 // por ahora son diferentes por cada uno. Caso contrario se pasa la logica al schema de ServicioSchema el código
 
-export const PracticaModel = ServicioMedModel.discriminator(
+export const PracticaModel = PrestacionModel.discriminator(
   "practica",
   practicaSchema
 );

@@ -21,12 +21,12 @@ export class MedicoRouter {
         this.medicoRouter.patch("/:idMedico/disponibilidades/:disponibilidadId", (req, res, next) => { this.controller.editarDisponibilidad(req, res, next); });
         this.medicoRouter.delete("/:idMedico/disponibilidades/:disponibilidadId", (req, res, next) => { this.controller.eliminarDisponibilidad(req, res, next); });
 
-        this.medicoRouter.get("/:idMedico/servicios", (req, res, next) => { this.controller.obtenerServicioMeds(req, res, next); });
-        this.medicoRouter.post("/:idMedico/servicios", (req, res, next) => { this.controller.altaServicioMed(req, res, next); });
+        this.medicoRouter.get("/:idMedico/prestaciones", (req, res, next) => { this.controller.obtenerPrestaciones(req, res, next); });
+        this.medicoRouter.post("/:idMedico/prestaciones", (req, res, next) => { this.controller.altaPrestacion(req, res, next); });
 
-        this.medicoRouter.get("/:idMedico/servicios/:idServicioMed", (req, res, next) => { this.controller.obtenerServicioMedPorId(req, res, next); });
-        this.medicoRouter.patch("/:idMedico/servicios/:idServicioMed", (req, res, next) => { this.controller.editarServicioMed(req, res, next); });
-        this.medicoRouter.delete("/:idMedico/servicios/:idServicioMed", (req, res, next) => { this.controller.bajaServicioMed(req, res, next); });
+        this.medicoRouter.get("/:idMedico/prestaciones/:idPrestacion", (req, res, next) => { this.controller.obtenerPrestacionPorId(req, res, next); });
+        this.medicoRouter.patch("/:idMedico/prestaciones/:idPrestacion", (req, res, next) => { this.controller.editarPrestacion(req, res, next); });
+        this.medicoRouter.delete("/:idMedico/prestaciones/:idPrestacion", (req, res, next) => { this.controller.bajaPrestacion(req, res, next); });
 
     }
 
@@ -57,13 +57,13 @@ medicoRouter.route("/:idMedico/disponibilidades/:disponibilidadId")
     .delete((req, res, next) => medicoController.eliminarDisponibilidad(req, res, next))
 
 medicoRouter.route('/:idMedico/servicios')
-    .get((req, res, next) => medicoController.obtenerServicioMeds(req, res, next))
-    .post((req, res, next) => medicoController.altaServicioMed(req, res, next))
+    .get((req, res, next) => medicoController.obtenerPrestaciones(req, res, next))
+    .post((req, res, next) => medicoController.altaPrestacion(req, res, next))
 
-medicoRouter.route('/:idMedico/servicios/:idServicioMed')
-    .get((req, res, next) => medicoController.obtenerServicioMedPorId(req, res, next))
-    .patch((req, res, next) => medicoController.editarServicioMed(req, res, next))
-    .delete((req, res, next) => medicoController.bajaServicioMed(req, res, next))
+medicoRouter.route('/:idMedico/servicios/:idPrestacion')
+    .get((req, res, next) => medicoController.obtenerPrestacionPorId(req, res, next))
+    .patch((req, res, next) => medicoController.editarPrestacion(req, res, next))
+    .delete((req, res, next) => medicoController.bajaPrestacion(req, res, next))
 
 export default medicoRouter; */
 

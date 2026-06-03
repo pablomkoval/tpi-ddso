@@ -204,7 +204,7 @@ const swaggerOptions = {
 
       '/v1/medicos/{idMedico}/servicios': {
         get: {
-          summary: 'Obtener los servicios médicos que ofrece un médico específico',
+          summary: 'Obtener las prestaciones que ofrece un médico específico',
           tags: ['Medicos - Servicios'],
           parameters: [
             { name: 'idMedico', in: 'path', required: true, schema: { type: 'string' }, description: 'ID del médico' }

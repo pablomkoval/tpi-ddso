@@ -1,7 +1,7 @@
 import { BadRequestError } from "../shared/errors/AppError.js";
 import { parsearId } from "../utils/parsearId.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js"
-//import { createServicioMedSchema } from "../validators/servicioMed.schema.js";
+//import { createPrestacionSchema } from "../validators/prestacion.schema.js";
 import { createServicioSchema } from "../validators/servicio.schema.zod.js";
 
 

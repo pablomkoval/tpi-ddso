@@ -22,7 +22,7 @@ const turnoSchema = new mongoose.Schema(
         },
         servicio: {
             type: mongoose.Types.ObjectId,
-            ref: "ServicioMedico",
+            ref: "Prestacion",
             required: true
         },
         costo: {

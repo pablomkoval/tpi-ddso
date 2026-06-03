@@ -23,7 +23,7 @@ describe("Turnos", () => {
                 horaDesde: "09:00",
                 horaHasta: "17:00",
                 sede: sede,
-                servicioMedico: practica
+                prestacion: practica
             })
             
             const medico = new Medico(
@@ -60,7 +60,7 @@ describe("Turnos", () => {
                 horaDesde: "09:00",
                 horaHasta: "11:00",
                 sede: sede1,
-                servicioMedico: practica
+                prestacion: practica
             })
 
             const disponibilidad2 = new DisponibilidadHoraria({
@@ -68,7 +68,7 @@ describe("Turnos", () => {
                 horaDesde: "09:00",
                 horaHasta: "11:00",
                 sede: sede2,
-                servicioMedico: practica
+                prestacion: practica
             })
             
             const medico = new Medico(
@@ -113,7 +113,7 @@ describe("Turnos", () => {
                 horaDesde: "12:00",
                 horaHasta: "14:00",
                 sede: sede1,
-                servicioMedico: practica1
+                prestacion: practica1
             })
 
             const disponibilidad2 = new DisponibilidadHoraria({
@@ -121,7 +121,7 @@ describe("Turnos", () => {
                 horaDesde: "12:00",
                 horaHasta: "14:00",
                 sede: sede2,
-                servicioMedico: practica2
+                prestacion: practica2
             })
             
             const medico = new Medico(

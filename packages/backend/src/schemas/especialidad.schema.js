@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { ServicioMedModel } from './servicioMed.schema.js';
+import { PrestacionModel } from './prestacion.schema.js';
 
 const especialidadSchema = new mongoose.Schema({});
 
-export const EspecialidadModel = ServicioMedModel.discriminator(
+export const EspecialidadModel = PrestacionModel.discriminator(
   "especialidad",
   especialidadSchema
 );

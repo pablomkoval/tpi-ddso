@@ -113,7 +113,7 @@ export class MedicoService {
                     horaDesde: d.horaDesde,
                     horaHasta: d.horaHasta,
                     sede: d.sede,
-                    servicioMedico: toObjectId(d.servicioMedico)
+                    prestacion: toObjectId(d.prestacion)
                 })
             );
 
@@ -157,21 +157,21 @@ export class MedicoService {
         return medico;
     }
 
-    async obtenerServicioMeds(idMedico) {
+    async obtenerPrestaciones(idMedico) {
         try {
             const medico = await this.medicoRepository.findById(idMedico);
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
-            const servicioMeds = medico.serviciosMedTotales();
-            return servicioMeds
-            /* return servicioMeds.map(s => this.servicioMedToDTO(s)); */
+            const prestaciones = medico.serviciosMedTotales();
+            return prestaciones
+            /* return prestaciones.map(s => this.prestacionToDTO(s)); */
         } catch (error) {
             throw new Error(`Error al obtener servicios de medico: ${error.message}`, { cause: error });
         }
     }
 
-    async obtenerServicioMedPorId(idMedico, idServicioMed) {
+    async obtenerPrestacionPorId(idMedico, idPrestacion) {
         try {
             const medico = await this.medicoRepository.findById(idMedico);
 
@@ -179,23 +179,23 @@ export class MedicoService {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const servicioMed = await this.servicioService.findServicioMedById(idServicioMed)
+            const prestacion = await this.servicioService.findPrestacionById(idPrestacion)
 
-            if (!servicioMed) {
-                throw new NotFoundError("ServicioMed con Id " + idServicioMed + " de Medico con Id " + idMedico + " no encontrado", "SERVICIOMED_NO_ENCONTRADO");
+            if (!prestacion) {
+                throw new NotFoundError("Prestacion con Id " + idPrestacion + " de Medico con Id " + idMedico + " no encontrado", "PRESTACION_NO_ENCONTRADA");
             }
 
-            if (!medico.prestaServicioPorId(servicioMed)) {
-                throw new BadRequestError("El Médico de id " + idMedico + " no presta el servicioMed de id " + idServicioMed, "MEDICO_NO_PRESTASERVICIO")
+            if (!medico.prestaServicioPorId(prestacion)) {
+                throw new BadRequestError("El Médico de id " + idMedico + " no presta el prestacion de id " + idPrestacion, "MEDICO_NO_PRESTASERVICIO")
             }
 
-            return /* this.servicioMedToDTO( */servicioMed/* ) */;
+            return /* this.prestacionToDTO( */prestacion/* ) */;
         } catch (error) {
             throw new Error(`Error al obtener servicio medico por id: ${error.message}`, { cause: error });
         }
     }
 
-    async altaServicioMed(idMedico, datosServicioMed) {
+    async altaPrestacion(idMedico, datosPrestacion) {
         //const session = await mongoose.startSession()
 
         //session.startTransaction()
@@ -205,20 +205,20 @@ export class MedicoService {
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
-            const servicioMed = await this.servicioService.createServicioMed(datosServicioMed/* , session */)
-
-            medico.agregarServicio(servicioMed)
+            const prestacion = await this.servicioService.createPrestacion(datosPrestacion/* , session */)
+            
+            medico.agregarServicio(prestacion)
 
 
             await this.medicoRepository.guardar(medico)
 
 
-            return/*  this.servicioMedToDTO( */servicioMed/* ); */
+            return/*  this.prestacionToDTO( */prestacion/* ); */
         } catch (error) {
 
             //await session.abortTransaction()
 
-            throw new Error(`Error al dar de alta un servicioMed ${error.message}`, { cause: error });
+            throw new Error(`Error al dar de alta un prestacion ${error.message}`, { cause: error });
         }
         finally {
 
@@ -226,7 +226,7 @@ export class MedicoService {
         }
     }
 
-    async bajaServicioMed(idMedico, idServicioMed) {
+    async bajaPrestacion(idMedico, idPrestacion) {
 
         //const session = await mongoose.startSession()
 
@@ -238,30 +238,30 @@ export class MedicoService {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
 
-            const servicioMedABorrar = await this.servicioService.findServicioMedById(idServicioMed/* , session */)
-            if (!servicioMedABorrar) {
-                throw new NotFoundError("ServicioMed con Id " + idServicioMed + " de Medico con Id " + idMedico + " no encontrado", "SERVICIOMED_NO_ENCONTRADO");
+            const prestacionABorrar = await this.servicioService.findPrestacionById(idPrestacion/* , session */)
+            if (!prestacionABorrar) {
+                throw new NotFoundError("Prestacion con Id " + idPrestacion + " de Medico con Id " + idMedico + " no encontrado", "PRESTACION_NO_ENCONTRADA");
             }
-            if (!medico.prestaServicioPorId(servicioMedABorrar)) {
-                throw new BadRequestError("El Médico de id " + idMedico + " no presta el servicioMed de id " + idServicioMed, "MEDICO_NO_PRESTASERVICIO")
+            if (!medico.prestaServicioPorId(prestacionABorrar)) {
+                throw new BadRequestError("El Médico de id " + idMedico + " no presta el prestacion de id " + idPrestacion, "MEDICO_NO_PRESTASERVICIO")
             }
 
 
-            medico.quitarServicio(servicioMedABorrar)
-            await this.servicioService.deleteServicioMed(servicioMedABorrar/* , session */)
+            medico.quitarServicio(prestacionABorrar)
+            await this.servicioService.deletePrestacion(prestacionABorrar/* , session */)
 
             await this.medicoRepository.guardar(medico/* , session */)
 
 
             //await session.commitTransaction()
 
-            return /* this.servicioMedToDTO */(servicioMedABorrar);
+            return /* this.prestacionToDTO */(prestacionABorrar);
 
         } catch (error) {
 
             //await session.abortTransaction()
 
-            throw new Error(`Error al dar de baja un servicioMed: ${error.message}`, { cause: error });
+            throw new Error(`Error al dar de baja un prestacion: ${error.message}`, { cause: error });
         }
         finally {
 
@@ -270,7 +270,7 @@ export class MedicoService {
     }
 
 
-    async actualizarServicioMed(idMedico, idServicioMed, datosServicioMed) {
+    async actualizarPrestacion(idMedico, idPrestacion, datosPrestacion) {
         //const session = await mongoose.startSession()
 
         //session.startTransaction()
@@ -280,27 +280,27 @@ export class MedicoService {
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
-            const servicioMedAActualizar = await this.servicioService.findServicioMedById(idServicioMed/* , session */)
+            const prestacionAActualizar = await this.servicioService.findPrestacionById(idPrestacion/* , session */)
 
-            if (!servicioMedAActualizar) {
-                throw new NotFoundError("ServicioMed con Id " + idServicioMed + " de Medico con Id " + idMedico + " no encontrado", "SERVICIOMED_NO_ENCONTRADO");
+            if (!prestacionAActualizar) {
+                throw new NotFoundError("Prestacion con Id " + idPrestacion + " de Medico con Id " + idMedico + " no encontrado", "PRESTACION_NO_ENCONTRADA");
             }
 
-            if (!medico.prestaServicioPorId(servicioMedAActualizar)) {
-                throw new BadRequestError("El Médico de id " + idMedico + " no presta el servicioMed de id " + idServicioMed, "MEDICO_NO_PRESTASERVICIO")
+            if (!medico.prestaServicioPorId(prestacionAActualizar)) {
+                throw new BadRequestError("El Médico de id " + idMedico + " no presta el prestacion de id " + idPrestacion, "MEDICO_NO_PRESTASERVICIO")
             }
 
 
-            const servicioMedActualizado = await this.servicioService.updateServicioMed(idServicioMed, datosServicioMed/* , session */)
+            const prestacionActualizado = await this.servicioService.updatePrestacion(idPrestacion, datosPrestacion/* , session */)
 
             //await session.commitTransaction()
 
-            return /* this.servicioMedToDTO( */servicioMedActualizado/* ); */
+            return /* this.prestacionToDTO( */prestacionActualizado/* ); */
         } catch (error) {
 
             //await session.abortTransaction()
 
-            throw new Error(`Error al actualizar un servicioMed ${error.message}`, { cause: error });
+            throw new Error(`Error al actualizar un prestacion ${error.message}`, { cause: error });
         }
         finally {
 
