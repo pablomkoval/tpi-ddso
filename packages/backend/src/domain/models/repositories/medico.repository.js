@@ -53,6 +53,4 @@ export class MedicoRepository {
                  .populate('especialidades', 'nombre')
                  .lean();
          } */
-
-
 }

@@ -8,6 +8,7 @@ import { NotFoundError } from "../../../../shared/errors/AppError.js";
 export default class Medico {
     disponibilidades = [];
     turnos = [];
+    _id;
 
     constructor(usuario, matricula, nombre, especialidades = [], practicas = [], sedes = []) {
         this.id = "placeholder";
@@ -141,9 +142,8 @@ export default class Medico {
 
     generarTurnos(diasACubrir = 7) {
         const servicios = [...this.especialidades, ...this.practicas]; // A falta de clase abstracta "Servicio"
-        servicios.forEach(s => {
-            this.generarTurnosPara(s, diasACubrir);
-        })
+        // Devuelvo los turnos generados de todos los servicios del médico en un mismo array
+        return servicios.flatMap(servicio => this.generarTurnosPara(servicio, diasACubrir));
     }
 
     generarTurnosPara(servicio, diasACubrir = 7) {
@@ -180,7 +180,7 @@ export default class Medico {
                     if (this.tieneTurnoEn(fechaHoraTurno)) {
                         continue;
                     }
-                    const turno = new Turno(this, fechaHoraTurno, servicio, disponibilidad.sede);
+                    const turno = new Turno(this._id, fechaHoraTurno, servicio, disponibilidad.sede);
                     //this.turnos.push(turno);
                     turnosGenerados.push(turno);
                 }
@@ -193,5 +193,7 @@ export default class Medico {
         return [...this.turnos];
     }
 
-
+    agregarTurno(turno) {
+        this.turnos.push(turno._id);
+    }
 }

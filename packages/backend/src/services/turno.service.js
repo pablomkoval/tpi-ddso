@@ -77,11 +77,11 @@ export class TurnoService {
     servicioService,
     medicoRepository = null,
   ) {
-    ((this.turnoRepository = turnoRepository),
-      (this.medicoService = medicoService),
-      (this.pacienteService = pacienteService),
-      (this.servicioService = servicioService),
-      (this.medicoRepository = medicoRepository));
+    this.turnoRepository = turnoRepository;
+    this.medicoService = medicoService;
+    this.pacienteService = pacienteService;
+    this.servicioService = servicioService;
+    this.medicoRepository = medicoRepository;
   }
 
   async buscarDisponibles(params) {
@@ -98,7 +98,7 @@ export class TurnoService {
       sortOrder = "asc",
     } = params;
 
-    if (!prestacionId/*  && !practica */) {
+    if (!prestacion/*  && !practica */) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
         400,
@@ -106,7 +106,7 @@ export class TurnoService {
       );
     }
 
-    const prestacionExistente = await this.servicioService.findPrestacionById(prestacionId);
+    const prestacionExistente = await this.servicioService.findPrestacionById(prestacion);
 
 
     if (!prestacionExistente) {
@@ -181,8 +181,7 @@ export class TurnoService {
     const sort = { [sortField]: sortDirection };
 
     const filtros = {
-      especialidad: especialidad || null,
-      practica: practica || null,
+      prestacion: prestacion || null,
       medico: profesional || null,
       sede: sede || null,
       fechaDesde: fechaDesde || null,
@@ -236,15 +235,9 @@ export class TurnoService {
 
   async generarTurnos() {
     try {
-      if (!this.medicoRepository) {
-        throw new AppError(
-          "El repositorio de médicos no fue inicializado",
-          500,
-          "ERROR_GENERACION_TURNOS",
-        );
-      }
-
-      const medicos = await this.medicoRepository.findAll();
+      console.log("Antes de la búsqueda de médicos.")
+      console.log("MedicoService:", this.medicoService)
+      const medicos = await this.medicoService.findAll();
       if (!medicos || medicos.length === 0) {
         throw new AppError(
           "Hubo un error al generar los turnos: no se encontraron médicos",
@@ -253,31 +246,42 @@ export class TurnoService {
         );
       }
 
-      medicos.forEach((medico) => medico.generarTurnos());
+      console.log("Médicos obtenidos.")
 
-      const turnosGenerados = medicos.flatMap((medico) => medico.turnos ?? []);
+      const turnosGenerados = medicos.flatMap((medico) => medico.generarTurnos());
+
+      console.log("Turnos generados.")
 
       if (turnosGenerados.length > 0) {
-        for (const turno of turnosGenerados) {
-          await this.turnoRepository.save(turno);
+
+        const turnosGuardados = await this.turnoRepository.saveAll(turnosGenerados);
+
+        // Actualizo cada médico con los turnos generados para que queden reflejados en la base de datos
+
+        turnosGuardados.forEach(async (turno) => {
+          if (turno.medico) {
+            await this.medicoService.agregarTurno(turno.medico, turno);
+          }
         }
+        )
       }
 
+      console.log("Turnos guardados en la base de datos.")
     } catch (error) {
       if (error instanceof AppError) {
         throw error;
       }
 
       throw new AppError(
-        "Hubo un error al generar los turnos",
+        error.mensaje ?? "Hubo un error al generar los turnos",
         500,
         "ERROR_GENERACION_TURNOS",
       );
     }
   }
 
-  async reservarTurno() {}
+  async reservarTurno() { }
 
-  async cancelarTurno() {}
+  async cancelarTurno() { }
 }
 

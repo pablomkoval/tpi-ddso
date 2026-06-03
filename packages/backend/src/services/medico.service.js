@@ -74,6 +74,7 @@ export class MedicoService {
     }
 
     async findAll() {
+        console.log("Entre al findAll de MedicoService")
         const medicos = await this.medicoRepository.findAll();
         return medicos;
     }
@@ -308,5 +309,41 @@ export class MedicoService {
         }
     }
 
+    async actualizarTurnos(medicoId, turnos) {
+        try {
+            const medico = await this.medicoRepository.findById(medicoId);
+            if (!medico) {
+                throw new AppError("Médico no encontrado");
+            }
+
+            turnos.forEach(turno => medico.agregarTurno(turno));
+
+            await this.medicoRepository.guardar(medico);
+        } catch (error) {
+            throw new AppError("Error al actualizar turnos del médico: " + error.message, 500, "MEDICO_ACTUALIZAR_TURNOS_FAIL", { cause: error });
+        }
+    }
+
+    async agregarTurno(medicoId, turno) {
+        try {
+            const medico = await this.medicoRepository.findById(medicoId);
+            if (!medico) {
+                throw new AppError("Médico no encontrado");
+            }
+            medico.agregarTurno(turno);
+            await this.medicoRepository.guardar(medico);
+        } catch (error) {
+            throw new AppError("Error al agregar turno del médico: " + error.message, 500, "MEDICO_AGREGAR_TURNO_FAIL", { cause: error });
+        }
+    }
+
+    async guardar(medico) {
+        try {
+            const medicoGuardado = await this.medicoRepository.guardar(medico);
+            return medicoGuardado;
+        } catch (error) {
+            throw new AppError("Error al guardar el médico: " + error.message, 500, "MEDICO_GUARDAR_FAIL", { cause: error });
+        }
+    }
 
 }

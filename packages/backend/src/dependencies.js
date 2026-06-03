@@ -36,6 +36,7 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     const servicioService = new ServicioService(servicioRepository, prestacionRepository);
     const pacienteService = new PacienteService(pacienteRepository, usuarioRepository);
     const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository);
+    console.log("MedicoService inyectado a turnoService:", medicoService);
     const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
 
     //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
