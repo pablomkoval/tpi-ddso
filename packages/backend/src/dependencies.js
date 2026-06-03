@@ -21,7 +21,6 @@ import { TurnoRouter } from "./routes/routers/turno.router.js";
 import { PacienteRouter } from "./routes/routers/paciente.router.js";
 import { MedicoRouter } from "./routes/routers/medico.router.js";
 
-export default function inyectarDependenciasYRouter(routerGeneral) {
     //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
     const notiRepository = new NotificacionesRepository();
     const servicioRepository = new ServicioRepository();
@@ -37,7 +36,8 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     const pacienteService = new PacienteService(pacienteRepository, usuarioRepository);
     const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository);
     console.log("MedicoService inyectado a turnoService:", medicoService);
-    const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
+
+    export const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
 
     //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
     const notiController = new NotificacionesController(notiService);
@@ -47,13 +47,13 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     const medicoController = new MedicoController(medicoService);
 
     //////////////////////////////// ROUTERS /////////////////////////////////////////////////////////////
-
     const notiRouter = new NotificacionesRouter(notiController);
     const servicioRouter = new ServicioRouter(servicioController);
     const turnoRouter = new TurnoRouter(turnoController);
     const pacienteRouter = new PacienteRouter(pacienteController);
     const medicoRouter = new MedicoRouter(medicoController);
 
+export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
     routerGeneral.use("/pacientes", pacienteRouter.getRouter())
     routerGeneral.use("/turnos", turnoRouter.getRouter())

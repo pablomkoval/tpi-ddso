@@ -1,21 +1,19 @@
 import nodeCron from "node-cron";
 import dotenv from "dotenv";
-import { TurnoService } from "../services/turno.service.js";
-import { TurnoRepository } from "../domain/models/repositories/turno.repository.js";
-import { MedicoRepository } from "../domain/models/repositories/medico.repository.js";
+import { turnoService } from "../dependencies.js";
 
 dotenv.config({ path: new URL("../.env", import.meta.url) });
 
 const intervalMs = parseInt(process.env.JOBS_GENERAR_TURNOS_INTERVAL_MS || 86400000);
 
 const ejecutarGeneracionTurnos = async () => {
-    const turnoService = new TurnoService(
-        new TurnoRepository(),
-        null,
-        null,
-        null,
-        new MedicoRepository(),
-    );
+    // const turnoService = new TurnoService(
+    //     new TurnoRepository(),
+    //     null,
+    //     null,
+    //     null,
+    //     new MedicoRepository(),
+    // );
 
     try {
         console.log("Generando turnos...");
