@@ -70,11 +70,18 @@ const calcularCostoPaciente = (costoBase, nivelCobertura) => {
 };
 
 export class TurnoService {
-  constructor(turnoRepository, medicoService, pacienteService, servicioService) {
-    this.turnoRepository = turnoRepository,
-      this.medicoService = medicoService,
-      this.pacienteService = pacienteService,
-      this.servicioService = servicioService
+  constructor(
+    turnoRepository,
+    medicoService,
+    pacienteService,
+    servicioService,
+    medicoRepository = null,
+  ) {
+    ((this.turnoRepository = turnoRepository),
+      (this.medicoService = medicoService),
+      (this.pacienteService = pacienteService),
+      (this.servicioService = servicioService),
+      (this.medicoRepository = medicoRepository));
   }
 
   async buscarDisponibles(params) {
@@ -91,7 +98,7 @@ export class TurnoService {
       sortOrder = "asc",
     } = params;
 
-    if (!servicioMedId/*  && !practica */) {
+    if (!servicioMedId /*  && !practica */) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
         400,
@@ -99,8 +106,8 @@ export class TurnoService {
       );
     }
 
-    const servicioMedExistente = await this.servicioService.findServicioMedById(servicioMedId);
-
+    const servicioMedExistente =
+      await this.servicioService.findServicioMedById(servicioMedId);
 
     if (!servicioMedExistente) {
       throw new AppError(
@@ -182,11 +189,14 @@ export class TurnoService {
       fechaHasta: fechaHasta || null,
     };
 
-    const { turnos, total } = await this.turnoRepository.buscarDisponibles(filtros, {
-      skip,
-      limit: limitNum,
-      sort,
-    });
+    const { turnos, total } = await this.turnoRepository.buscarDisponibles(
+      filtros,
+      {
+        skip,
+        limit: limitNum,
+        sort,
+      },
+    );
 
     const turnosEnriquecidos = turnos.map((turno) => {
       const nivelCobertura = obtenerNivelCobertura(
@@ -225,27 +235,49 @@ export class TurnoService {
   }
 
   async generarTurnos() {
-    const medicos = await this.medicoRepository.findAll();
+    try {
+      if (!this.medicoRepository) {
+        throw new AppError(
+          "El repositorio de médicos no fue inicializado",
+          500,
+          "ERROR_GENERACION_TURNOS",
+        );
+      }
 
-    medicos.forEach(medico => {
-      medico.generarTurnos();
-      medico.turnos.forEach(turno => this.turnoRepository.save(turno));
-      this.medicoRepository.update(medico);
-    })
+      const medicos = await this.medicoRepository.findAll();
+      if (!medicos || medicos.length === 0) {
+        throw new AppError(
+          "Hubo un error al generar los turnos: no se encontraron médicos",
+          500,
+          "ERROR_GENERACION_TURNOS",
+        );
+      }
+
+      medicos.forEach((medico) => medico.generarTurnos());
+
+      const turnosGenerados = medicos.flatMap((medico) => medico.turnos ?? []);
+
+      if (turnosGenerados.length > 0) {
+        for (const turno of turnosGenerados) {
+          await this.turnoRepository.save(turno);
+        }
+      }
+
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new AppError(
+        "Hubo un error al generar los turnos",
+        500,
+        "ERROR_GENERACION_TURNOS",
+      );
+    }
   }
 
-  async reservarTurno() {
+  async reservarTurno() {}
 
-
-  }
-
-  async cancelarTurno() {
-
-
-  }
-
-
+  async cancelarTurno() {}
 }
-
-
 

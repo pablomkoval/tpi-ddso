@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: new URL('../.env', import.meta.url) });
 
 //CONEXION A LA BASE DE DATOS
 export class MongoDBClient {
