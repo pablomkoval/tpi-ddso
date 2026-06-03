@@ -13,14 +13,11 @@ const obtenerId = (valor) => {
 };
 
 const obtenerCostoBase = (turno) => {
-  if (Number.isFinite(turno.costo)) {
+  if (Number.isFinite(turno?.servicio?.costo)) {
+    return turno.servicio.costo;
+  }
+  if (Number.isFinite(turno.costo) && turno.costo > 0) {
     return turno.costo;
-  }
-  if (Number.isFinite(turno?.practica?.costo)) {
-    return turno.practica.costo;
-  }
-  if (Number.isFinite(turno?.prestacion?.costo)) {
-    return turno.prestacion.costo;
   }
   return 0;
 };
@@ -30,13 +27,21 @@ const obtenerNivelCobertura = (turno, plan) => {
     return NivelCobertura.NO_CUBIERTA;
   }
 
-  const idPractica = obtenerId(turno?.practica);
-  if (idPractica) {
-    const coberturasPractica = Array.isArray(plan.coberturasPractica)
+  // El campo en el schema de Turno se llama "servicio" y referencia a Prestacion.
+  // El "tipoServicio" viene del discriminator de Prestacion.
+  const servicio = turno?.servicio;
+  if (!servicio) {
+    return NivelCobertura.NO_CUBIERTA;
+  }
+
+  const idServicio = obtenerId(servicio);
+
+  if (servicio.tipoServicio === "practica") {
+    const coberturas = Array.isArray(plan.coberturasPractica)
       ? plan.coberturasPractica
       : [];
-    const cobertura = coberturasPractica.find(
-      (item) => String(obtenerId(item.practica)) === String(idPractica),
+    const cobertura = coberturas.find(
+      (item) => String(obtenerId(item.practica)) === String(idServicio),
     );
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
@@ -98,7 +103,7 @@ export class TurnoService {
       sortOrder = "asc",
     } = params;
 
-    if (!prestacion/*  && !practica */) {
+    if (!prestacion) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
         400,

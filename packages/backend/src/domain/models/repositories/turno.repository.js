@@ -1,24 +1,72 @@
 import { TurnoModel } from "../../../schemas/turno.schema.js";
 
 export class TurnoRepository {
-    constructor() {
-        this.model = TurnoModel;
+  constructor() {
+    this.model = TurnoModel;
+  }
+
+  async save(turno) {
+    const nuevoTurno = new this.model(turno);
+    return await nuevoTurno.save();
+  }
+
+  async guardar(turno) {
+    return await turno.save();
+  }
+
+  async findAll() {
+    return await this.model.find();
+  }
+
+  async findById(id) {
+    return await this.model.findById(id);
+  }
+
+  async findByIdConServicio(id) {
+    return await this.model.findById(id).populate("servicio");
+  }
+
+  async findByPaciente(pacienteId) {
+    return await this.model
+      .find({ paciente: String(pacienteId) })
+      .populate("servicio")
+      .sort({ fechaHora: -1 });
+  }
+
+  async buscarDisponibles(filtros, opciones = {}) {
+    const { skip = 0, limit = 10, sort = { fechaHora: 1 } } = opciones;
+
+    const query = { estado: "DISPONIBLE" };
+
+    // "prestacion" del filtro corresponde al campo "servicio" en el schema de Turno
+    if (filtros.prestacion) {
+      query.servicio = filtros.prestacion;
+    }
+    if (filtros.medico) {
+      query.medico = filtros.medico;
+    }
+    if (filtros.sede) {
+      query.sede = filtros.sede;
+    }
+    if (filtros.fechaDesde || filtros.fechaHasta) {
+      query.fechaHora = {};
+      if (filtros.fechaDesde)
+        query.fechaHora.$gte = new Date(filtros.fechaDesde);
+      if (filtros.fechaHasta)
+        query.fechaHora.$lte = new Date(filtros.fechaHasta);
     }
 
-    async save(turno) {
-        const nuevoTurno = new this.model(turno);
-        return await nuevoTurno.save();
-    }
+    const [turnos, total] = await Promise.all([
+      this.model
+        .find(query)
+        .populate("servicio")
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.model.countDocuments(query),
+    ]);
 
-    async findAll() {
-        return await this.model.find();
-    }
-
-    async findById(id) {
-        return await this.model.findById(id);
-    }
-
-    async update(id, turnoModificado) {
-        return await this.model.findByIdAndUpdate(id, turnoModificado, { new: true });
-    }
+    return { turnos, total };
+  }
 }

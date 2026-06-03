@@ -61,7 +61,6 @@ describe("DisponibilidadHoraria", () => {
                 horaHasta: "17:00",
                 sede: { id: "sede1", nombre: "Sede Central" }
             })
-            console.log("id de la disponibilidad 1:", disponibilidad1.id)
 
             const disponibilidad2 = new DisponibilidadHoraria({
                 diaSemana: DiaSemana.LUNES,
@@ -69,8 +68,6 @@ describe("DisponibilidadHoraria", () => {
                 horaHasta: "18:00",
                 sede: { id: "sede1", nombre: "Sede Central" }
             })
-
-            console.log("id de la disponibilidad 2:", disponibilidad2.id)
 
             expect(disponibilidad1.seSolapaCon(disponibilidad2)).toBe(true);
         })

@@ -55,10 +55,25 @@ export class TurnoController {
         });
       }
 
-      //poner error si mandan otra cosa que no sea RESERVADO o CANCELADO, tipo error de estado no valido algo asi
+   
     } catch (error) {
       next(error);
     }
   }
 }
 
+   //poner error si mandan otra cosa que no sea RESERVADO o CANCELADO, tipo error de estado no valido algo asi
+  /* async reservar(req, res, next) {
+    try {
+      const turnoReservado = await this.turnoService.reservarTurno(req.params.id, req.body);
+      return res.status(200).json(turnoReservado); 
+      async cancelar(req, res, next) {
+    try {
+      await this.turnoService.cancelarTurno(req.params.id, req.body);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+      
+      */

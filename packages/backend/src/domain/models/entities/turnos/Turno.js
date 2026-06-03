@@ -7,10 +7,9 @@ export class Turno{
     sede;
     estado = EstadoTurno.DISPONIBLE;
     historialEstados = [];
-    //estado = disponible?
     
     constructor(medico, fechaHora, servicio, sede){
-        this.id = "placeholder"; //id se le asigna o se genera segun una base de datos?       
+        this.id = "placeholder";       
         this.medico = medico;
         //paciente no se define al crear un turno, solo esta disponible
         this.fechaHora = fechaHora;
@@ -23,10 +22,15 @@ export class Turno{
         //sin paciente no hay costo aún
     }
 
-    actualizarEstado(nuevoEstado, quien, motivoCambio){
-        this.estado = nuevoEstado; 
-        /* ojo fechahoraingreso, y que estado se registra */
-        const cambioEstado = new CambioEstadoTurno(nuevoEstado, this, quien, motivoCambio);
-        this.historialEstados.push(cambioEstado);
-    }
+  actualizarEstado(nuevoEstado, quien, motivoCambio) {
+    this.estado = nuevoEstado;
+    // Le pasamos this.id en vez de this — evita la referencia circular
+    const cambio = new CambioEstadoTurno(
+      nuevoEstado,
+      this.id ?? this._id,
+      quien,
+      motivoCambio,
+    );
+    this.historialEstados.push(cambio);
+  }
 }

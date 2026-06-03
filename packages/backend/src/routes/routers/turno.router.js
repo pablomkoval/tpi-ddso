@@ -18,6 +18,9 @@ export class TurnoRouter {
         // this.turnoRouter.put("/:id/reservar", (req, res, next) => { this.controller.reservar(req, res, next); });
         // this.turnoRouter.delete("/:id/cancelar", (req, res, next) => { this.controller.cancelar(req, res, next); });
         this.turnoRouter.post("/:id/estados", (req, res, next) => { this.controller.cambiarEstado(req, res, next); });
+        // 2 implementaciones vigentes, una vuela
+        this.turnoRouter.put("/:id/reservar", (req, res, next) => { this.controller.reservar(req, res, next); });
+        this.turnoRouter.delete("/:id/cancelar", (req, res, next) => { this.controller.cancelar(req, res, next); });
 
     }
 

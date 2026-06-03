@@ -74,7 +74,6 @@ export class MedicoService {
     }
 
     async findAll() {
-        console.log("Entre al findAll de MedicoService")
         const medicos = await this.medicoRepository.findAll();
         return medicos;
     }
