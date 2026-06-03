@@ -14,7 +14,7 @@ const baseSchema = {
         .positive()
 }
 
-export const createServicioMedSchema =
+export const createPrestacionSchema =
     z.discriminatedUnion("tipoServicio", [
 
         z.object({

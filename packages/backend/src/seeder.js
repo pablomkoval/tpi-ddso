@@ -1,7 +1,7 @@
 import app from "./app.js";
 import { MongoDBClient } from "./config/database.js";
 import { TipoServicio } from "./domain/enum/TipoServicio.js";
-import { ServicioModel } from "./schemas/ServicioSchema.js";
+import { ServicioModel } from "./schemas/servicio.schema.js";
 
 const puerto = 3000;
 

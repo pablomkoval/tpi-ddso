@@ -8,9 +8,9 @@ import { createServicioSchema } from "../validators/servicio.schema.zod.js";
 import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js";
 
 export class ServicioService {
-    constructor(servicioRepository, servicioMedRepository) {
+    constructor(servicioRepository, prestacionRepository) {
         this.servicioRepository = servicioRepository;
-        this.servicioMedRepository = servicioMedRepository;
+        this.prestacionRepository = prestacionRepository;
     }
 
 
@@ -141,33 +141,33 @@ export class ServicioService {
 
     ////////////////////// SERVICIOS MED ////////////////////////
 
-    async findServicioMedById(idServicioMed, session = null) {
-        //validarEnteroPositivo(idServicioMed, "Id")
-        const servicioMed = await this.servicioMedRepository.findById(idServicioMed, session)
-        if (!servicioMed) {
+    async findPrestacionById(idPrestacion, session = null) {
+        //validarEnteroPositivo(idPrestacion, "Id")
+        const prestacion = await this.prestacionRepository.findById(idPrestacion, session)
+        if (!prestacion) {
             throw new NotFoundError("Servicio no encontrado")
         }
 
-        return servicioMed //no toTDO porque: 1. Otro formato, 2. Lo hace medicoService
+        return prestacion //no toTDO porque: 1. Otro formato, 2. Lo hace medicoService
     }
 
-    async createServicioMed(datosServicioMed, session = null) {
-        //this.validarDatosServicioMed(datosServicioMed)
+    async createPrestacion(datosPrestacion, session = null) {
+        //this.validarDatosPrestacion(datosPrestacion)
         //buscar si el servicioUnico es existente, sino crearlo, caso practica ver que se hace con el codigo
-        const servicioMedGuardado = await this.servicioMedRepository.save(datosServicioMed, session)
-        return servicioMedGuardado
+        const prestacionGuardado = await this.prestacionRepository.save(datosPrestacion, session)
+        return prestacionGuardado
     }
 
-    async deleteServicioMed(servicioMed, session = null) {
-        return await this.servicioMedRepository.softDelete(servicioMed.id, session)
+    async deletePrestacion(prestacion, session = null) {
+        return await this.prestacionRepository.softDelete(prestacion.id, session)
     }
 
-    async updateServicioMed(idServicioMed, datosServicioMed, session = null) {
-        return await this.servicioMedRepository.update(idServicioMed, datosServicioMed, session)
+    async updatePrestacion(idPrestacion, datosPrestacion, session = null) {
+        return await this.prestacionRepository.update(idPrestacion, datosPrestacion, session)
     }
 
-    /* validarDatosServicioMed(datosServicioMed) { //deberia venir parseado desde medicoController 
-        const resultado = createServicioMedSchema.safeParse(datosServicioMed)
+    /* validarDatosPrestacion(datosPrestacion) { //deberia venir parseado desde medicoController 
+        const resultado = createPrestacionSchema.safeParse(datosPrestacion)
 
         if (!resultado.success) {
             throw new UnprocessableEntityError(

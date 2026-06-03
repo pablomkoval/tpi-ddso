@@ -12,7 +12,7 @@ const disponibilidadSchema = z.object({
     horaDesde: z.string(),
     horaHasta: z.string(),
     sede: sedeSchema,
-    servicioMedico: createIdMongoSchema
+    prestacion: createIdMongoSchema
 
 })
 

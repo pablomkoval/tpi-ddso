@@ -1,6 +1,6 @@
 import { parsearId } from "../utils/parsearId.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
-import { createServicioMedSchema } from "../validators/servicioMed.schema.zod.js";
+import { createPrestacionSchema } from "../validators/prestacion.schema.zod.js";
 import { createMedicoSchema } from "../validators/medico.schema.zod.js";
 
 export class MedicoController {
@@ -72,7 +72,7 @@ export class MedicoController {
             horaDesde: disponibilidad.horaDesde,
             horaHasta: disponibilidad.horaHasta,
             sede: disponibilidad.sede,
-            servicioMedico: disponibilidad.servicioMedico
+            prestacion: disponibilidad.prestacion
         }
     }
 
@@ -127,83 +127,82 @@ export class MedicoController {
 
     // Servicio Por Medico ///////////////////////////////////////////////////////////////////
 
-    servicioMedToDTO(servicioMed) {
+    prestacionToDTO(prestacion) {
         const servMedDto = {
-            id: servicioMed._id,
-            nombre: servicioMed.servicioUnico.nombre,
-            duracionTurnoEnMins: servicioMed.duracionTurnoEnMins,
-            costo: servicioMed.costo,
-            tipoServicio: servicioMed.tipoServicio,
-            codigo: servicioMed.tipoServicio === "practica" ? servicioMed.codigo : undefined,
+            id: prestacion._id,
+            nombre: prestacion.servicioUnico.nombre,
+            duracionTurnoEnMins: prestacion.duracionTurnoEnMins,
+            costo: prestacion.costo,
+            tipoServicio: prestacion.tipoServicio,
+            codigo: prestacion.tipoServicio === "practica" ? prestacion.codigo : undefined,
         }
         return servMedDto
     }
 
 
-    obtenerServicioMeds = async (req, res, next) => {
+    obtenerPrestaciones = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const servicioMeds = await this.medicoService.obtenerServicioMeds(idMedico)
-            res.json(servicioMeds.map(s => this.servicioMedToDTO(s)))
+            const prestaciones = await this.medicoService.obtenerPrestaciones(idMedico)
+            res.json(prestaciones.map(s => this.prestacionToDTO(s)))
         } catch (error) {
             return next(error)
         }
 
     }
 
-    obtenerServicioMedPorId = async (req, res, next) => {
+    obtenerPrestacionPorId = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const idServicioMed = parsearId(req.params.idServicioMed)
-            const servicioMed = await this.medicoService.obtenerServicioMedPorId(idMedico, idServicioMed)
-            res.status(201).json({ status: "success", data: this.servicioMedToDTO(servicioMed) })
+            const idPrestacion = parsearId(req.params.idPrestacion)
+            const prestacion = await this.medicoService.obtenerPrestacionPorId(idMedico, idPrestacion)
+            res.status(201).json({ status: "success", data: this.prestacionToDTO(prestacion) })
         } catch (error) {
             return next(error)
         }
     }
 
 
-    altaServicioMed = async (req, res, next) => {
+    altaPrestacion = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const servicioMed = this.extraerYValidarBodyServicioMed(req.body)
-
-            const servicioMedCreado = await this.medicoService.altaServicioMed(idMedico, servicioMed);
-
-            return res.status(201).json({ status: "success", data: this.servicioMedToDTO(servicioMedCreado) })
+            const prestacion = this.extraerYValidarBodyPrestacion(req.body)
+            const prestacionCreado = await this.medicoService.altaPrestacion(idMedico, prestacion);
+            
+            return res.status(201).json({ status: "success", data: this.prestacionToDTO(prestacionCreado) })
         } catch (error) {
             return next(error)
         }
 
     }
 
-    bajaServicioMed = async (req, res, next) => {
+    bajaPrestacion = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const idServicioMed = parsearId(req.params.idServicioMed)
+            const idPrestacion = parsearId(req.params.idPrestacion)
 
-            const servicioMedEliminado = await this.medicoService.bajaServicioMed(idMedico, idServicioMed);
-            return res.status(201).json({ status: "success", data: this.servicioMedToDTO(servicioMedEliminado) })
+            const prestacionEliminado = await this.medicoService.bajaPrestacion(idMedico, idPrestacion);
+            return res.status(201).json({ status: "success", data: this.prestacionToDTO(prestacionEliminado) })
         } catch (error) {
             return next(error)
         }
     }
 
-    editarServicioMed = async (req, res, next) => {
+    editarPrestacion = async (req, res, next) => {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const idServicioMed = parsearId(req.params.idServicioMed)
-            const datosServicioMed = this.extraerYValidarBodyServicioMed(req.body)
-            const servicioMedActualizado = await this.medicoService.actualizarServicioMed(idMedico, idServicioMed, datosServicioMed);
-            return res.status(200).json({ status: "success", data: this.servicioMedToDTO(servicioMedActualizado) })
+            const idPrestacion = parsearId(req.params.idPrestacion)
+            const datosPrestacion = this.extraerYValidarBodyPrestacion(req.body)
+            const prestacionActualizado = await this.medicoService.actualizarPrestacion(idMedico, idPrestacion, datosPrestacion);
+            return res.status(200).json({ status: "success", data: this.prestacionToDTO(prestacionActualizado) })
         } catch (error) {
             return next(error)
         }
 
     }
 
-    extraerYValidarBodyServicioMed(body) {
-        const resultado = createServicioMedSchema.safeParse(body)
+    extraerYValidarBodyPrestacion(body) {
+        const resultado = createPrestacionSchema.safeParse(body)
         if (!resultado.success) {
             throw new BadRequestError(
                 resultado.error.issues.map(i => i.message).join(", ")

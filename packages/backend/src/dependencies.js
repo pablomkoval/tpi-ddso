@@ -7,7 +7,7 @@ import { MedicoService } from "./services/medico.service.js";
 import { UsuarioRepository } from "./domain/models/repositories/usuario.repository.js";
 import { MedicoController } from "./controllers/medico.controller.js";
 import { ServicioRepository } from "./domain/models/repositories/servicio.repository.js";
-import { ServicioMedRepository } from "./domain/models/repositories/servicioMed.repository.js";
+import { PrestacionRepository } from "./domain/models/repositories/prestacion.repository.js";
 import { ServicioService } from "./services/servicio.service.js";
 import { ServiciosController } from "./controllers/servicios.controller.js";
 import { TurnoRepository } from "./domain/models/repositories/turno.repository.js";
@@ -25,7 +25,7 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
     const notiRepository = new NotificacionesRepository();
     const servicioRepository = new ServicioRepository();
-    const servicioMedRepository = new ServicioMedRepository();
+    const prestacionRepository = new PrestacionRepository();
     const turnoRepository = new TurnoRepository();
     const usuarioRepository = new UsuarioRepository(); //definir si se usa realmente (aplicar cambio a inyecciones abajo)
     const medicoRepository = new MedicoRepository();
@@ -33,9 +33,9 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
 
     //////////////////////////////// SERVICES /////////////////////////////////////////////////////////////
     const notiService = new NotificacionesService(notiRepository);
-    const servicioService = new ServicioService(servicioRepository, servicioMedRepository);
+    const servicioService = new ServicioService(servicioRepository, prestacionRepository);
     const pacienteService = new PacienteService(pacienteRepository, usuarioRepository);
-    const medicoService = new MedicoService(medicoRepository, usuarioRepository, servicioService);
+    const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository);
     const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
 
     //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////

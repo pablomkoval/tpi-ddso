@@ -6,7 +6,7 @@ import { uuidv4 } from "zod";
 
 export class DisponibilidadHoraria{
 
-    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, servicioMedico}){
+    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, prestacion}){
         this.validarDiaSemana(diaSemana);
         this.validarHorario(horaDesde);
         this.validarHorario(horaHasta);
@@ -17,7 +17,7 @@ export class DisponibilidadHoraria{
         this.horaDesde = horaDesde;
         this.horaHasta = horaHasta;
         this.sede = sede;
-        this.servicioMedico = servicioMedico;
+        this.prestacion = prestacion;
     }
 
     validarDiaSemana(diaSemana) {

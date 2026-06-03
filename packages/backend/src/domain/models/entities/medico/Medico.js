@@ -69,7 +69,7 @@ export default class Medico {
             horaDesde: disponibilidad.horaDesde,
             horaHasta: disponibilidad.horaHasta,
             sede: disponibilidad.sede,
-            servicioMedico: disponibilidad.servicioMedico
+            prestacion: disponibilidad.prestacion
         });
 
         // Validar que la sede de la disponibilidad esté autorizada para el médico
@@ -86,7 +86,7 @@ export default class Medico {
                 horaDesde: d.horaDesde,
                 horaHasta: d.horaHasta,
                 sede: d.sede,
-                servicioMedico: d.servicioMedico
+                prestacion: d.prestacion
             });
             return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
         })
@@ -115,7 +115,7 @@ export default class Medico {
         disponibilidad.horaDesde = cambios.horaDesde ?? disponibilidad.horaDesde;
         disponibilidad.horaHasta = cambios.horaHasta ?? disponibilidad.horaHasta;
         disponibilidad.sede = cambios.sede ?? disponibilidad.sede;
-        disponibilidad.servicioMedico = cambios.servicioMedico ?? disponibilidad.servicioMedico;
+        disponibilidad.prestacion = cambios.prestacion ?? disponibilidad.prestacion;
     }
     ////////////////////////////    Turnos   /////////////////////////////////////////////////////
 
@@ -150,7 +150,7 @@ export default class Medico {
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
         this.disponibilidades.forEach(disponibilidad => {
             // Acá debería ser un id no el código
-            if (disponibilidad.servicioMedico.codigo !== servicio.codigo) {
+            if (disponibilidad.prestacion.codigo !== servicio.codigo) {
                 return;
             }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);

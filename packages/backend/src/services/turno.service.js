@@ -19,8 +19,8 @@ const obtenerCostoBase = (turno) => {
   if (Number.isFinite(turno?.practica?.costo)) {
     return turno.practica.costo;
   }
-  if (Number.isFinite(turno?.servicioMed?.costo)) {
-    return turno.servicioMed.costo;
+  if (Number.isFinite(turno?.prestacion?.costo)) {
+    return turno.prestacion.costo;
   }
   return 0;
 };
@@ -41,13 +41,13 @@ const obtenerNivelCobertura = (turno, plan) => {
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
 
-  const idEspecialidad = obtenerId(turno?.servicioMed);
+  const idEspecialidad = obtenerId(turno?.prestacion);
   if (idEspecialidad) {
     const coberturasEspecialidad = Array.isArray(plan.coberturasEspecialidad)
       ? plan.coberturasEspecialidad
       : [];
     const cobertura = coberturasEspecialidad.find(
-      (item) => String(obtenerId(item.servicioMed)) === String(idEspecialidad),
+      (item) => String(obtenerId(item.prestacion)) === String(idEspecialidad),
     );
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
@@ -86,7 +86,7 @@ export class TurnoService {
 
   async buscarDisponibles(params) {
     const {
-      servicioMed,
+      prestacion,
       profesional,
       sede,
       fechaDesde,
@@ -98,7 +98,7 @@ export class TurnoService {
       sortOrder = "asc",
     } = params;
 
-    if (!servicioMedId /*  && !practica */) {
+    if (!prestacionId/*  && !practica */) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
         400,
@@ -106,10 +106,10 @@ export class TurnoService {
       );
     }
 
-    const servicioMedExistente =
-      await this.servicioService.findServicioMedById(servicioMedId);
+    const prestacionExistente = await this.servicioService.findPrestacionById(prestacionId);
 
-    if (!servicioMedExistente) {
+
+    if (!prestacionExistente) {
       throw new AppError(
         "La especialidad especificada no existe",
         404,
