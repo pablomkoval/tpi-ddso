@@ -30,24 +30,35 @@ export class TurnoController {
     }
   }
 
-  async reservar(req, res, next) {
+  async cambiarEstado(req, res, next) {
     try {
-      const turnoReservado = await this.turnoService.reservarTurno(req.params.id, req.body);
-      return res.status(200).json(turnoReservado);
+      const { id } = req.params;
+      const { estado, ...datos } = req.body
+
+      if (!estado) {
+        //error de que falta poner estado del turno en el body
+      }
+
+      if (estado === "RESERVADO") {
+        const turnoReservado = await this.turnoService.reservarTurno(id, datos);
+        return res.status(200).json({ 
+          status: "success", 
+          data: turnoReservado, 
+        });
+      } 
+      
+      if (estado === "CANCELADO") {
+        const turnoCancelado = await this.turnoService.cancelarTurno(id, datos);
+        return res.status(200).json({ 
+          status: "success", 
+          data: turnoCancelado 
+        });
+      }
+
+      //poner error si mandan otra cosa que no sea RESERVADO o CANCELADO, tipo error de estado no valido algo asi
     } catch (error) {
       next(error);
     }
   }
-
-  async cancelar(req, res, next) {
-    try {
-      await this.turnoService.cancelarTurno(req.params.id, req.body);
-      return res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  }
-
-
 }
 

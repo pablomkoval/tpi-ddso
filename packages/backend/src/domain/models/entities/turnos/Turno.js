@@ -18,6 +18,7 @@ export class Turno{
 
         this.servicio = servicio; // servicio: especialidad o practica
         
+        this.actualizarEstado(EstadoTurno.DISPONIBLE, "SYSTEM", "Generación automática de turno");
         //estado comienza disponible
         //sin paciente no hay costo aún
     }

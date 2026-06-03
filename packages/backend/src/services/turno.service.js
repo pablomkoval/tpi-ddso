@@ -234,18 +234,36 @@ export class TurnoService {
     })
   }
 
-  async reservarTurno() {
+  async reservarTurno(id, datos) {
+    const { pacienteId } = datos;
+    //if (!pacienteId) //error de que no se puso id del paciente
 
+    const turno = await this.turnoRepository.findById(id); // Trae la instancia viva con loadClass
+    //if (!turno) error de q no se encontro turno
 
+    turno.paciente = pacienteId;
+    turno.actualizarEstado("RESERVADO", pacienteId, "Reserva realizada por el paciente");
+
+    const turnoActualizado = await this.turnoRepository.update(id, turno);
+    return turnoActualizado;
   }
 
-  async cancelarTurno() {
+  async cancelarTurno(id, datos) {
+    const { usuario, motivoCambio } = datos;
+    //if (!motivoCambio) error de q no se indico motivo de cancelacion de turno
 
+    const turno = await this.turnoRepository.findById(id);
+    //if (!turno) error de que no se encontro el turno
 
+    const diferenciaHoras = (new Date(turno.fechaHora) - new Date()) / (1000 * 60 * 60);
+
+    if (diferenciaHoras < 1) {
+      //error de que no se cumple el requisito de anticiapcion
+    }
+
+    turno.actualizarEstado("CANCELADO", usuario || "PACIENTE", motivoCambio);
+
+    const turnoCancelado = await this.turnoRepository.update(id, turno);
+    return turnoCancelado;
   }
-
-
 }
-
-
-

@@ -17,4 +17,8 @@ export class TurnoRepository {
     async findById(id) {
         return await this.model.findById(id);
     }
+
+    async update(id, turnoModificado) {
+        return await this.model.findByIdAndUpdate(id, turnoModificado, { new: true });
+    }
 }
