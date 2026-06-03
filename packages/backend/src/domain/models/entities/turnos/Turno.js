@@ -1,31 +1,28 @@
-import { EstadoTurno } from "../../enum/EstadoTurno.js";
+import { EstadoTurno } from "../../../enum/EstadoTurno.js";
 import { CambioEstadoTurno } from "./CambioEstadoTurno.js";
 
-export class Turno{
-    paciente;
-    costo;
-    sede;
-    estado = EstadoTurno.DISPONIBLE;
-    historialEstados = [];
-    //estado = disponible?
-    
-    constructor(medico, fechaHora, servicio){
-        this.id = "placeholder"; //id se le asigna o se genera segun una base de datos?       
-        this.medico = medico;
-        //paciente no se define al crear un turno, solo esta disponible
-        this.fechaHora = fechaHora;
-        //la sede no queda definida hasta que se confirme el turno (consultar)
+export class Turno {
+  paciente = null;
+  costo = null;
+  sede = null;
+  estado = EstadoTurno.DISPONIBLE;
+  historialEstados = [];
 
-        this.servicio = servicio; // servicio: especialidad o practica
-        
-        //estado comienza disponible
-        //sin paciente no hay costo aún
-    }
+  constructor(medico, fechaHora, servicio) {
+    this.medico = medico;
+    this.fechaHora = fechaHora;
+    this.servicio = servicio;
+  }
 
-    actualizarEstado(nuevoEstado, quien, motivoCambio){
-        this.estado = nuevoEstado; 
-        /* ojo fechahoraingreso, y que estado se registra */
-        const cambioEstado = new CambioEstadoTurno(nuevoEstado, this, quien, motivoCambio);
-        this.historialEstados.push(cambioEstado);
-    }
+  actualizarEstado(nuevoEstado, quien, motivoCambio) {
+    this.estado = nuevoEstado;
+    // Le pasamos this.id en vez de this — evita la referencia circular
+    const cambio = new CambioEstadoTurno(
+      nuevoEstado,
+      this.id ?? this._id,
+      quien,
+      motivoCambio,
+    );
+    this.historialEstados.push(cambio);
+  }
 }

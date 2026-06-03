@@ -4,8 +4,11 @@ import router from './routes/router.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import errorHandler from './middlewares/errorHandler.js';
+import inyectarDependenciasYRouter from './dependencies.js';
+
 
 const app = express();
+
 
 app.use(cors());
 app.use(express.json());
@@ -13,8 +16,11 @@ app.use(express.json());
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+inyectarDependenciasYRouter(router);
+
 // Rutas
 app.use(router);
+
 
 // Middleware de manejo de errores (debe ir al final)
 app.use(errorHandler);
