@@ -2,6 +2,8 @@ import { SedeNoAutorizadaError } from "../../../errors/SedeNoAutorizadaError.js"
 import { ServicioNoPrestadoError } from "../../../errors/ServicioNoPrestadoError.js";
 import { DisponibilidadHoraria } from "./DisponibilidadHoraria.js";
 import { Turno } from "../turnos/Turno.js";
+import { HorarioInvalidoError } from "../../../errors/HorarioInvalidoError.js";
+import { NotFoundError } from "../../../../shared/errors/AppError.js";
 
 export default class Medico {
     disponibilidades = [];
@@ -40,9 +42,9 @@ export default class Medico {
         }
     }
 
-    prestaServicio(servicio) {
-        return this.especialidades.some(especialidad => especialidad.esMismoServicioQue(servicio))
-            || this.practicas.some(practica => practica.esMismoServicioQue(servicio));
+    prestaServicio(servicio_id) {
+        return this.especialidades.some(especialidad_id => especialidad_id === servicio_id)
+            || this.practicas.some(practica_id => practica_id === servicio_id);
     }
 
     prestaServicioPorId(servicio) {
@@ -91,8 +93,14 @@ export default class Medico {
             return nuevaDisponibilidad.seSolapaCon(disponibilidadVieja);
         })
         ) {
-            throw new Error("La disponibilidad se solapa con una existente");
+            throw new HorarioInvalidoError("La nueva disponibilidad se solapa con una disponibilidad existente");
         }
+
+        // Validar que el médico presete el servicio indicado en la disponibilidad
+        if (!this.prestaServicioPorId(nuevaDisponibilidad.prestacion)) {
+            throw new ServicioNoPrestadoError(`El médico "${this.nombre}" no presta el servicio "${nuevaDisponibilidad.prestacion.nombre}" requerido por la disponibilidad`);
+        }
+
         return nuevaDisponibilidad;
     }
 
@@ -108,7 +116,15 @@ export default class Medico {
     editarDisponibilidad(disponibilidadId, cambios) {
         const disponibilidad = this.disponibilidades.find(d => String(d.id) === String(disponibilidadId) || String(d._id) === String(disponibilidadId));
         if (!disponibilidad) {
-            throw new Error("Disponibilidad no encontrada");
+            throw new NotFoundError(`No se encontró la disponibilidad con id "${disponibilidadId}"`);
+        }
+
+        // Si se intenta asignar una sede nueva, verificar que esté autorizada para el médico
+        if (cambios.sede) {
+            const sedeValida = this.sedes.some(sede => sede.id === cambios.sede.id);
+            if (!sedeValida) {
+                throw new SedeNoAutorizadaError(`La sede "${cambios.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
+            }
         }
 
         disponibilidad.diaSemana = cambios.diaSemana ?? disponibilidad.diaSemana;
@@ -131,7 +147,8 @@ export default class Medico {
     }
 
     generarTurnosPara(servicio, diasACubrir = 7) {
-        if (!this.prestaServicio(servicio)) {
+        const turnosGenerados = [];
+        if (!this.prestaServicioPorId(servicio)) {
             throw new ServicioNoPrestadoError(`El médico "${this.nombre}" no presta el servicio "${servicio.nombre}"`);
         }
         const fechaInicio = new Date();
@@ -149,8 +166,8 @@ export default class Medico {
 
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
         this.disponibilidades.forEach(disponibilidad => {
-            // Acá debería ser un id no el código
-            if (disponibilidad.prestacion.codigo !== servicio.codigo) {
+            if (!disponibilidad.prestacion._id.equals(servicio._id)) {
+                console.log("La disponibilidad no corresponde al servicio, no se generan turnos para esta disponibilidad");
                 return;
             }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);
@@ -163,11 +180,13 @@ export default class Medico {
                     if (this.tieneTurnoEn(fechaHoraTurno)) {
                         continue;
                     }
-                    const turno = new Turno(this, fechaHoraTurno, servicio);
-                    this.turnos.push(turno);
+                    const turno = new Turno(this, fechaHoraTurno, servicio, disponibilidad.sede);
+                    //this.turnos.push(turno);
+                    turnosGenerados.push(turno);
                 }
             }
         })
+        return turnosGenerados;
     }
 
     obtenerTurnos() {

@@ -9,12 +9,12 @@ export class Turno{
     historialEstados = [];
     //estado = disponible?
     
-    constructor(medico, fechaHora, servicio){
+    constructor(medico, fechaHora, servicio, sede){
         this.id = "placeholder"; //id se le asigna o se genera segun una base de datos?       
         this.medico = medico;
         //paciente no se define al crear un turno, solo esta disponible
         this.fechaHora = fechaHora;
-        //la sede no queda definida hasta que se confirme el turno (consultar)
+        this.sede = sede;
 
         this.servicio = servicio; // servicio: especialidad o practica
         

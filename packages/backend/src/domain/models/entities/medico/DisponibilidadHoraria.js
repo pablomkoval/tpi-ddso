@@ -2,11 +2,11 @@ import { DiaSemana } from "../../../enum/DiaSemana.js";
 import { HorarioInvalidoError } from "../../../errors/HorarioInvalidoError.js";
 import { RangoHorarioInvalidoError } from "../../../errors/RangoHorarioInvalidoError.js";
 import { DiaSemanaInvalidoError } from "../../../errors/DiaSemanaInvalidoError.js";
-import { uuidv4 } from "zod";
+import { v4 as uuidv4 } from "uuid";
 
 export class DisponibilidadHoraria{
 
-    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, prestacion}){
+    constructor({ id = uuidv4(), diaSemana, horaDesde, horaHasta, sede, prestacion}){
         this.validarDiaSemana(diaSemana);
         this.validarHorario(horaDesde);
         this.validarHorario(horaHasta);

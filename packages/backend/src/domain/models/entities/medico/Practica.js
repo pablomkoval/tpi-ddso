@@ -1,7 +1,8 @@
 import { TipoServicio } from "../../../enum/TipoServicio";
 
 export class Practica {
-    id
+    id;
+    _id;
 
     constructor(codigo, nombre, duracionTurnoEnMins, costo) {
         this.id = "placeholder";
