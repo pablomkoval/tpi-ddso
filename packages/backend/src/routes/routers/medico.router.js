@@ -27,6 +27,7 @@ export class MedicoRouter {
          *              application/json:
          *                  schema:
          *                      type: object
+         *                      required: [usuario, matricula, nombre]
          *                      properties:
          *                          usuario: { type: string, example: '664b44e13e84f7d123e92000' }
          *                          matricula: { type: string, example: 'MN-98765' }
@@ -92,11 +93,13 @@ export class MedicoRouter {
          *              application/json:
          *                  schema:
          *                      type: object
+         *                      required: [disponibilidades]
          *                      properties:
          *                          disponibilidades:
          *                              type: array
          *                          items:
          *                              type: object
+         *                              required: [diaSemana, horaDesde, horaHasta, sede, prestacion]
          *                              properties:
          *                                  diaSemana: { type: number, example: 1 }
          *                                  horaDesde: { type: string, example: '08:00' }
@@ -190,12 +193,13 @@ export class MedicoRouter {
          *              application/json:
          *                  schema:
          *                      type: object
+         *                      required: [servicioUnico, costo, duracionTurnoEnMins, tipoServicio]
          *                      properties:
          *                          servicioUnico: { type: string, example: '664b44e13e84f7d123e92001' }
          *                          duracionTurnoEnMins: { type: number, example: 30 }
          *                          costo: { type: number, example: 15000 }
          *                          tipoServicio: { type: string, enum: [especialidad, practica], example: 'especialidad' }
-         *                          codigo: { type: string, example: '' }
+         *                          codigo: { type: string, example: 'PRAC-01' }
          *      responses:
          *          201:
          *              description: Servicio asociado al médico exitosamente
