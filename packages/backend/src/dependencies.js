@@ -24,40 +24,48 @@ import { TurnoRouter } from "./routes/routers/turno.router.js";
 import { SolicitudCambioTurnoRouter } from "./routes/routers/solicitudCambioTurno.router.js";
 import { PacienteRouter } from "./routes/routers/paciente.router.js";
 import { MedicoRouter } from "./routes/routers/medico.router.js";
+import { SedeRepository } from "./domain/models/repositories/sede.repository.js";
+import { SedeService } from "./services/sede.service.js";
+import { SedeController } from "./controllers/sede.controller.js";
+import { SedeRouter } from "./routes/routers/sede.router.js";
 
-    //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
-    const notiRepository = new NotificacionesRepository();
-    const servicioRepository = new ServicioRepository();
-    const prestacionRepository = new PrestacionRepository();
-    const turnoRepository = new TurnoRepository();
-    const solicitudCambioTurnoRepository = new SolicitudCambioTurnoRepository();
-    const usuarioRepository = new UsuarioRepository(); //definir si se usa realmente (aplicar cambio a inyecciones abajo)
-    const medicoRepository = new MedicoRepository();
-    const pacienteRepository = new PacienteRepository();
+//////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
+const notiRepository = new NotificacionesRepository();
+const servicioRepository = new ServicioRepository();
+const prestacionRepository = new PrestacionRepository();
+const turnoRepository = new TurnoRepository();
+const solicitudCambioTurnoRepository = new SolicitudCambioTurnoRepository();
+const usuarioRepository = new UsuarioRepository(); //definir si se usa realmente (aplicar cambio a inyecciones abajo)
+const medicoRepository = new MedicoRepository();
+const pacienteRepository = new PacienteRepository();
+const sedeRepository = new SedeRepository();
 
-    //////////////////////////////// SERVICES /////////////////////////////////////////////////////////////
-    const notiService = new NotificacionesService(notiRepository);
-    const servicioService = new ServicioService(servicioRepository, prestacionRepository);
-    const pacienteService = new PacienteService(pacienteRepository, turnoRepository, notiService, solicitudCambioTurnoRepository);
-    const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository);
-    export const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
-    const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
+//////////////////////////////// SERVICES /////////////////////////////////////////////////////////////
+const notiService = new NotificacionesService(notiRepository);
+const servicioService = new ServicioService(servicioRepository, prestacionRepository);
+const pacienteService = new PacienteService(pacienteRepository, turnoRepository, notiService, solicitudCambioTurnoRepository);
+const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository);
+export const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
+const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
+const sedeService = new SedeService(sedeRepository);
 
-    //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
-    const notiController = new NotificacionesController(notiService);
-    const servicioController = new ServiciosController(servicioService);
-    const turnoController = new TurnoController(turnoService);
-    const solicitudCambioTurnoController = new SolicitudCambioTurnoController(solicitudCambioTurnoService);
-    const pacienteController = new PacienteController(pacienteService);
-    const medicoController = new MedicoController(medicoService);
+//////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
+const notiController = new NotificacionesController(notiService);
+const servicioController = new ServiciosController(servicioService);
+const turnoController = new TurnoController(turnoService);
+const solicitudCambioTurnoController = new SolicitudCambioTurnoController(solicitudCambioTurnoService);
+const pacienteController = new PacienteController(pacienteService);
+const medicoController = new MedicoController(medicoService);
+const sedeController = new SedeController(sedeService);
 
-    //////////////////////////////// ROUTERS /////////////////////////////////////////////////////////////
-    const notiRouter = new NotificacionesRouter(notiController);
-    const servicioRouter = new ServicioRouter(servicioController);
-    const turnoRouter = new TurnoRouter(turnoController);
-    const solicitudCambioTurnoRouter = new SolicitudCambioTurnoRouter(solicitudCambioTurnoController)
-    const pacienteRouter = new PacienteRouter(pacienteController);
-    const medicoRouter = new MedicoRouter(medicoController);
+//////////////////////////////// ROUTERS /////////////////////////////////////////////////////////////
+const notiRouter = new NotificacionesRouter(notiController);
+const servicioRouter = new ServicioRouter(servicioController);
+const turnoRouter = new TurnoRouter(turnoController);
+const solicitudCambioTurnoRouter = new SolicitudCambioTurnoRouter(solicitudCambioTurnoController)
+const pacienteRouter = new PacienteRouter(pacienteController);
+const medicoRouter = new MedicoRouter(medicoController);
+const sedeRouter = new SedeRouter(sedeController);
 
 export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
@@ -66,5 +74,6 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/solicitudes-cambio", solicitudCambioTurnoRouter.getRouter())
     routerGeneral.use("/notificaciones", notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())
+    routerGeneral.use("/sedes", sedeRouter.getRouter())
 }
 

@@ -60,8 +60,8 @@ export default class Medico {
 
     ////////////////////////////    Sedes   /////////////////////////////////////////////////////
 
-    agregarSede(nuevaSede) {
-        this.sedes.push(nuevaSede);
+    agregarSede(nuevaSedeId) {
+        this.sedes.push(nuevaSedeId);
     }
 
     ////////////////////////////    Disponibilidades   /////////////////////////////////////////////////////
@@ -76,9 +76,9 @@ export default class Medico {
         });
 
         // Validar que la sede de la disponibilidad esté autorizada para el médico
-        const sedeValida = this.sedes.some(sede => sede.id === nuevaDisponibilidad.sede.id);
+        const sedeValida = this.sedes.some(sede => sede.equals(nuevaDisponibilidad.sede));
         if (!sedeValida) {
-            throw new SedeNoAutorizadaError(`La sede "${nuevaDisponibilidad.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
+            throw new SedeNoAutorizadaError(`La sede de ID "${nuevaDisponibilidad.sede}" no está autorizada para el médico "${this.nombre}"`);
         }
 
         // Validar que la nueva disponibilidad no se solape con las existentes
@@ -122,9 +122,9 @@ export default class Medico {
 
         // Si se intenta asignar una sede nueva, verificar que esté autorizada para el médico
         if (cambios.sede) {
-            const sedeValida = this.sedes.some(sede => sede.id === cambios.sede.id);
+            const sedeValida = this.sedes.some(sede => sede.equals(cambios.sede));
             if (!sedeValida) {
-                throw new SedeNoAutorizadaError(`La sede "${cambios.sede.nombre}" no está autorizada para el médico "${this.nombre}"`);
+                throw new SedeNoAutorizadaError(`La sede con ID "${cambios.sede}" no está autorizada para el médico "${this.nombre}"`);
             }
         }
 
@@ -174,7 +174,6 @@ export default class Medico {
                 fechaActual <= fechaFinal;
                 fechaActual = new Date(fechaActual.getTime() + SEMANA_MS)) {
                 // me fijo todos los lunes hasta llegar al limite
-
                 const instantes = disponibilidad.generarInstantesTurnoParaFecha(fechaActual, duracionTurnoEnMins);
                 for (const fechaHoraTurno of instantes) {
                     if (this.tieneTurnoEn(fechaHoraTurno)) {

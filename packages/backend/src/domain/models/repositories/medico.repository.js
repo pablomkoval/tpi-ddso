@@ -12,7 +12,7 @@ export class MedicoRepository {
     }
 
     async findAll() {
-        return await this.model.find();
+        return await this.model.find().populate('especialidades').populate('practicas').populate('sedes');
     }
 
     async findById(id) { // implementar session despues
@@ -22,6 +22,7 @@ export class MedicoRepository {
         }
         await medico.populate('especialidades');
         await medico.populate('practicas');
+        await medico.populate('sedes')
         return medico;
     }
 
@@ -29,12 +30,13 @@ export class MedicoRepository {
         return await medico.save(/* { session } */)
     }
 
-    async findDisponibilidadesById(id) {
+    /* async findDisponibilidadesById(id) {
         try {
             const medico = await this.model.findById(id)
                 .populate('disponibilidades')
                 .populate('especialidades')
-                .populate('practicas');
+                .populate('practicas')
+                .populate('sedes');
 
             if (!medico) {
                 throw new Error('Médico no encontrado');
@@ -43,7 +45,7 @@ export class MedicoRepository {
         } catch (error) {
             throw new Error(`Error al obtener disponibilidades: ${error.message}`, { cause: error });
         }
-    }
+    } */
 
     /*  async findByServicio(especialidadId) {
              return await MedicoModel.find({

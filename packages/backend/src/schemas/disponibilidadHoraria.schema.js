@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { sedeSchema } from "./sede.schema.js";
+import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
 
 export const disponibilidadHorariaSchema = new mongoose.Schema(
     {
@@ -22,7 +22,8 @@ export const disponibilidadHorariaSchema = new mongoose.Schema(
             required: true
         },
         sede: {
-            type: sedeSchema,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Sede',
             required: true
         },
         prestacion: {
@@ -35,3 +36,5 @@ export const disponibilidadHorariaSchema = new mongoose.Schema(
         _id: true
     }
 )
+
+disponibilidadHorariaSchema.loadClass(DisponibilidadHoraria);

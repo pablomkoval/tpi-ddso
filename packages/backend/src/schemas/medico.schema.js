@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Medico from "../domain/models/entities/medico/Medico.js";
 import { disponibilidadHorariaSchema } from "./disponibilidadHoraria.schema.js";
-import { sedeSchema } from "./sede.schema.js";
 
 const medicoSchema = new mongoose.Schema(
     {
@@ -34,10 +33,11 @@ const medicoSchema = new mongoose.Schema(
             ref: 'Prestacion',
             default: []
         }],
-        sedes: {
-            type: [sedeSchema],
+        sedes: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Sede',
             default: []
-        },
+        }],
         disponibilidades: {
             type: [disponibilidadHorariaSchema],
             default: []

@@ -66,7 +66,7 @@ export class MedicoService {
         }
 
         const actualizado = await this.medicoRepository.update(idMedico, data);
-        if(!actualizado) {
+        if (!actualizado) {
             throw new AppError("No se pudo actualizar el médico", 500, "MEDICO_UPDATE_FAIL");
         }
 
@@ -106,8 +106,8 @@ export class MedicoService {
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
-
-            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d => 
+            console.log("DataDisponibilidades: ", nuevasDisponibilidades)
+            const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d =>
                 new DisponibilidadHoraria({
                     diaSemana: d.diaSemana,  // ← Llega como string, el constructor lo convierte
                     horaDesde: d.horaDesde,
@@ -116,7 +116,7 @@ export class MedicoService {
                     prestacion: toObjectId(d.prestacion)
                 })
             );
-
+            console.log("Disponibilidades Instanciadas: ", nuevasDisponibilidadesInstanciadas)
             medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
             const medicoActualizado = await medico.save();
             return medicoActualizado;
@@ -136,9 +136,9 @@ export class MedicoService {
         };
 
         medico.editarDisponibilidad(disponibilidadId, cambiosConvertidos);
-        
+
         const medicoGuardado = await medico.save();
-        if(!medicoGuardado) {
+        if (!medicoGuardado) {
             throw new AppError("No se pudo editar la disponibilidad", 500, "DISPONIBILIDAD_EDITAR_FAIL");
         }
 
@@ -206,7 +206,7 @@ export class MedicoService {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
             const prestacion = await this.servicioService.createPrestacion(datosPrestacion/* , session */)
-            
+
             medico.agregarServicio(prestacion)
 
 

@@ -18,7 +18,6 @@ export class PrestacionRepository {
     }
 
     async findById(id, session = null) {
-        console.error("ola 4: origins")
         return await this.models["prestacion"].findById(id).populate('servicioUnico')
     }
 

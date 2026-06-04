@@ -14,6 +14,10 @@ export class TurnoRepository {
     return await turno.save();
   }
 
+  async saveAll(turnos) {
+    return this.model.insertMany(turnos)
+  }
+
   async findAll() {
     return await this.model.find();
   }

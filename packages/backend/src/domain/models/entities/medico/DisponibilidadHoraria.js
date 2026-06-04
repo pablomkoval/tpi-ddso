@@ -4,9 +4,9 @@ import { RangoHorarioInvalidoError } from "../../../errors/RangoHorarioInvalidoE
 import { DiaSemanaInvalidoError } from "../../../errors/DiaSemanaInvalidoError.js";
 import { uuidv4 } from "zod";
 
-export class DisponibilidadHoraria{
+export class DisponibilidadHoraria {
 
-    constructor({id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, prestacion}){
+    constructor({ id = String(uuidv4()), diaSemana, horaDesde, horaHasta, sede, prestacion }) {
         this.validarDiaSemana(diaSemana);
         this.validarHorario(horaDesde);
         this.validarHorario(horaHasta);
@@ -23,7 +23,7 @@ export class DisponibilidadHoraria{
     validarDiaSemana(diaSemana) {
         const diasValidos = Object.values(DiaSemana);
         const diaSemanaNum = Number(diaSemana);
-        
+
         if (isNaN(diaSemanaNum) || !diasValidos.includes(diaSemanaNum)) {
             throw new DiaSemanaInvalidoError(`El día de semana "${diaSemana}" no es válido`);
         }
@@ -43,30 +43,29 @@ export class DisponibilidadHoraria{
             throw new RangoHorarioInvalidoError(`La hora de inicio (${horaDesde}) debe ser anterior a la hora de fin (${horaHasta})`);
         }
     }
-    
-    obtenerHoraDesde(){
+
+    obtenerHoraDesde() {
         return this.obtenerHoraMin(this.horaDesde)
     }
 
-    obtenerHoraHasta(){
+    obtenerHoraHasta() {
         return this.obtenerHoraMin(this.horaHasta)
     }
 
-    obtenerHoraMin(horarioString){
+    obtenerHoraMin(horarioString) {
         const [hora, minutos] = horarioString.split(':').map(Number)
         return minutos + hora * 60
     }
- 
 
-    cantidadTurnosPosiblesSegun(duracionServicioMins){
+
+    cantidadTurnosPosiblesSegun(duracionServicioMins) {
         const cantidadTurnosPosibles = (this.obtenerHoraHasta() - this.obtenerHoraDesde()) / duracionServicioMins
         return Math.floor(cantidadTurnosPosibles);
     }
 
-    generarInstantesTurnoParaFecha(fecha, duracionServicioMins){
+    generarInstantesTurnoParaFecha(fecha, duracionServicioMins) {
         const cantidadTurnos = this.cantidadTurnosPosiblesSegun(duracionServicioMins);
         const instantes = [];
-
         for (let i = 0; i < cantidadTurnos; i++) {
             const inicioTurno = this.obtenerHoraDesde() + (i * duracionServicioMins);
             const horas = Math.floor(inicioTurno / 60);
@@ -83,7 +82,7 @@ export class DisponibilidadHoraria{
         if (this.diaSemana !== otraDisponibilidad.diaSemana) {
             return false; // No se solapan si son en días diferentes
         }
-        if(this.id === otraDisponibilidad.id){
+        if (this.id === otraDisponibilidad.id) {
             return false; // No se solapan si son la misma disponibilidad (útil para edición)
         }
 

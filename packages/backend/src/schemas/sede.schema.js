@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const sedeSchema = new mongoose.Schema(
+const sedeSchema = new mongoose.Schema(
     {
         id: {
             type: String,
@@ -18,5 +18,9 @@ export const sedeSchema = new mongoose.Schema(
             trim: true
         }
     },
-    { _id: false }
+    {
+        collection: 'sedes'
+    }
 )
+
+export const SedeModel = mongoose.model('Sede', sedeSchema);
