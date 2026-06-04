@@ -8,16 +8,206 @@ export class PacienteRouter {
     }
 
     initRoutes() {
+        /**
+         *  @swagger
+         * /pacientes:
+         *  post:
+         *      summary: Dar de alta un nuevo paciente
+         *      tags: [Pacientes]
+         *      requestBody:
+         *          required: true
+         *          content:
+         *              application/json:
+         *                  schema:
+         *                      type: object
+         *                      properties:
+         *                          usuario:
+         *                              type: string
+         *                              example: 'gabi123'
+         *                          dni:
+         *                              type: string
+         *                              example: '45123899'
+         *                          nombre:
+         *                              type: string
+         *                              example: 'Gabriel Toledo'
+         *                          obraSocial:
+         *                              type: string
+         *                              example: 'OSDE'
+         *                          plan:
+         *                              type: string
+         *                              example: '210'
+         *      responses:
+         *          201:
+         *              description: Paciente registrado exitosamente
+         *          200:
+         *              description: Lista de pacientes obtenida correctamente
+         *  get:
+         *      summary: Listar todos los pacientes
+         *      tags: [Pacientes]
+         *      responses:
+         *          200:
+         *              description: Lista de pacientes obtenida correctamente
+         */
         this.pacienteRouter.post("/", (req, res, next) => { this.controller.create(req, res, next); });
         this.pacienteRouter.get("/", (req, res, next) => { this.controller.findAll(req, res, next); });
         
+        /**
+         * @swagger
+         * /pacientes/{idPaciente}:
+         *  get:
+         *      summary: Buscar un paciente por ID
+         *      tags: [Pacientes]
+         *      parameters:
+         *        - name: idPaciente
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *              description: ID único del paciente en MongoDB
+         *      responses:
+         *          200:
+         *              description: Paciente retornado de forma correcta
+         *  put:
+         *      summary: Actualizar datos de un paciente
+         *      tags: [Pacientes]
+         *      parameters:
+         *        - name: idPaciente
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *      requestBody:
+         *          required: true
+         *          content:
+         *              application/json:
+         *                  schema:
+         *                      type: object
+         *                      properties:
+         *                          obraSocial:
+         *                              type: string
+         *                              example: 'OSDE'
+         *                          plan:
+         *                              type: string
+         *                              example: '310'
+         *      responses:
+         *          200:
+         *              description: Paciente actualizado correctamente
+         */
         this.pacienteRouter.get("/:idPaciente", (req, res, next) => { this.controller.findById(req, res, next); });
         this.pacienteRouter.put("/:idPaciente", (req, res, next) => { this.controller.update(req, res, next); });
 
-        // Rutas del ciclo de vida de los turnos del paciente
+
+
+        // Rutas del ciclo de vida de los turnos del paciente //
+
+
+
+        /**
+         * @swagger
+         * /pacientes/{idPaciente}/turnos:
+         *  get:
+         *      summary: Consultar historial de turnos de un paciente
+         *      tags: [Pacientes - Flujo Turnos]
+         *      parameters:
+         *        - name: idPaciente
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *      responses:
+         *          200:
+         *              description: Historial de turnos obtenido correctamente
+         */
         this.pacienteRouter.get("/:idPaciente/turnos", (req, res, next) => { this.controller.consultarHistorial(req, res, next); });
+
+        /**
+         * @swagger
+         * /pacientes/{idPaciente}/turnos/{turnoId}/reservaciones:
+         *  post:
+         *      summary: Reservar un turno específico para el paciente
+         *      tags: [Pacientes - Flujo Turnos]
+         *      parameters:
+         *        - name: idPaciente
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *        - name: turnoId
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *      responses:
+         *          200:
+         *              description: Turno reservado con éxito
+         */
         this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/reservaciones", (req, res, next) => { this.controller.reservarTurno(req, res, next); });
+
+        /**
+         * @swagger
+         * /pacientes/{idPaciente}/turnos/{turnoId}/cancelaciones:
+         *  post:
+         *      summary: Cancelar un turno desde el flujo del paciente
+         *      tags: [Pacientes - Flujo Turnos]
+         *      parameters:
+         *        - name: idPaciente
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *        - name: turnoId
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *      requestBody:
+         *          required: true
+         *          content:
+         *              application/json:
+         *                  schema:
+         *                      type: object
+         *                      properties:
+         *                          motivoCambio:
+         *                              type: string
+         *                              example: 'Superposición con otra consulta'
+         *      responses:
+         *          204:
+         *              description: Turno cancelado correctamente
+         */
         this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cancelaciones", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
+
+        /**
+         * @swagger
+         * /pacientes/{idPaciente}/turnos/{turnoId}/cambios:
+         *  post:
+         *      summary: Solicitar un cambio de fecha/hora para un turno asignado
+         *      tags: [Pacientes - Flujo Turnos]
+         *      parameters:
+         *        - name: idPaciente
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *        - name: turnoId
+         *          in: path
+         *          required: true
+         *          schema:
+         *              type: string
+         *      requestBody:
+         *          required: true
+         *          content:
+         *              application/json:
+         *                  schema:
+         *                      type: object
+         *                      properties:
+         *                          nuevaFechaHora:
+         *                              type: string
+         *                              format: 'date-time'
+         *                              example: '2026-06-15T10:30:00.000Z'
+         *      responses:
+         *          201:
+         *              description: Solicitud de cambio registrada con éxito
+         */
         this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cambios", (req, res, next) => { this.controller.solicitarCambioFecha(req, res, next); });
     }
 
