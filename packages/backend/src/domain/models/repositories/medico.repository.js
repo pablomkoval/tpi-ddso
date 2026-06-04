@@ -12,7 +12,10 @@ export class MedicoRepository {
     }
 
     async findAll() {
-        return await this.model.find().populate('especialidades').populate('practicas').populate('sedes');
+        return await this.model.find().populate('especialidades practicas sedes');
+    }
+    async findAllConTurnos() {
+        return await this.model.find().populate(['especialidades', 'practicas', 'sedes', 'turnos']);
     }
 
     async findById(id) { // implementar session despues

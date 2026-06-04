@@ -101,7 +101,7 @@ export class PacienteService {
       );
     }
 
-    if (String(turno.paciente) !== String(pacienteId)) {
+    if (!turno.paciente.equals(pacienteId)) {
       throw new BadRequestError(
         "No podés cancelar un turno que no te pertenece",
         "TURNO_AJENO",

@@ -241,7 +241,7 @@ export class TurnoService {
   async generarTurnos() {
     try {
       console.log("Antes de la búsqueda de médicos.")
-      const medicos = await this.medicoService.findAll();
+      const medicos = await this.medicoService.findAllConTurnos();
       if (!medicos || medicos.length === 0) {
         throw new AppError(
           "Hubo un error al generar los turnos: no se encontraron médicos",
@@ -250,25 +250,19 @@ export class TurnoService {
         );
       }
 
-      console.log("Médicos obtenidos.")
-      console.error("Médicos: ", medicos)
-
       const turnosGenerados = medicos.flatMap((medico) => medico.generarTurnos());
 
-      console.log("Turnos generados.")
-      console.error(JSON.stringify(turnosGenerados, null, 2))
+      /* console.log("Turnos generados.")
+      console.error(JSON.stringify(turnosGenerados, null, 2)) */
 
       if (turnosGenerados.length > 0) {
-        console.error("hola1")
         const turnosGuardados = await this.turnoRepository.saveAll(turnosGenerados);
-        console.error("hola2")
         // Actualizo cada médico con los turnos generados para que queden reflejados en la base de datos
 
         turnosGuardados.forEach(async (turno) => {
           if (turno.medico) {
-            console.error("hola3")
+
             await this.medicoService.agregarTurno(turno.medico, turno);
-            console.error("hola4")
           }
         }
         )

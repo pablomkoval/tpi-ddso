@@ -221,4 +221,36 @@ export class MedicoController {
         return resultado.data
     }
 
+    async consultarHistorialPaciente(req, res, next) {
+        try {
+            const idPaciente = parsearId(req.params.idPaciente);
+            const historial = await this.medicoService.consultarHistorialPaciente(idPaciente);
+            res.status(200).json(historial);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async realizarTurno(req, res, next) {
+        try {
+            const idMedico = parsearId(req.params.idMedico);
+            const turnoId = parsearId(req.params.turnoId);
+            const turnoRealizado = await this.medicoService.realizarTurno(idMedico, turnoId);
+            res.status(200).json(turnoRealizado);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async cancelarTurno(req, res, next) {
+        try {
+            const idMedico = parsearId(req.params.idMedico);
+            const turnoId = parsearId(req.params.turnoId);
+            const { motivo } = req.body;
+            const turnoCancelado = await this.medicoService.cancelarTurno(idMedico, turnoId, motivo);
+            res.status(200).json(turnoCancelado);
+        } catch (error) {
+            return next(error);
+        }
+    }
 }

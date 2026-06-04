@@ -155,7 +155,6 @@ export default class Medico {
         const fechaFinal = new Date(fechaInicio);
         fechaFinal.setDate(fechaFinal.getDate() + diasACubrir);
         const duracionTurnoEnMins = servicio.duracionTurnoEnMins;
-
         const siguienteFechaParaDia = (fechaBase, diaSemana) => {
             const fecha = new Date(fechaBase);
             const diff = (diaSemana - fecha.getUTCDay() + 7) % 7;
@@ -185,6 +184,7 @@ export default class Medico {
                 }
             }
         })
+
         return turnosGenerados;
     }
 

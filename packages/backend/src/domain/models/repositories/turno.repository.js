@@ -15,7 +15,8 @@ export class TurnoRepository {
   }
 
   async saveAll(turnos) {
-    return this.model.insertMany(turnos)
+    const turnosGuardados = await this.model.insertMany(turnos)
+    return turnosGuardados
   }
 
   async findAll() {

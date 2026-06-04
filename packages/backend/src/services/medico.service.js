@@ -1,20 +1,22 @@
 import AppError, { BadRequestError } from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
+import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
 import { NotFoundError } from "../shared/errors/AppError.js"
 import mongoose from 'mongoose'
 
-
+const MINUTOS_MINIMOS_CANCELACION = 60;
 
 
 const toObjectId = (value) =>
     value ? new mongoose.Types.ObjectId(value) : value;
 
 export class MedicoService {
-    constructor(medicoRepository, servicioService, usuarioRepository) {
+    constructor(medicoRepository, servicioService, usuarioRepository, turnoRepository) {
         this.medicoRepository = medicoRepository;
         this.servicioService = servicioService;
         this.usuarioRepository = usuarioRepository; // definir si es necesario
+        this.turnoRepository = turnoRepository;
     }
 
     // toDTO(medico) {
@@ -344,5 +346,93 @@ export class MedicoService {
             throw new AppError("Error al guardar el médico: " + error.message, 500, "MEDICO_GUARDAR_FAIL", { cause: error });
         }
     }
+
+    async consultarHistorialPaciente(pacienteId) {
+        await this.findById(pacienteId);
+        return await this.turnoRepository.findByPaciente(pacienteId);
+    }
+
+    // async realizarTurno(medicoId, turnoId) {
+    //     const medico = await this.findById(medicoId);
+
+    //     const turno = await this.turnoRepository.findById(turnoId);
+    //     if (!turno) {
+    //       throw new NotFoundError(
+    //         `Turno con id ${turnoId} no encontrado`,
+    //         "TURNO_NO_ENCONTRADO",
+    //       );
+    //     }
+
+    //     if (!turno.medico.equals(medicoId)) {
+    //       throw new BadRequestError(
+    //         "No podés marcar como realizado un turno que no te pertenece",
+    //         "TURNO_AJENO",
+    //       );
+    //     }
+
+    //     if (!turno.estado.equals(EstadoTurno.CONFIRMADO)) {
+    //       throw new BadRequestError(
+    //         `No se puede marcar como realizado un turno en estado ${turno.estado}`,
+    //         "TURNO_NO_REALIZABLE",
+    //       );
+    //     }
+
+
+    // }
+
+    async cancelarTurno(medicoId, turnoId, motivo) {
+        const medico = await this.findById(medicoId);
+
+        const turno = await this.turnoRepository.findById(turnoId);
+        if (!turno) {
+          throw new NotFoundError(
+            `Turno con id ${turnoId} no encontrado`,
+            "TURNO_NO_ENCONTRADO",
+          );
+        }
+
+        if (!turno.medico.equals(medicoId)) {
+          throw new BadRequestError(
+            "No podés cancelar un turno que no te pertenece",
+            "TURNO_AJENO",
+          );
+        }
+
+        const estadosCancelables = [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO];
+        if (!estadosCancelables.includes(turno.estado)) {
+          throw new BadRequestError(
+            `No se puede cancelar un turno en estado ${turno.estado}`,
+            "TURNO_NO_CANCELABLE",
+          );
+        }
+
+        const minutosRestantes =
+          (new Date(turno.fechaHora) - new Date()) / (1000 * 60);
+        if (minutosRestantes < MINUTOS_MINIMOS_CANCELACION) {
+          throw new BadRequestError(
+            `Solo se puede cancelar con al menos ${MINUTOS_MINIMOS_CANCELACION} minutos de anticipación. ` +
+              `Faltan ${Math.floor(minutosRestantes)} minutos para el turno.`,
+            "CANCELACION_FUERA_DE_PLAZO",
+          );
+        }
+
+        turno.actualizarEstado(EstadoTurno.CANCELADO, medicoId, motivo);
+
+        const turnoGuardado = await this.turnoRepository.guardar(turno);
+
+        const nombreServicio = turno.servicio?.nombre ?? "servicio no especificado";
+        await this.notificacionesService.create({
+            destinatario: turno.paciente,
+            remitente: medicoId,
+            mensaje: `El medico ${medico.nombre} canceló el turno de ${nombreServicio}. Motivo: ${motivo}`,
+        });
+
+        return turnoGuardado;
+    }
+
+    async findAllConTurnos(){
+        return await this.medicoRepository.findAllConTurnos();
+    }
+
 
 }

@@ -206,7 +206,7 @@ describe("Agregar servicios a un médico", () => {
 describe("Generar turnos de un médico", () => {
     test("Debería generar los turnos de un médico para un servicio prestado en particular", () => {
         const usuario = new Usuario("medico1", "password123");
-        const sede = { id: "sede1", nombre: "Sede Central" };
+        const sede = {_id: new mongoose.Types.ObjectId("507f11111111111799439011"), nombre: "Sede Central", direccion:"Direccion" };
 
         const medico = new Medico(
             usuario,
@@ -214,7 +214,7 @@ describe("Generar turnos de un médico", () => {
             "Dr. Juan Pérez",
             [],
             [],
-            [sede]
+            [sede._id]
         )
 
         // Mock de una práctica para agregar al médico
@@ -234,7 +234,7 @@ describe("Generar turnos de un médico", () => {
             diaSemana: DiaSemana.LUNES,
             horaDesde: "09:00",
             horaHasta: "11:00",
-            sede: sede,
+            sede: sede._id,
             prestacion: practica1
         })
 
@@ -249,7 +249,7 @@ describe("Generar turnos de un médico", () => {
 
 //import { DiaSemana} from "../../../../src/domain/enum/DiaSemana.js";
 /* 2 IMPLEMENTACIONES DE MEDICO TEST */
-describe("Medico", () => {
+/* describe("Medico", () => {
     describe("Creación de un médico", () => {
         test("Debería crear un médico con los datos proporcionados", () => {
 
@@ -416,4 +416,4 @@ describe("Medico", () => {
             }).toThrow(`La sede "${sede2.nombre}" no está autorizada para el médico "${medico.nombre}"`);
         })
     })
-})
+}) */

@@ -28,6 +28,9 @@ export class MedicoRouter {
         this.medicoRouter.patch("/:idMedico/prestaciones/:idPrestacion", (req, res, next) => { this.controller.editarPrestacion(req, res, next); });
         this.medicoRouter.delete("/:idMedico/prestaciones/:idPrestacion", (req, res, next) => { this.controller.bajaPrestacion(req, res, next); });
 
+        this.medicoRouter.get("/:idPaciente/turnos", (req, res, next) => { this.controller.consultarHistorialPaciente(req, res, next); });
+        this.medicoRouter.post("/:idMedico/turnos/:turnoId/realizados", (req, res, next) => { this.controller.realizarTurno(req, res, next); })
+        this.medicoRouter.post("/:idMedico/turnos/:turnoId/cancelaciones", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
     }
 
     getRouter() {

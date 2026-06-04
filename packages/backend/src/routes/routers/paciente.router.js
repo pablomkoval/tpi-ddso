@@ -16,9 +16,9 @@ export class PacienteRouter {
 
         // Rutas del ciclo de vida de los turnos del paciente
         this.pacienteRouter.get("/:idPaciente/turnos", (req, res, next) => { this.controller.consultarHistorial(req, res, next); });
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/reservar", (req, res, next) => { this.controller.reservarTurno(req, res, next); });
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cancelar", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/solicitar-cambio", (req, res, next) => { this.controller.solicitarCambioFecha(req, res, next); });
+        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/reservaciones", (req, res, next) => { this.controller.reservarTurno(req, res, next); });
+        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cancelaciones", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
+        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cambios", (req, res, next) => { this.controller.solicitarCambioFecha(req, res, next); });
     }
 
     getRouter() {
