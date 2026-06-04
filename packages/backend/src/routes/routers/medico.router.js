@@ -137,6 +137,7 @@ export class MedicoRouter {
          *                  schema:
          *                      type: object
          *                      properties:
+         *                          diaSemana: { type: number, example: 1 }
          *                          horaDesde: { type: string, example: '10:00' }
          *                          horaHasta: { type: string, example: '11:00' }
          *      responses:
