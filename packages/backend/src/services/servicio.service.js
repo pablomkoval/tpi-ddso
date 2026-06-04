@@ -27,7 +27,6 @@ export class ServicioService {
 
         const totalPaginas = totalServicios === 0 ? 0 : Math.ceil(totalServicios / limitePorPagina)
 
-
         return {
             servicios,
             numeroPagina,

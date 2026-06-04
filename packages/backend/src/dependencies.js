@@ -40,7 +40,7 @@ import { MedicoRouter } from "./routes/routers/medico.router.js";
     const servicioService = new ServicioService(servicioRepository, prestacionRepository);
     const pacienteService = new PacienteService(pacienteRepository, turnoRepository, notiService, solicitudCambioTurnoRepository);
     const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository);
-    const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
+    export const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
     const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
 
     //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////

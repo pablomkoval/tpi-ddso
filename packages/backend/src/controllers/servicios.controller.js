@@ -21,18 +21,18 @@ export class ServiciosController {
 
     findAll = async (req, res, next) => { //listar todos los servicios, un médico solo realmente no buscaria todos los servicios de otros médicos
         try {
+            
             const paginacion = this.extraerPaginacion(req.query)
             //const filtros = this.extraerFiltros(req.query)
             const resultado = await this.servicioService.findAll({ ...paginacion/* , filtros */ })
-
             return res.status(200).json({
                 status: "success",
-                data: resultado.serviciosFormateados,
+                data: resultado.servicios.map(s => this.servicioToDTO(s)),
                 paginacion: {
                     numeroPagina: resultado.numeroPagina,
                     limitePorPagina: resultado.limitePorPagina,
                     totalPaginas: resultado.totalPaginas,
-                    totalServicios: resultado.totalServicios.map(s => this.servicioToDTO(s))
+                    totalServicios: resultado.totalServicios
                 }
             })
         } catch (error) {

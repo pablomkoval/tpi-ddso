@@ -59,7 +59,7 @@ const swaggerOptions = {
     ],
     
     paths: {
-      '/v1/medicos': {
+      '/medicos': {
         get: {
           summary: 'Obtener la lista de todos los médicos',
           tags: ['Medicos'],
@@ -92,7 +92,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/medicos/{id}': {
+      '/medicos/{id}': {
         get: {
           summary: 'Obtener un médico por id',
           tags: ['Medicos'],
@@ -106,7 +106,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/medicos/{id}/disponibilidad': {
+      '/medicos/{id}/disponibilidad': {
         get: {
           summary: 'Obtener disponibilidades horarias de un médico',
           tags: ['Disponibilidades'],
@@ -162,7 +162,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/medicos/{id}/disponibilidad/{disponibilidadId}': {
+      '/medicos/{id}/disponibilidad/{disponibilidadId}': {
         patch: {
           summary: 'Editar una disponibilidad horaria especfiica de un médico',
           tags: ['Disponibilidades'],
@@ -202,7 +202,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/medicos/{idMedico}/servicios': {
+      '/medicos/{idMedico}/servicios': {
         get: {
           summary: 'Obtener las prestaciones que ofrece un médico específico',
           tags: ['Medicos - Servicios'],
@@ -240,7 +240,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/medicos/{idMedico}/servicios/{idServicio}': {
+      '/medicos/{idMedico}/servicios/{idServicio}': {
         get: {
           summary: 'Obtener la información de un servicio específico prestado por el médico',
           tags: ['Medicos - Servicios'],
@@ -293,7 +293,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/servicios': {
+      '/servicios': {
         get: {
           summary: 'Obtener el catálogo completo de servicios médicos',
           description: 'Devuelve un listado de todas las especialidades y prácticas médicas registradas en el sistema.',
@@ -330,7 +330,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/servicios/seed': {
+      '/servicios/seed': {
         post: {
           summary: 'Poblar la base de datos con servicios médicos iniciales',
           description: 'Inserta un lote predefinido de especialidades y prácticas básicas para facilitar las pruebas en desarrollo.',
@@ -341,7 +341,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/servicios/categorias': {
+      '/servicios/categorias': {
         get: {
           summary: 'Obtener las categorías de los servicios médicos',
           description: 'Devuelve las categorías o agrupaciones disponibles para clasificar los servicios.',
@@ -352,7 +352,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/servicios/{id}': {
+      '/servicios/{id}': {
         get: {
           summary: 'Obtener un servicio médico específico del catálogo',
           tags: ['Catálogo Servicios'],
@@ -408,7 +408,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/turnos/disponibles': {
+      '/turnos/disponibles': {
         get: {
           summary: 'Obtener el listado de todos los turnos disponibles',
           description: 'Devuelve una lista con todos los turnos generados por el sistema cuyo estado actual es "DISPONIBLE".',
@@ -421,7 +421,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/turnos/{idTurno}': {
+      '/turnos/{idTurno}': {
         get: {
           summary: 'Obtener un turno médico específico por Id',
           description: 'Recupera los detalles completos de un turno individual.',
@@ -442,7 +442,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/turnos/{idTurno}/reservar': {
+      '/turnos/{idTurno}/reservar': {
         post: {
           summary: 'Reservar un turno disponible para un paciente',
           description: 'Cambia el estado del turno de "DISPONIBLE" a "RESERVADO" asociándolo a un paciente específico.',
@@ -482,7 +482,7 @@ const swaggerOptions = {
         }
       },
 
-      '/v1/turnos/{idTurno}/cancelar': {
+      '/turnos/{idTurno}/cancelar': {
         post: {
           summary: 'Cancelar un turno previamente agendado',
           description: 'Cambia el estado del turno a "CANCELADO" registrando el usuario que operó el cambio y el motivo correspondiente.',
