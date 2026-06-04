@@ -88,6 +88,18 @@ export class MedicoController {
         }
     }
 
+    async obtenerDisponibilidadesSegunPrestacion(req, res, next) {
+        try {
+            const idMedico = parsearId(req.params.idMedico);
+            const idPrestacion = parsearId(req.params.idPrestacion);
+            const disponibilidades = await this.medicoService.obtenerDisponibilidadesSegunPrestacion(idMedico, idPrestacion);
+            const disponibilidadesDTO = disponibilidades.map(d => this.disponibilidadToDTO(d))
+            res.status(200).json(disponibilidadesDTO);
+        }
+        catch (error) {
+            return next(error);
+        }
+    }
 
     async agregarDisponibilidades(req, res, next) {
         const nuevasDisponibilidades = req.body.disponibilidades;

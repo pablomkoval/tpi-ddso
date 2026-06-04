@@ -12,6 +12,8 @@ const toObjectId = (value) =>
     value ? new mongoose.Types.ObjectId(value) : value;
 
 export class MedicoService {
+    turnoService
+
     constructor(medicoRepository, servicioService, usuarioRepository, turnoRepository) {
         this.medicoRepository = medicoRepository;
         this.servicioService = servicioService;
@@ -102,6 +104,21 @@ export class MedicoService {
         }
     }
 
+    async obtenerDisponibilidadesSegunPrestacion(idMedico, idPrestacion) {
+        try {
+            const medico = await this.medicoRepository.findById(idMedico);
+            if (!medico) {
+                throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
+            }
+            const disponibilidadesFiltradas = medico.disponibilidades.filter(disponibilidad =>
+                disponibilidad.prestacionId?.toString() === idPrestacion.toString()
+            );
+            return disponibilidadesFiltradas;
+        } catch (error) {
+            throw new AppError(`Error al obtener disponibilidades: ${error.message}`, 500, "DISPONIBILIDADES_OBTENER_FAIL");
+        }
+    }
+
     async agregarDisponibilidades(idMedico, nuevasDisponibilidades) {
         try {
             const medico = await this.medicoRepository.findById(idMedico);
@@ -139,10 +156,21 @@ export class MedicoService {
 
         medico.editarDisponibilidad(disponibilidadId, cambiosConvertidos);
 
+        const turnosABorrar = await this.turnoService.findAllByDisponibilidad(disponibilidadId)
+
+        turnosABorrar.forEach(t => medico.quitarTurno(t))
+
+        await this.turnoService.actualizarTurnosDisponibles(disponibilidadId)
+
         const medicoGuardado = await medico.save();
+
         if (!medicoGuardado) {
             throw new AppError("No se pudo editar la disponibilidad", 500, "DISPONIBILIDAD_EDITAR_FAIL");
         }
+
+        
+        await this.turnoService.actualizarTurnosDisponibles(disponibilidadId)
+
 
         return medico;
     }
@@ -151,11 +179,15 @@ export class MedicoService {
         const medico = await this.medicoRepository.findById(idMedico);
         if (!medico) throw new AppError("Médico no encontrado", 404, "MEDICO_NO_ENCONTRADO");
 
-        medico.disponibilidades = medico.disponibilidades.filter(
-            d => String(d._id) !== String(disponibilidadId)
-        );
-
+        medico.disponibilidades = medico.disponibilidades.filter(d => !d._id.equals(disponibilidadId));
+        const turnosABorrar = await this.turnoRepository.findAllByDisponibilidad(disponibilidadId)
+        console.error("hola1")
+        turnosABorrar.forEach(t => medico.quitarTurno(t))
+        console.error("hola2")
+        await this.turnoService.actualizarTurnosDisponibles(disponibilidadId)
+        console.error("hola3")
         await medico.save();
+        console.error("hola4")
         return medico;
     }
 
@@ -352,33 +384,37 @@ export class MedicoService {
         return await this.turnoRepository.findByPaciente(pacienteId);
     }
 
-    // async realizarTurno(medicoId, turnoId) {
-    //     const medico = await this.findById(medicoId);
+    async realizarTurno(medicoId, turnoId) {
+        const turno = await this.turnoRepository.findById(turnoId);
+        if (!turno) {
+          throw new NotFoundError(
+            `Turno con id ${turnoId} no encontrado`,
+            "TURNO_NO_ENCONTRADO",
+          );
+        }
 
-    //     const turno = await this.turnoRepository.findById(turnoId);
-    //     if (!turno) {
-    //       throw new NotFoundError(
-    //         `Turno con id ${turnoId} no encontrado`,
-    //         "TURNO_NO_ENCONTRADO",
-    //       );
-    //     }
+        if (!turno.medico.equals(medicoId)) {
+          throw new BadRequestError(
+            "No podés marcar como realizado un turno que no te pertenece",
+            "TURNO_AJENO",
+          );
+        }
 
-    //     if (!turno.medico.equals(medicoId)) {
-    //       throw new BadRequestError(
-    //         "No podés marcar como realizado un turno que no te pertenece",
-    //         "TURNO_AJENO",
-    //       );
-    //     }
+        if (!turno.estado.equals(EstadoTurno.CONFIRMADO)) {
+          throw new BadRequestError(
+            `No se puede marcar como realizado un turno en estado ${turno.estado}`,
+            "TURNO_NO_REALIZABLE",
+          );
+        }
 
-    //     if (!turno.estado.equals(EstadoTurno.CONFIRMADO)) {
-    //       throw new BadRequestError(
-    //         `No se puede marcar como realizado un turno en estado ${turno.estado}`,
-    //         "TURNO_NO_REALIZABLE",
-    //       );
-    //     }
+        turno.actualizarEstado(EstadoTurno.REALIZADO, medicoId, "El turno se realizó correctamente");
 
+        const turnoGuardado = await this.turnoRepository.guardar(turno);
 
-    // }
+        //Optamos por no mandar una notificacion al paciente cuando un turno fue marcado como realizado porque no tiene sentido.
+
+        return turnoGuardado;
+    }
 
     async cancelarTurno(medicoId, turnoId, motivo) {
         const medico = await this.findById(medicoId);

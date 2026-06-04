@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Turno } from "../domain/models/entities/turnos/Turno.js";
+import { disponibilidadHorariaSchema } from "./disponibilidadHoraria.schema.js";
 
 const turnoSchema = new mongoose.Schema(
   {
@@ -25,11 +26,6 @@ const turnoSchema = new mongoose.Schema(
       ref: "Prestacion",
       required: true,
     },
-    turnoSugerido: {
-      type: mongoose.Types.ObjectId,
-      ref: "Turno",
-      default: null,
-    },
     costo: {
       type: Number,
       default: 0,
@@ -46,14 +42,20 @@ const turnoSchema = new mongoose.Schema(
       ],
       default: "DISPONIBLE",
     },
+
+    disponibilidadOrigen: {
+      type: disponibilidadHorariaSchema,
+      required : true,
+    },
+
     historialEstados: [
       {
         estado: String,
         fechaHoraCambio: Date,
         usuario: String,
         motivoCambio: String,
-      },
-    ],
+      }
+    ],    
   },
   {
     timestamps: true,

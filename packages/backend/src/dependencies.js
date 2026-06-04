@@ -46,6 +46,7 @@ const servicioService = new ServicioService(servicioRepository, prestacionReposi
 const pacienteService = new PacienteService(pacienteRepository, turnoRepository, notiService, solicitudCambioTurnoRepository);
 const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository, turnoRepository);
 export const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
+medicoService.turnoService = turnoService
 const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
 const sedeService = new SedeService(sedeRepository);
 

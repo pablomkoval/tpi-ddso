@@ -31,6 +31,21 @@ export class TurnoRepository {
     return await this.model.findById(id).populate("servicio");
   }
 
+  async findAllByDisponibilidad(disponibilidadID) {
+    return await this.model.find({
+      "disponibilidadOrigen._id": disponibilidadID,
+      estado: "DISPONIBLE"
+    });
+  }
+
+
+  async borrarTurnosPorDisponibilidad(disponibilidadID) {
+    await this.model.deleteMany({
+      "disponibilidadOrigen._id": disponibilidadID,
+      estado: "DISPONIBLE"
+    })
+  }
+
   async findByPaciente(pacienteId) {
     return await this.model
       .find({ paciente: String(pacienteId) })

@@ -314,4 +314,28 @@ export class TurnoService {
     const turnoCancelado = await this.turnoRepository.update(id, turno);
     return turnoCancelado;
   }
+
+
+  async actualizarTurnosDisponibles(disponibilidadId) {
+    try {
+      //const turnosAfectados = this.turnoRepository.findByDisponibilidad(disponibilidadId)
+      await this.turnoRepository.borrarTurnosPorDisponibilidad(disponibilidadId)
+
+    } catch (error) {
+      throw new Error(`Error al actualizar turnos disponibles: ${error.message}`, { cause: error });
+    }
+
+  }
+
+  async findAllByDisponibilidad (disponibilidadId){
+    try {
+      //const turnosAfectados = this.turnoRepository.findByDisponibilidad(disponibilidadId)
+      return await this.turnoRepository.findAllByDisponibilidad(disponibilidadId)
+
+    } catch (error) {
+      throw new Error(`Error al actualizar turnos disponibles: ${error.message}`, { cause: error });
+    }
+  }
+
+
 }

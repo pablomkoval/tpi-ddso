@@ -178,7 +178,7 @@ export default class Medico {
                     if (this.tieneTurnoEn(fechaHoraTurno)) {
                         continue;
                     }
-                    const turno = new Turno(this._id, fechaHoraTurno, servicio, disponibilidad.sede);
+                    const turno = new Turno(this._id, fechaHoraTurno, servicio, disponibilidad.sede, disponibilidad);
                     //this.turnos.push(turno);
                     turnosGenerados.push(turno);
                 }
@@ -195,4 +195,9 @@ export default class Medico {
     agregarTurno(turno) {
         this.turnos.push(turno._id);
     }
+    
+    quitarTurno(turno){
+        this.turnos = this.turnos.filter(t => !t.equals(turno._id));
+    }
+
 }

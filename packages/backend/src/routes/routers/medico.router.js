@@ -16,6 +16,7 @@ export class MedicoRouter {
         //método patch si hacemos disponibilidades sin path
 
         this.medicoRouter.get("/:idMedico/disponibilidades", (req, res, next) => { this.controller.obtenerDisponibilidades(req, res, next); });
+        this.medicoRouter.get("/:idMedico/disponibilidades/:idPrestacion", (req, res, next) => { this.controller.obtenerDisponibilidadesSegunPrestacion(req, res, next); });
         this.medicoRouter.post("/:idMedico/disponibilidades", (req, res, next) => { this.controller.agregarDisponibilidades(req, res, next); });
 
         this.medicoRouter.patch("/:idMedico/disponibilidades/:disponibilidadId", (req, res, next) => { this.controller.editarDisponibilidad(req, res, next); });
