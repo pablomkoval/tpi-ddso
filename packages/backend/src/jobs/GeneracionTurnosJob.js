@@ -7,13 +7,6 @@ dotenv.config({ path: new URL("../.env", import.meta.url) });
 const intervalMs = parseInt(process.env.JOBS_GENERAR_TURNOS_INTERVAL_MS || 86400000);
 
 const ejecutarGeneracionTurnos = async () => {
-    // const turnoService = new TurnoService(
-    //     new TurnoRepository(),
-    //     null,
-    //     null,
-    //     null,
-    //     new MedicoRepository(),
-    // );
 
     try {
         console.log("Generando turnos...");

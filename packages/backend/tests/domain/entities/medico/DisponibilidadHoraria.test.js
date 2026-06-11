@@ -1,6 +1,7 @@
 import { describe, test, expect } from "@jest/globals";
 import { DiaSemana} from "../../../../src/domain/enum/DiaSemana.js";
 import { DisponibilidadHoraria } from "../../../../src/domain/models/entities/medico/DisponibilidadHoraria";
+import mongoose from "mongoose";
 
 describe("DisponibilidadHoraria", () => {
     describe("Creación de una disponibilidad horaria", () => {
@@ -68,6 +69,8 @@ describe("DisponibilidadHoraria", () => {
                 horaHasta: "18:00",
                 sede: { id: "sede1", nombre: "Sede Central" }
             })
+            disponibilidad1._id = new mongoose.Types.ObjectId("507f1f77bcf86cd799439044");
+            disponibilidad2._id = new mongoose.Types.ObjectId("507f1f77bcf86cd799439055");
 
             expect(disponibilidad1.seSolapaCon(disponibilidad2)).toBe(true);
         })

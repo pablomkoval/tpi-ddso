@@ -11,7 +11,6 @@ export default class Medico {
     _id;
 
     constructor(usuario, matricula, nombre, especialidades = [], practicas = [], sedes = []) {
-        this.id = "placeholder";
         this.usuario = usuario;
         this.matricula = matricula;
         this.nombre = nombre;
@@ -65,18 +64,18 @@ export default class Medico {
     }
 
     ////////////////////////////    Disponibilidades   /////////////////////////////////////////////////////
-    validarDisponibilidad(disponibilidad) {
-        const nuevaDisponibilidad = new DisponibilidadHoraria({
+    validarDisponibilidad(nuevaDisponibilidad) {
+        /* const nuevaDisponibilidad = new DisponibilidadHoraria({
             id: disponibilidad.id,
             diaSemana: disponibilidad.diaSemana,
             horaDesde: disponibilidad.horaDesde,
             horaHasta: disponibilidad.horaHasta,
             sede: disponibilidad.sede,
             prestacion: disponibilidad.prestacion
-        });
-
+        }); */
+        
         // Validar que la sede de la disponibilidad esté autorizada para el médico
-        const sedeValida = this.sedes.some(sede => sede.equals(nuevaDisponibilidad.sede));
+        const sedeValida = this.sedes.some(sede => sede._id.equals(nuevaDisponibilidad.sede));
         if (!sedeValida) {
             throw new SedeNoAutorizadaError(`La sede de ID "${nuevaDisponibilidad.sede}" no está autorizada para el médico "${this.nombre}"`);
         }

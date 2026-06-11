@@ -16,6 +16,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node packages/backend/src/server.js",
+    "start:jobs": "node packages/backend/src/jobs.js",
     "dev": "node --watch packages/backend/src/server.js",
     "seed-db": "node packages/backend/src/seeder.js",
     "test": "set NODE_OPTIONS=--experimental-vm-modules && jest --runInBand --verbose",
