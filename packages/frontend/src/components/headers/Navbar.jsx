@@ -4,25 +4,26 @@ import { FaShoppingCart } from 'react-icons/fa';
 import './Navbar.css';
 import '../../index.css';
 
-const Navbar = ({ carrito }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const [cantUnidades, setCantUnidades] = useState(0);
+  //const carrito;
 
   const irACheckout = () => {
     navigate('/checkout');
   };
 
-  const cantUnidadesEnCarrito = () => {
+ /*  const cantUnidadesEnCarrito = () => {
     let suma = 0;
     for (const producto of carrito) {
       suma += producto.unidades;
     }
     return suma;
-  };
+  }; */
 
-  useEffect(() => {
+  /* useEffect(() => {
     setCantUnidades(cantUnidadesEnCarrito());
-  }, [carrito]);
+  }, [carrito]); */
 
   return (
     <header className="navbar-bg">
@@ -39,8 +40,8 @@ const Navbar = ({ carrito }) => {
 
         <div className="navbar-section right">
           <button className="cart" onClick={irACheckout}>
-            <FaShoppingCart color="white" />
-            <span className="cart-count">{cantUnidades}</span>
+            <FaShoppingCart color="white" />{/* 
+            <span className="cart-count">{cantUnidades}</span> */}
           </button>
         </div>
       </nav>

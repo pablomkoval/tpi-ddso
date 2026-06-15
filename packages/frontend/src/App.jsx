@@ -11,48 +11,13 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route path="/login" element={
-          <LoginPage />
-        } />
+      <Route path="/" element={<Layout/>}>
+        
       </Route>
+      <Route path="/login" element={<LoginPage />}/>
     </Routes>
   );
 
-  // return (
-  //   <ThemeProvider theme={theme}>
-  //     <Routes>
-  //       <Route path="/" element={<Layout carrito={carrito} />}>
-  //         <Route index element={<Home />} />
-  //         <Route
-  //           path="/productos/:id"
-  //           element={
-  //             <ProductDetailPage
-  //               carrito={carrito}
-  //               actualizarCarrito={actualizarCarrito}
-  //             />
-  //           }
-  //         />
-  //         <Route
-  //           path="/checkout"
-  //           element={
-  //             <Checkout
-  //               carrito={carrito}
-  //               limpiarCarrito={limpiarCarrito}
-  //             />
-  //           }
-  //         />
-  //       </Route>
-  //     </Routes>
-  //   </ThemeProvider>
-  // );
-
-  /*
-  <div className="App">
-  <header className="App-header">
-  </header>
-    </div>
-  */
 }
 
 export default App;

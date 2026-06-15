@@ -6,6 +6,7 @@ const Layout = ({ carrito }) => {
     return (
         <>
           <Header username="Redondito de ricota"></Header>
+          <Navbar/>
           <Outlet />
         </>
     );
