@@ -1,0 +1,27 @@
+
+.landing-body {
+    display:flex;
+    justify-content: center;
+    flex-direction: row;
+}
+.presentacion-body {
+    margin: 3rem;
+}
+
+.presentacion-texto {
+    font-size: 120%;
+}
+
+.icono-sweetmedical {
+    font-size: 120%;
+}
+
+.titulo-sweetmedical {
+    color: var(--primary-blue);
+}
+
+@media (max-width: 768px) {
+    .landing-body {
+        flex-direction: column;
+    }
+}
