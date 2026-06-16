@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './LoginBox.css';
 import {
     Box,
     Button,
@@ -49,10 +48,21 @@ const LoginBox = ({ onRegisterClick }) => {
     };
 
     return (
-        <Paper className="login-box" elevation={0}>
-            <Stack className="login-box__content">
-                <Box className="login-box__header">
-                    <Typography component="h3" variant="h5">
+        <Paper
+            elevation={0}
+            sx={{
+                width: '100%',
+                maxWidth: '480px',
+                p: { xs: 3, sm: 5 }, 
+                backgroundColor: 'background.paper',
+                border: '1px solid #d8dae2',
+                borderRadius: '16px',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+            }}
+        >
+            <Stack sx={{ gap: 4 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography component="h3" variant="h5" sx={{ fontWeight: 'bold' }}>
                         Bienvenido de nuevo
                     </Typography>
 
@@ -62,25 +72,55 @@ const LoginBox = ({ onRegisterClick }) => {
                 </Box>
 
                 <ToggleButtonGroup
-                    className="login-box__role-selector"
                     exclusive
                     value={role}
                     onChange={handleRoleChange}
                     aria-label="Seleccionar perfil"
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                        gap: 2,
+                        '& .MuiToggleButtonGroup-grouped': {
+                            margin: 0,
+                            border: '2px solid #f2f3fb !important',
+                            borderRadius: '12px !important',
+                        }
+                    }}
                 >
                     {roleOptions.map((option) => (
                         <ToggleButton
-                            className="login-box__role-button"
                             key={option.value}
                             value={option.value}
                             aria-label={option.label}
+                            sx={{
+                                width: '100%',
+                                p: 2,
+                                color: 'text.primary',
+                                backgroundColor: '#f9f9ff',
+                                textTransform: 'none',
+                                transition: 'all 0.2s ease',
+                                '&:hover, &.Mui-selected, &.Mui-selected:hover': {
+                                    color: 'primary.main',
+                                    backgroundColor: '#f0f7ff',
+                                    borderColor: 'primary.main !important',
+                                }
+                            }}
                         >
-                            <Stack className="login-box__role-content">
-                                <Box className="login-box__role-icon">
+                            <Stack sx={{ alignItems: 'center', gap: 1 }}>
+                                <Box sx={{
+                                    display: 'grid',
+                                    width: '40px',
+                                    height: '40px',
+                                    placeItems: 'center',
+                                    backgroundColor: 'background.paper',
+                                    borderRadius: '50%',
+                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                                    color: 'inherit'
+                                }}>
                                     {option.icon}
                                 </Box>
 
-                                <Typography variant="body2">
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                     {option.label}
                                 </Typography>
                             </Stack>
@@ -88,8 +128,8 @@ const LoginBox = ({ onRegisterClick }) => {
                     ))}
                 </ToggleButtonGroup>
 
-                <Box className="login-box__form" component="form" noValidate>
-                    <Stack className="login-box__fields">
+                <Box component="form" noValidate>
+                    <Stack sx={{ gap: 3 }}>
                         <TextField
                             label="Correo electrónico"
                             type="email"
@@ -136,28 +176,30 @@ const LoginBox = ({ onRegisterClick }) => {
                         />
 
                         <Button
-                            className="login-box__submit"
                             type="submit"
                             variant="contained"
                             endIcon={<LoginIcon />}
                             fullWidth
+                            sx={{
+                                boxShadow: '0 10px 25px rgba(0, 94, 184, 0.15)',
+                                '&:hover': {
+                                    backgroundColor: 'primary.dark',
+                                }
+                            }}
                         >
                             Ingresar a Sweet Medical
                         </Button>
                     </Stack>
                 </Box>
 
-                <Typography
-                    className="login-box__register"
-                    color="text.secondary"
-                    variant="body2"
-                >
+                <Typography color="text.secondary" variant="body2" sx={{ textAlign: 'center' }}>
                     ¿Aún no tiene cuenta?{' '}
                     <Link
                         component="button"
                         type="button"
                         underline="none"
                         onClick={onRegisterClick}
+                        sx={{ fontWeight: 700, p: 0 }}
                     >
                         Regístrese aquí
                     </Link>

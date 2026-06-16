@@ -20,8 +20,12 @@ export class NotificacionesController {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
-            const notificaciones = await this.notificacionesService.findAllPaginated(page, limit);
-            res.json(notificaciones.map(n => this.notificacionToDTO(n)));
+            const resultado = await this.notificacionesService.findAllPaginated(page, limit);
+
+            res.json({
+                ...resultado,
+                notificaciones: resultado.notificaciones.map(n => this.notificacionToDTO(n))
+            });
         } catch (error) {
             next(error);
         }
@@ -37,8 +41,12 @@ export class NotificacionesController {
                 return res.status(400).json({ error: "Se requiere userId en los query params" });
             }
 
-            const notificaciones = await this.notificacionesService.obtenerLeidas(userId, page, limit);
-            res.json(notificaciones.map(n => this.notificacionToDTO(n)));
+            const resultado = await this.notificacionesService.obtenerLeidas(userId, page, limit);
+
+            res.json({
+                ...resultado,
+                notificaciones: resultado.notificaciones.map(n => this.notificacionToDTO(n))
+            });
         } catch (error) {
             next(error);
         }
@@ -54,8 +62,11 @@ export class NotificacionesController {
                 return res.status(400).json({ error: "Se requiere userId en los query params" });
             }
 
-            const notificaciones = await this.notificacionesService.obtenerNoLeidas(userId, page, limit);
-            res.json(notificaciones.map(n => this.notificacionToDTO(n)));
+            const resultado = await this.notificacionesService.obtenerNoLeidas(userId, page, limit);
+
+            res.json({
+                ...resultado,
+                notificaciones: resultado.notificaciones.map(n => this.notificacionToDTO(n))});
         } catch (error) {
             next(error);
         }

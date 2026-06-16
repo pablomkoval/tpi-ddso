@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './RegisterBox.css';
 import {
     Alert,
     Box,
@@ -124,10 +123,23 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
     };
 
     return (
-        <Paper className="register-box" elevation={0}>
-            <Stack className="register-box__content">
-                <Box className="register-box__header">
-                    <Typography component="h3" variant="h5">
+        <Paper
+            elevation={0}
+            sx={{
+                width: '100%',
+                maxWidth: '520px',
+                maxHeight: { xs: 'none', sm: 'calc(100vh - 64px)' },
+                p: { xs: 3, sm: 5 },
+                overflowY: 'auto',
+                backgroundColor: 'background.paper',
+                border: '1px solid #d8dae2',
+                borderRadius: '16px',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+            }}
+        >
+            <Stack sx={{ gap: 3.5 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography component="h3" variant="h5" sx={{ fontWeight: 'bold' }}>
                         Crear cuenta
                     </Typography>
 
@@ -137,25 +149,55 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                 </Box>
 
                 <ToggleButtonGroup
-                    className="register-box__role-selector"
                     exclusive
                     value={role}
                     onChange={handleRoleChange}
                     aria-label="Seleccionar tipo de cuenta"
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                        gap: 2,
+                        '& .MuiToggleButtonGroup-grouped': {
+                            margin: 0,
+                            border: '2px solid #f2f3fb !important',
+                            borderRadius: '12px !important',
+                        }
+                    }}
                 >
                     {roleOptions.map((option) => (
                         <ToggleButton
-                            className="register-box__role-button"
                             key={option.value}
                             value={option.value}
                             aria-label={option.label}
+                            sx={{
+                                width: '100%',
+                                p: 2,
+                                color: 'text.primary',
+                                backgroundColor: '#f9f9ff',
+                                textTransform: 'none',
+                                transition: 'all 0.2s ease',
+                                '&:hover, &.Mui-selected, &.Mui-selected:hover': {
+                                    color: 'primary.main',
+                                    backgroundColor: '#f0f7ff',
+                                    borderColor: 'primary.main !important',
+                                }
+                            }}
                         >
-                            <Stack className="register-box__role-content">
-                                <Box className="register-box__role-icon">
+                            <Stack sx={{ alignItems: 'center', gap: 1 }}>
+                                <Box sx={{
+                                    display: 'grid',
+                                    width: '40px',
+                                    height: '40px',
+                                    placeItems: 'center',
+                                    backgroundColor: 'background.paper',
+                                    borderRadius: '50%',
+                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                                    color: 'inherit'
+                                }}>
                                     {option.icon}
                                 </Box>
 
-                                <Typography variant="body2">
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                     {option.label}
                                 </Typography>
                             </Stack>
@@ -163,12 +205,8 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                     ))}
                 </ToggleButtonGroup>
 
-                <Box
-                    className="register-box__form"
-                    component="form"
-                    onSubmit={handleSubmit}
-                >
-                    <Stack className="register-box__fields">
+                <Box component="form" onSubmit={handleSubmit} noValidate>
+                    <Stack sx={{ gap: 2.5 }}>
                         <TextField
                             label="Correo electrónico"
                             name="usuario"
@@ -288,11 +326,16 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                         )}
 
                         <Button
-                            className="register-box__submit"
                             type="submit"
                             variant="contained"
                             endIcon={<PersonAddIcon />}
                             fullWidth
+                            sx={{
+                                boxShadow: '0 10px 25px rgba(0, 94, 184, 0.15)',
+                                '&:hover': {
+                                    backgroundColor: 'primary.dark',
+                                }
+                            }}
                         >
                             Registrar cuenta
                         </Button>
@@ -300,22 +343,19 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                 </Box>
 
                 {submittedPayload && (
-                    <Alert className="register-box__alert" severity="success">
+                    <Alert severity="success" sx={{ alignItems: 'center' }}>
                         Datos preparados para enviar a {submittedPayload.endpoint}
                     </Alert>
                 )}
 
-                <Typography
-                    className="register-box__login"
-                    color="text.secondary"
-                    variant="body2"
-                >
+                <Typography color="text.secondary" variant="body2" sx={{ textAlign: 'center' }}>
                     ¿Ya tenés cuenta?{' '}
                     <Link
                         component="button"
                         type="button"
                         underline="none"
                         onClick={onLoginClick}
+                        sx={{ fontWeight: 700, p: 0 }}
                     >
                         Ingresá aquí
                     </Link>
