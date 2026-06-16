@@ -1,0 +1,85 @@
+.buscar-turnos-container {
+    display: flex;
+    gap: 32px;
+    padding: 24px;
+    min-height: 85vh;
+    background-color: #f9f9ff;
+}
+
+.filtros-sidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+.rango-fechas-row {
+    display: flex;
+    gap: 12px;
+}
+
+.resultados-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.resultados-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.medico-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.medico-info-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.medico-action-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: right;
+    min-width: 180px;
+}
+
+.paginacion-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    padding-top: 16px;
+}
+
+@media (max-width: 900px) {
+    .buscar-turnos-container {
+        flex-direction: column;
+    }
+    
+    .filtros-sidebar {
+        width: 100%;
+    }
+
+    .resultados-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .medico-action-block {
+        text-align: left;
+        width: 100%;
+    }
+}
