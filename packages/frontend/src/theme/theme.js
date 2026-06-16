@@ -44,6 +44,12 @@ const theme = createTheme({
         button: {
             fontWeight: 700,
             textTransform: 'none'
+        },
+
+        navLink: {
+            fontSize: '0.875rem',
+            fontWeight: 400,
+            lineHeight: 1.5,
         }
     },
 

@@ -1,12 +1,10 @@
 import { Outlet } from "react-router-dom";
-import Header from "../../components/headers/header/Header.jsx";
-import Navbar from "../../components/headers/Navbar.jsx";
+import Header from "../../components/header/Header.jsx";
 
-const Layout = ({ carrito }) => {
+const Layout = () => {
     return (
         <>
-          <Header username="Redondito de ricota"></Header>
-          <Outlet />
+          <Header></Header>
         </>
     );
 };
