@@ -14,7 +14,7 @@ const swaggerOptions = {
       },
     },
     servers: [
-      {url: 'http://localhost:3000/', description: 'Servidor de desarrollo'},
+      {url: 'http://localhost:4000/', description: 'Servidor de desarrollo'},
       {url: 'https://api.turnos.com/', description: 'Servidor de producción'},
     ],
     components: {

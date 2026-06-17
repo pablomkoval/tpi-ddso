@@ -22,6 +22,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { registerService } from "../../services/registerService";
 
 const roleOptions = [
     {
@@ -111,14 +112,19 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
         setShowPassword((currentValue) => !currentValue);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
         const registerPayload = buildRegisterPayload(role, form);
-        setSubmittedPayload(registerPayload);
 
-        if (onRegister) {
-            onRegister(registerPayload);
+        try {
+            await registerService.register(registerPayload);
+
+            setSubmittedPayload(registerPayload);
+
+            alert("Usuario registrado correctamente");
+        } catch (error) {
+            alert(error.message);
         }
     };
 

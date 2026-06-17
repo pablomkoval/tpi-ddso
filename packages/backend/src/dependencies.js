@@ -28,6 +28,11 @@ import { SedeRepository } from "./domain/models/repositories/sede.repository.js"
 import { SedeService } from "./services/sede.service.js";
 import { SedeController } from "./controllers/sede.controller.js";
 import { SedeRouter } from "./routes/routers/sede.router.js";
+import { UsuarioService } from "./services/usuario.service.js";
+import { AuthService } from "./services/auth.service.js";
+import { KeycloakService } from "./services/keycloak.service.js";
+import { AuthController } from "./controllers/auth.controller.js";
+import { AuthRouter } from "./routes/routers/auth.router.js";
 
 //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
 const notiRepository = new NotificacionesRepository();
@@ -49,6 +54,9 @@ export const turnoService = new TurnoService(turnoRepository, medicoService, pac
 medicoService.turnoService = turnoService
 const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
 const sedeService = new SedeService(sedeRepository);
+const keycloakService = new KeycloakService();
+const usuarioService = new UsuarioService(usuarioRepository);
+const authService = new AuthService(keycloakService, usuarioService, pacienteService, medicoService);
 
 //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
 const notiController = new NotificacionesController(notiService);
@@ -58,6 +66,7 @@ const solicitudCambioTurnoController = new SolicitudCambioTurnoController(solici
 const pacienteController = new PacienteController(pacienteService);
 const medicoController = new MedicoController(medicoService);
 const sedeController = new SedeController(sedeService);
+const authController = new AuthController(authService);
 
 //////////////////////////////// ROUTERS /////////////////////////////////////////////////////////////
 const notiRouter = new NotificacionesRouter(notiController);
@@ -67,6 +76,7 @@ const solicitudCambioTurnoRouter = new SolicitudCambioTurnoRouter(solicitudCambi
 const pacienteRouter = new PacienteRouter(pacienteController);
 const medicoRouter = new MedicoRouter(medicoController);
 const sedeRouter = new SedeRouter(sedeController);
+const authRouter = new AuthRouter(authController);
 
 export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
@@ -76,5 +86,6 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/notificaciones", notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())
     routerGeneral.use("/sedes", sedeRouter.getRouter())
+    routerGeneral.use("/auth", authRouter.getRouter())
 }
 

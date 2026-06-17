@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { Usuario } from '../domain/models/entities/Usuario.js';
 
 const usuarioSchema = new mongoose.Schema({
-    nombre: {
+    username: {
         type: String,
         required: true,
         unique: true,

@@ -23,6 +23,7 @@
     "test-windows": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
+    "@keycloak/keycloak-admin-client": "^26.6.3",
     "axios": "^1.18.0",
     "cors": "^2.8.6",
     "create-react-app": "^5.1.0",
