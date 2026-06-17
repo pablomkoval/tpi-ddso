@@ -315,7 +315,26 @@
           "attributes": {}
         }
       ],
-      "react-client": [],
+      "react-client": [
+        {
+          "id": "8a33ee36-7944-42f2-87c2-51fbfa73124d",
+          "name": "medico",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7bb3bb3a-61c3-42e8-8f7f-b266d0afd977",
+          "attributes": {}
+        },
+        {
+          "id": "87eab21e-096b-4e3c-b6d9-3c6903c006f6",
+          "name": "paciente",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7bb3bb3a-61c3-42e8-8f7f-b266d0afd977",
+          "attributes": {}
+        }
+      ],
       "account": [
         {
           "id": "3a2d48d3-10e0-413d-bc62-421070aa6f07",
@@ -690,9 +709,9 @@
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
-      "standardFlowEnabled": true,
+      "standardFlowEnabled": false,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "publicClient": true,
       "frontchannelLogout": true,
@@ -2461,7 +2480,7 @@
       "alias": "UPDATE_PROFILE",
       "name": "Update Profile",
       "providerId": "UPDATE_PROFILE",
-      "enabled": true,
+      "enabled": false,
       "defaultAction": false,
       "priority": 40,
       "config": {}
@@ -2470,7 +2489,7 @@
       "alias": "VERIFY_EMAIL",
       "name": "Verify Email",
       "providerId": "VERIFY_EMAIL",
-      "enabled": true,
+      "enabled": false,
       "defaultAction": false,
       "priority": 50,
       "config": {}

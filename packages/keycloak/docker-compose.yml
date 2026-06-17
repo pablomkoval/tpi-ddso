@@ -8,7 +8,9 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
     ports:
       - "8080:8080"
     volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./keycloak_data:/opt/keycloak/data/
