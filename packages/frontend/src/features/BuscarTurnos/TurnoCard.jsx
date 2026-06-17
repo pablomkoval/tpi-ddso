@@ -2,6 +2,7 @@ import { Box, Avatar, Typography, Chip, Button } from '@mui/material';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PersonIcon from '@mui/icons-material/Person';
+import { useNavigate } from 'react-router-dom';
 
 const estadoStyles = {
   Parcial:  { bgcolor: 'primary.light',  color: 'primary.main' },
@@ -10,6 +11,7 @@ const estadoStyles = {
 
 const TurnoCard = ({ turno }) => {
   const { nombre, especialidad, fecha, hora, sede, estado, precio } = turno;
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -64,8 +66,12 @@ const TurnoCard = ({ turno }) => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" size="small">Agregar a preselección</Button>
-          <Button variant="contained" size="small">Reservar</Button>
+          <Button variant="outlined" size="small" onClick={() => console.log('preselección', turno.id)}>
+            Agregar a preselección
+          </Button>
+          <Button variant="contained" size="small" onClick={() => navigate(`/turnos/${turno.id}`)}>
+            Reservar
+          </Button>
         </Box>
       </Box>
     </Box>

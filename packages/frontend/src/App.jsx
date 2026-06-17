@@ -14,6 +14,7 @@ import Terminos from './features/Terminos/Terminos.jsx';
 import Privacidad from './features/Privacidad/Privacidad.jsx';
 import Ayuda from './features/Ayuda/Ayuda.jsx';
 import DashboardPaciente from './features/DashboardPaciente/DashboardPaciente.jsx';
+import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
 
 function App() {
@@ -78,6 +79,15 @@ function App() {
             element={
               <PrivateRoute requiredRole="medico">
                 <AgendaMedica />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="turnos/:id"
+            element={
+              <PrivateRoute requiredRole="paciente">
+                <DetalleTurno />
               </PrivateRoute>
             }
           />
