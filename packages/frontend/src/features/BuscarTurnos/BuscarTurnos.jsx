@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import TurnosResults from './TurnosResults.jsx';
 
-const Home = () => {
+const BuscarTurnos = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100%' }}>
       {/* Panel de filtros — componente del compañero */}
@@ -12,4 +12,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default BuscarTurnos;
