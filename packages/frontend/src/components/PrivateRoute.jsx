@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { MedicalServices } from '@mui/icons-material';
-import useAuth from '../services/useAuth';
+import { jwtDecode } from 'jwt-decode';
 
 /**
  * Componente que protege rutas privadas.
@@ -19,39 +19,35 @@ import useAuth from '../services/useAuth';
  *   <PrivateRoute requiredRole="paciente"><BuscarTurnos /></PrivateRoute>
  */
 const PrivateRoute = ({ children, requiredRole }) => {
-    const { isAuthenticated, isLoading, hasRole } = useAuth();
+    const token = localStorage.getItem("token");
 
-    if (isLoading) {
-        return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100vh',
-                    gap: 2,
-                }}
-            >
-                <MedicalServices color="primary" sx={{ fontSize: 48 }} />
-                <CircularProgress color="primary" />
-                <Typography variant="body1" color="text.secondary">
-                    Verificando sesión...
-                </Typography>
-            </Box>
-        );
-    }
-
-    if (!isAuthenticated) {
+    if (!token) {
         return <Navigate to="/login" replace />;
     }
 
-    // Si se requiere un rol específico y el usuario no lo tiene
-    if (requiredRole && !hasRole(requiredRole)) {
-        return <Navigate to="/sin-permiso" replace />;
-    }
+    try {
+        const decoded = jwtDecode(token);
 
-    return children;
+        //opcional
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp && decoded.exp < currentTime) {
+            localStorage.removeItem("token"); // Limpiamos el token viejo
+            return <Navigate to="/login" replace />;
+        }
+
+        if (requiredRole) {
+            const CLIENT_ID = "react-client"; 
+            const rolesDelCliente = decoded.resource_access?.[CLIENT_ID]?.roles || [];
+            
+            if (!rolesDelCliente.includes(requiredRole)) {
+                return <Navigate to="/sin-permiso" replace />;
+            }
+        }
+        return children;
+    } catch (error) {
+        localStorage.removeItem("token");
+        return <Navigate to="/login" replace />;
+    }
 };
 
 export default PrivateRoute;

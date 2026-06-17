@@ -1,54 +1,79 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import LoginBox from "../components/sessionComponents/LoginBox.jsx";
+import RegisterBox from "../components/sessionComponents/RegisterBox.jsx";
+import { Box, Typography } from "@mui/material";
 import { MedicalServices } from "@mui/icons-material";
-import useAuth from "../services/useAuth";
 
-/**
- * Página de login.
- * Si el usuario ya está autenticado, lo redirige al inicio.
- * Si no, lo redirige automáticamente al login de Keycloak.
- */
 const LoginPage = () => {
-    const { isAuthenticated, isLoading, login } = useAuth();
+    const [isRegistering, setIsRegistering] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isLoading) {
-            if (isAuthenticated) {
-                // Ya tiene sesión, redirigir a la app
-                navigate("/", { replace: true });
-            } else {
-                // Redirigir a la página de login de Keycloak
-                login();
-            }
+        const token = localStorage.getItem("token");
+        if (token) {
+            // Si ya está logueado, lo mandamos al inicio (dashboard)
+            navigate("/home", { replace: true });
         }
-    }, [isAuthenticated, isLoading, login, navigate]);
+    }, [navigate]);
 
-    // Mientras Keycloak verifica o redirige, mostrar pantalla de carga
-    return (
+   return (
         <Box
             sx={{
                 display: "flex",
-                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
+                flexDirection: { xs: "column", md: "row" }, 
                 height: "100vh",
                 width: "100vw",
-                gap: 3,
+                overflowX: "hidden",
             }}
         >
-            <MedicalServices
-                color="primary"
-                sx={{ fontSize: 64 }}
-            />
-            <Typography variant="h5" fontWeight="bold" color="primary">
-                Sweet Medical
-            </Typography>
-            <CircularProgress color="primary" />
-            <Typography variant="body2" color="text.secondary">
-                Redirigiendo al inicio de sesión...
-            </Typography>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    m: { xs: 3, md: 6 },
+                    width: { xs: "90%", md: "50%" },
+                }}
+            >
+                <Typography
+                    variant="h4"
+                    component="h2"
+                    sx={{
+                        color: "primary.main", 
+                        display: "flex",
+                        alignItems: "center",
+                        fontWeight: "bold",
+                        mb: 2,
+                    }}
+                >
+                    <MedicalServices sx={{ fontSize: "1.2em", mr: 1 }} />
+                    Sweet Medical
+                </Typography>
+
+                <Typography sx={{ fontSize: "1.2rem", mb: 3 }}>
+                    Accede a tu historial médico, gestiona y agenda turnos con profesionales de la salud en una plataforma centralizada y eficiente.
+                </Typography>
+
+                <Box
+                    component="img"
+                    src="/images/landing.jpg"
+                    alt="Landing Sweet Medical"
+                    sx={{
+                        width: "90%",
+                        borderRadius: "0.8rem",
+                        border: "0.15rem solid",
+                        borderColor: "grey.800", 
+                    }}
+                />
+            </Box>
+
+            {isRegistering ? (
+                <RegisterBox onLoginClick={() => setIsRegistering(false)} />
+            ) : (
+                <LoginBox onRegisterClick={() => setIsRegistering(true)} />
+            )}
         </Box>
     );
 };

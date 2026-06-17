@@ -5,11 +5,13 @@ const usuarioSchema = new mongoose.Schema({
     nombre: {
         type: String,
         required: true,
+        unique: true,
         trim: true
     },
-    contraseña: {
+    keycloakId: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     }
 }, {
     timestamps: true,
