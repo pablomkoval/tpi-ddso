@@ -19,10 +19,11 @@ import theme from './theme/theme.js';
 
 function App() {
 
- return (
-  <Routes>
+  return (
+    <ThemeProvider theme={theme}>
+      <Routes>
 
-    {/*
+        {/*
     <Route path="/" element={<Layout />}>
       <Route path="buscar-turnos" element={<BuscarTurnos />} />
       <Route path="definir-disponibilidad" element={<DefinirDisponibilidad />} />
@@ -32,76 +33,62 @@ function App() {
     </Route>
     */}
 
-    {/* Layout principal autenticado */}
-    <Route
-      path="/"
-      element={
-        <PrivateRoute>
-          <Layout />
-        </PrivateRoute>
-      }
-    >
-      {/* Solo pacientes */}
-      <Route
-        path="buscar-turnos"
-        element={
-          <PrivateRoute requiredRole="paciente">
-            <BuscarTurnos />
-          </PrivateRoute>
-        }
-      />
+        {/* Layout principal autenticado */}
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
+          {/* Solo pacientes */}
+          <Route
+            path="buscar-turnos"
+            element={
+              <PrivateRoute requiredRole="paciente">
+                <BuscarTurnos />
+              </PrivateRoute>
+            }
+          />
 
-      {/* Solo médicos */}
-      <Route
-        path="definir-disponibilidad"
-        element={
-          <PrivateRoute requiredRole="medico">
-            <DefinirDisponibilidad />
-          </PrivateRoute>
-        }
-      />
+          {/* Solo médicos */}
+          <Route
+            path="definir-disponibilidad"
+            element={
+              <PrivateRoute requiredRole="medico">
+                <DefinirDisponibilidad />
+              </PrivateRoute>
+            }
+          />
 
-      {/* Solo médicos */}
-      <Route
-        path="agenda-medica"
-        element={
-          <PrivateRoute requiredRole="medico">
-            <AgendaMedica />
-          </PrivateRoute>
-        }
-      />
+          {/* Solo médicos */}
+          <Route
+            path="agenda-medica"
+            element={
+              <PrivateRoute requiredRole="medico">
+                <AgendaMedica />
+              </PrivateRoute>
+            }
+          />
 
-      <Route path="notificaciones/" element={<NotificacionPage />} />
+          <Route path="notificaciones/" element={<NotificacionPage />} />
 
-      {/* Si querés que también requiera login */}
-      <Route path="checkout/" element={<Checkout />} />
-    </Route>
-
-    <Route path="/login" element={<LoginPage />} />
-
-    <Route
-      path="/sin-permiso"
-      element={
-        <div style={{ textAlign: "center", padding: "4rem" }}>
-          <h2>Acceso denegado</h2>
-          <p>No tenés permisos para ver esta página.</p>
-        </div>
-      }
-    />
-  </Routes>
-);
-  return (
-    <ThemeProvider theme={theme}>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="/mis-turnos" element={<MisTurnos />} />
-          <Route path="/notificaciones" element={<Notificaciones />} />
-          <Route path="/terminos" element={<Terminos />} />
-          <Route path="/privacidad" element={<Privacidad />} />
-          <Route path="/ayuda" element={<Ayuda />} />
-          <Route path="/login" element={<LoginPage />} />
+          {/* Si querés que también requiera login */}
+          <Route path="checkout/" element={<Checkout />} />
         </Route>
+
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/sin-permiso"
+          element={
+            <div style={{ textAlign: "center", padding: "4rem" }}>
+              <h2>Acceso denegado</h2>
+              <p>No tenés permisos para ver esta página.</p>
+            </div>
+          }
+        />
       </Routes>
     </ThemeProvider>
   );
