@@ -13,6 +13,7 @@ import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
 import Terminos from './features/Terminos/Terminos.jsx';
 import Privacidad from './features/Privacidad/Privacidad.jsx';
 import Ayuda from './features/Ayuda/Ayuda.jsx';
+import DashboardPaciente from './features/DashboardPaciente/DashboardPaciente.jsx';
 import theme from './theme/theme.js';
 
 function App() {
@@ -40,6 +41,8 @@ function App() {
             </PrivateRoute>
           }
         >
+          <Route index element={<Dashboard />} />
+
           {/* Solo pacientes */}
           <Route
             path="buscar-turnos"
