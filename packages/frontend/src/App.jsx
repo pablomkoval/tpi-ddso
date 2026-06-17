@@ -8,6 +8,7 @@ import NotificacionPage from './features/NotificacionPage.jsx';
 import BuscarTurnos from './features/buscarTurnos/BuscarTurnos.jsx';
 import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDisponibilidad.jsx';
 import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
+import Checkout from './features/checkout.jsx';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
         <Route path="definir-disponibilidad" element={<DefinirDisponibilidad />} />
         <Route path="agenda-medica" element={<AgendaMedica />} />
         <Route path="notificaciones/" element={<NotificacionPage/>} />
+        <Route path="checkout/" element={<Checkout/>}/>
       </Route>
       <Route path="/login" element={<LoginPage />}/>
     </Routes>
