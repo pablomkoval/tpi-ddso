@@ -4,6 +4,7 @@ import LoginBox from "../components/sessionComponents/LoginBox.jsx";
 import RegisterBox from "../components/sessionComponents/RegisterBox.jsx";
 import { Box, Typography } from "@mui/material";
 import { MedicalServices } from "@mui/icons-material";
+import { jwtDecode } from 'jwt-decode';
 
 const LoginPage = () => {
     const [isRegistering, setIsRegistering] = useState(false);
@@ -14,16 +15,21 @@ const LoginPage = () => {
         if (token) {
             // Si ya está logueado, lo mandamos al inicio (dashboard)
             navigate("/home", { replace: true });
+            console.log(jwtDecode(token));
+            console.log(jwtDecode(localStorage.getItem("token")));
+            console.log("en loginPage");
+        } else {
+            console.log("caso else loginpage")
         }
     }, [navigate]);
 
-   return (
+    return (
         <Box
             sx={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                flexDirection: { xs: "column", md: "row" }, 
+                flexDirection: { xs: "column", md: "row" },
                 height: "100vh",
                 width: "100vw",
                 overflowX: "hidden",
@@ -41,7 +47,7 @@ const LoginPage = () => {
                     variant="h4"
                     component="h2"
                     sx={{
-                        color: "primary.main", 
+                        color: "primary.main",
                         display: "flex",
                         alignItems: "center",
                         fontWeight: "bold",
@@ -64,7 +70,7 @@ const LoginPage = () => {
                         width: "90%",
                         borderRadius: "0.8rem",
                         border: "0.15rem solid",
-                        borderColor: "grey.800", 
+                        borderColor: "grey.800",
                     }}
                 />
             </Box>

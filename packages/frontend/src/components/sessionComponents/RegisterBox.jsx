@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     Box,
@@ -11,7 +11,11 @@ import {
     TextField,
     ToggleButton,
     ToggleButtonGroup,
-    Typography
+    Typography,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import BadgeIcon from '@mui/icons-material/Badge';
 import EmailIcon from '@mui/icons-material/Email';
@@ -54,43 +58,51 @@ const splitIds = (value) =>
         .filter(Boolean);
 
 const buildRegisterPayload = (role, form) => {
-    const basePayload = {
-        usuario: form.usuario,
-        password: form.password,
-        nombre: form.nombre
-    };
-
-    if (role === 'paciente') {
-        return {
-            tipoPerfil: role,
-            endpoint: '/pacientes',
-            body: {
-                ...basePayload,
-                dni: form.dni,
-                obraSocial: form.obraSocial || null,
-                plan: form.plan || null
-            }
-        };
-    }
-
     return {
-        tipoPerfil: role,
-        endpoint: '/medicos',
+        endpoint: '/auth/register',
         body: {
-            ...basePayload,
-            matricula: form.matricula,
-            especialidades: splitIds(form.especialidades),
-            practicas: splitIds(form.practicas),
-            sedes: splitIds(form.sedes)
+            role,
+            username: form.usuario,
+            password: form.password,
+            nombre: form.nombre,
+
+            ...(role === 'paciente' && {
+                dni: form.dni,
+                obraSocial: form.obraSocial,
+                plan: form.plan
+            }),
+
+            ...(role === 'medico' && {
+                matricula: form.matricula,
+                especialidades: splitIds(form.especialidades),
+                practicas: splitIds(form.practicas),
+                sedes: splitIds(form.sedes)
+            })
         }
     };
 };
 
 const RegisterBox = ({ onLoginClick, onRegister }) => {
+    const [listaObrasSociales, setListaObrasSociales] = useState([]);
+    const [listaPlanes, setListaPlanes] = useState([]);
+    const [obraSocialSeleccionada, setObraSocialSeleccionada] = useState('');
+    const [planSeleccionado, setPlanSeleccionado] = useState('');
     const [role, setRole] = useState('paciente');
     const [form, setForm] = useState(initialForm);
     const [showPassword, setShowPassword] = useState(false);
     const [submittedPayload, setSubmittedPayload] = useState(null);
+
+    useEffect(() => {
+        const fetchObrasSociales = async () => {
+            try {
+                const data = await registerService.getObrasSociales();
+                setListaObrasSociales(data);
+            } catch (error) {
+                console.error("Error en useEffect:", error);
+            }
+        };
+        fetchObrasSociales();
+    }, []);
 
     const handleRoleChange = (_event, nextRole) => {
         if (nextRole !== null) {
@@ -108,12 +120,30 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
         }));
     };
 
+    const handleObraSocialChange = (event) => {
+        const osId = event.target.value;
+
+        setForm(prev => ({ ...prev, obraSocial: osId, plan: '' }));
+
+        const osEncontrada = listaObrasSociales.find(os => os._id === osId);
+        if (osEncontrada) {
+            setListaPlanes(osEncontrada.planes || []);
+        } else {
+            setListaPlanes([]);
+        }
+    };
+
     const handleTogglePassword = () => {
         setShowPassword((currentValue) => !currentValue);
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (role === 'paciente' && (!form.obraSocial || !form.plan)) {
+            alert("Por favor, seleccione una Obra Social y un Plan.");
+            return;
+        }
 
         const registerPayload = buildRegisterPayload(role, form);
 
@@ -295,22 +325,39 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                                         )
                                     }}
                                 />
+                                <FormControl fullWidth required>
+                                    <InputLabel id="os-label">Obra social</InputLabel>
+                                    <Select
+                                        labelId="os-label"
+                                        name="obraSocial"
+                                        value={form.obraSocial}
+                                        label="Obra social"
+                                        onChange={handleObraSocialChange}
+                                    >
+                                        {listaObrasSociales.map((os) => (
+                                            <MenuItem key={os._id} value={os._id}>
+                                                {os.nombre}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
 
-                                <TextField
-                                    label="Obra social"
-                                    name="obraSocial"
-                                    value={form.obraSocial}
-                                    onChange={handleFieldChange}
-                                    helperText="Por ejemplo: OSDE"
-                                />
-
-                                <TextField
-                                    label="Numero de plan"
-                                    name="plan"
-                                    value={form.plan}
-                                    onChange={handleFieldChange}
-                                    helperText="Por ejemplo: 210"
-                                />
+                                <FormControl fullWidth required disabled={!form.obraSocial}>
+                                    <InputLabel id="plan-label">Plan</InputLabel>
+                                    <Select
+                                        labelId="plan-label"
+                                        name="plan"
+                                        value={form.plan}
+                                        label="Plan"
+                                        onChange={handleFieldChange}
+                                    >
+                                        {listaPlanes.map((plan) => (
+                                            <MenuItem key={plan._id} value={plan._id}>
+                                                {plan.nombre}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </>
                         ) : (
                             <>

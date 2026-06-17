@@ -1,7 +1,5 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { MedicalServices } from '@mui/icons-material';
 import { jwtDecode } from 'jwt-decode';
 
 /**
@@ -20,6 +18,7 @@ import { jwtDecode } from 'jwt-decode';
  */
 const PrivateRoute = ({ children, requiredRole }) => {
     const token = localStorage.getItem("token");
+    
 
     if (!token) {
         return <Navigate to="/login" replace />;
@@ -27,7 +26,7 @@ const PrivateRoute = ({ children, requiredRole }) => {
 
     try {
         const decoded = jwtDecode(token);
-
+        
         //opcional
         const currentTime = Date.now() / 1000;
         if (decoded.exp && decoded.exp < currentTime) {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8081";
+const API_URL = "http://localhost:4000";
 
 export const registerService = {
   register: async (payload) => {
@@ -16,4 +16,14 @@ export const registerService = {
       throw new Error("Error al registrar usuario");
     }
   },
+
+  getObrasSociales: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/obras-sociales`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener obras sociales:", error);
+      throw new Error("No se pudieron cargar las obras sociales.");
+    }
+  }
 };

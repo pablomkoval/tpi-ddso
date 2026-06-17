@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+//import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import './Navbar.css';
@@ -6,7 +6,7 @@ import '../../index.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [cantUnidades, setCantUnidades] = useState(0);
+  //const [cantUnidades, setCantUnidades] = useState(0);
   //const carrito;
 
   const irACheckout = () => {

@@ -4,7 +4,7 @@ export const registerSchema = z.object({
 
     role: z.enum(["paciente", "medico"]),
 
-    username: z.string()
+    username: z.string().email("El usuario debe ser un correo electronico valido")
         .min(3),
 
     password: z.string()

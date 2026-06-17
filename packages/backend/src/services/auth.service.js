@@ -21,6 +21,11 @@ export class AuthService {
             password: data.password
         });
 
+        await this.keycloakService.assignRole(
+            kcUser.id,
+            data.role
+        );
+
         const usuario =
             await this.usuarioService.create({
                 username: data.username,

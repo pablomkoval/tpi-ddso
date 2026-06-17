@@ -33,6 +33,10 @@ import { AuthService } from "./services/auth.service.js";
 import { KeycloakService } from "./services/keycloak.service.js";
 import { AuthController } from "./controllers/auth.controller.js";
 import { AuthRouter } from "./routes/routers/auth.router.js";
+import { ObraSocialRepository } from "./domain/models/repositories/obraSocial.repository.js";
+import { ObraSocialService } from "./services/obraSocial.service.js";
+import { ObraSocialController } from "./controllers/obraSocial.controller.js";
+import { ObraSocialRouter } from "./routes/routers/obraSocial.router.js";
 
 //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
 const notiRepository = new NotificacionesRepository();
@@ -44,6 +48,7 @@ const usuarioRepository = new UsuarioRepository(); //definir si se usa realmente
 const medicoRepository = new MedicoRepository();
 const pacienteRepository = new PacienteRepository();
 const sedeRepository = new SedeRepository();
+const obraSocialRepository = new ObraSocialRepository();
 
 //////////////////////////////// SERVICES /////////////////////////////////////////////////////////////
 const notiService = new NotificacionesService(notiRepository);
@@ -57,6 +62,7 @@ const sedeService = new SedeService(sedeRepository);
 const keycloakService = new KeycloakService();
 const usuarioService = new UsuarioService(usuarioRepository);
 const authService = new AuthService(keycloakService, usuarioService, pacienteService, medicoService);
+const obraSocialService = new ObraSocialService(obraSocialRepository);
 
 //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
 const notiController = new NotificacionesController(notiService);
@@ -67,6 +73,7 @@ const pacienteController = new PacienteController(pacienteService);
 const medicoController = new MedicoController(medicoService);
 const sedeController = new SedeController(sedeService);
 const authController = new AuthController(authService);
+const obraSocialController = new ObraSocialController(obraSocialService);
 
 //////////////////////////////// ROUTERS /////////////////////////////////////////////////////////////
 const notiRouter = new NotificacionesRouter(notiController);
@@ -77,6 +84,7 @@ const pacienteRouter = new PacienteRouter(pacienteController);
 const medicoRouter = new MedicoRouter(medicoController);
 const sedeRouter = new SedeRouter(sedeController);
 const authRouter = new AuthRouter(authController);
+const obraSocialRouter = new ObraSocialRouter(obraSocialController);
 
 export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
@@ -87,5 +95,6 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/servicios", servicioRouter.getRouter())
     routerGeneral.use("/sedes", sedeRouter.getRouter())
     routerGeneral.use("/auth", authRouter.getRouter())
+    routerGeneral.use("/obras-sociales", obraSocialRouter.getRouter())
 }
 
