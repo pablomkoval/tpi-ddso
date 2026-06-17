@@ -41,7 +41,7 @@ function App() {
             </PrivateRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<DashboardPaciente />} />
 
           {/* Solo pacientes */}
           <Route
@@ -49,6 +49,15 @@ function App() {
             element={
               <PrivateRoute requiredRole="paciente">
                 <BuscarTurnos />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="mis-turnos"
+            element={
+              <PrivateRoute requiredRole="paciente">
+                <MisTurnos />
               </PrivateRoute>
             }
           />
