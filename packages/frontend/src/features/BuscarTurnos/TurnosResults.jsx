@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, Select, MenuItem, FormControl, Pagination } from '@mui/material';
 import TurnoCard from './TurnoCard.jsx';
 
@@ -10,6 +10,18 @@ const turnosMock = [
   { id: 3, nombre: 'Dr. Marcos Silva', especialidad: 'NEUROLOGÍA',   fecha: '17/06/2026', hora: '09:00', sede: 'Sede Belgrano', estado: 'Parcial',  precio: 2800 },
   { id: 4, nombre: 'Dra. Laura Gómez', especialidad: 'DERMATOLOGÍA', fecha: '18/06/2026', hora: '14:00', sede: 'Sede Centro',   estado: 'Completa', precio: 3100 },
 ];
+
+const filtrarTurnos = (turnos, filtros) => {
+  return turnos.filter((t) => {
+    if (filtros.profesional && !t.nombre.toLowerCase().includes(filtros.profesional.toLowerCase()))
+      return false;
+    if (filtros.especialidad && t.especialidad.toLowerCase() !== filtros.especialidad.toLowerCase())
+      return false;
+    if (filtros.sedes?.length > 0 && !filtros.sedes.includes(t.sede))
+      return false;
+    return true;
+  });
+};
 
 const ordenarOpciones = [
   { value: 'precio_asc',  label: 'Menor Precio' },
@@ -30,22 +42,14 @@ const TurnosResults = ({ filtros = {} }) => {
   const [pagina, setPagina] = useState(1);
   const [orden, setOrden] = useState('precio_asc');
 
-  const cargarTurnos = useCallback((paginaActual) => {
-    // TODO: reemplazar con fetch real cuando el backend tenga paginación:
-    // fetch(`/api/turnos?pagina=${paginaActual}&limite=${LIMITE}&${new URLSearchParams(filtros)}`)
-    //   .then(res => res.json())
-    //   .then(({ data, total }) => { setTurnos(data); setTotal(total); });
-    setTurnos(turnosMock);
-    setTotal(turnosMock.length);
-  }, []);
-
   useEffect(() => {
     setPagina(1);
+    // TODO: reemplazar con fetch real:
+    // fetch(`/api/turnos?${new URLSearchParams(filtros)}`).then(...)
+    const filtrados = filtrarTurnos(turnosMock, filtros);
+    setTurnos(filtrados);
+    setTotal(filtrados.length);
   }, [filtros]);
-
-  useEffect(() => {
-    cargarTurnos(pagina);
-  }, [pagina, cargarTurnos]);
 
   const turnosOrdenados = ordenarTurnos(turnos, orden);
 

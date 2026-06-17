@@ -1,13 +1,37 @@
+import { useState } from 'react';
 import { Box } from '@mui/material';
 import TurnosResults from './TurnosResults.jsx';
+import FiltrosBusqueda from './FiltrosBusqueda.jsx';
+
+const FILTROS_INICIALES = {
+  profesional: '',
+  especialidad: '',
+  consultorio: '',
+  sedes: [],
+  fechaDesde: '',
+  fechaHasta: '',
+};
 
 const BuscarTurnos = () => {
+  const [filtrosPendientes, setFiltrosPendientes] = useState(FILTROS_INICIALES);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIALES);
+
+  const handleChange = (campo, valor) => {
+    setFiltrosPendientes((prev) => ({ ...prev, [campo]: valor }));
+  };
+
+  const handleAplicar = () => {
+    setFiltrosAplicados({ ...filtrosPendientes });
+  };
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100%' }}>
-      {/* Panel de filtros — componente del compañero */}
-      <Box sx={{ width: 280, borderRight: '1px solid', borderColor: 'divider', flexShrink: 0 }} />
-
-      <TurnosResults />
+      <FiltrosBusqueda
+        filtros={filtrosPendientes}
+        onChange={handleChange}
+        onAplicar={handleAplicar}
+      />
+      <TurnosResults filtros={filtrosAplicados} />
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -23,24 +23,11 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { detalleTurnosData } from '../../mockdata/detalleTurnosData';
 
-const RESERVA_SEGUNDOS = 15 * 60;
-
 export default function DetalleTurno() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [segundos, setSegundos] = useState(RESERVA_SEGUNDOS);
 
   const turno = detalleTurnosData[id];
-
-  useEffect(() => {
-    if (!turno || segundos <= 0) return;
-    const timer = setInterval(() => setSegundos((s) => s - 1), 1000);
-    return () => clearInterval(timer);
-  }, [turno, segundos]);
-
-  const mm = String(Math.floor(segundos / 60)).padStart(2, '0');
-  const ss = String(segundos % 60).padStart(2, '0');
-  const timerVencido = segundos <= 0;
 
   if (!turno) {
     return (
@@ -318,49 +305,25 @@ export default function DetalleTurno() {
           px: { xs: 2, md: 4 },
           py: 1.5,
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           zIndex: 100,
-          gap: 2,
+          gap: 1.5,
         }}
       >
-        <Typography variant="body2" color="text.secondary">
-          {timerVencido ? (
-            <Typography component="span" variant="body2" color="error.main" fontWeight={700}>
-              La reserva temporal venció.
-            </Typography>
-          ) : (
-            <>
-              Turno reservado temporalmente por{' '}
-              <Typography
-                component="span"
-                variant="body2"
-                fontWeight={700}
-                color={segundos < 120 ? 'error.main' : 'text.primary'}
-              >
-                {mm}:{ss} min
-              </Typography>
-            </>
-          )}
-        </Typography>
-
-        <Box sx={{ display: 'flex', gap: 1.5, flexShrink: 0 }}>
-          <Button
-            variant="outlined"
-            startIcon={<PersonSearchIcon />}
-            onClick={() => console.log('Agregar a preselección', turno.id)}
-            disabled={timerVencido}
-          >
-            Agregar a preselección
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => console.log('Reservar turno', turno.id)}
-            disabled={timerVencido}
-          >
-            Reservar Turno
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          startIcon={<PersonSearchIcon />}
+          onClick={() => console.log('Agregar a preselección', turno.id)}
+        >
+          Agregar a preselección
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => console.log('Reservar turno', turno.id)}
+        >
+          Reservar Turno
+        </Button>
       </Box>
     </Box>
   );
