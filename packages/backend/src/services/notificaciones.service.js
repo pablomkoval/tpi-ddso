@@ -10,22 +10,12 @@ export class NotificacionesService {
 
     async obtenerLeidas (userId, page, limit) {
         const criterios = { destinatario: userId, leida: true };
-        const resultado = await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
-        
-        return {
-            ...resultado,
-            notificaciones: resultado.notificaciones
-        };
+        return await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
     }
 
     async obtenerNoLeidas (userId, page, limit) {
         const criterios = { destinatario: userId, leida: false };
-        const resultado = await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
-        
-        return {
-            ...resultado,
-            notificaciones: resultado.notificaciones
-        };
+        return await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
     }
 
     async create(data) {
