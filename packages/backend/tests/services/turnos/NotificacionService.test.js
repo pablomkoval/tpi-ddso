@@ -19,14 +19,14 @@ describe("Capa de servicio - NotificacionService", () => {
     test("obtenerNoLeidas() debe armar los criterios y devolver la estructura paginada", async () => {
         const mockRespuestaRepo = {
             notificaciones: [
-                {id: "6a173108ed88078b483f887b", destinatario: "6470abc12345678901234567", remitente: "647012398765432109876543", leida: false, mensaje: "Turno 1", fechaHoraCreacion: new Date("2026-05-25")},
-                {id: "6a173112ed88078b483f887c", destinatario: "6470abc12345678901234567", remitente: "647012398765432109876543", leida: false, mensaje: "Turno 2", fechaHoraCreacion: new Date("2026-05-25")}
+                { id: "6a173108ed88078b483f887b", destinatario: "6470abc12345678901234567", remitente: "647012398765432109876543", leida: false, mensaje: "Turno 1", fechaHoraCreacion: new Date("2026-05-25") },
+                { id: "6a173112ed88078b483f887c", destinatario: "6470abc12345678901234567", remitente: "647012398765432109876543", leida: false, mensaje: "Turno 2", fechaHoraCreacion: new Date("2026-05-25") }
             ],
             total: 2,
             page: 1,
             totalPages: 1
         };
-        
+
         mockRepository.findAllPaginated.mockResolvedValue(mockRespuestaRepo);
 
         const resultado = await service.obtenerNoLeidas("6470abc12345678901234567", 1, 5);
@@ -39,7 +39,7 @@ describe("Capa de servicio - NotificacionService", () => {
 
         expect(resultado.total).toBe(2);
         expect(resultado.totalPages).toBe(1);
-        expect(resultado.notificaciones[0]).toEqual({ 
+        expect(resultado.notificaciones[0]).toEqual({
             id: "6a173108ed88078b483f887b",
             destinatario: "6470abc12345678901234567",
             remitente: "647012398765432109876543",

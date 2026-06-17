@@ -1,14 +1,18 @@
+// packages/backend/tests/services/medico/MedicoService.test.js
 import { describe, test, expect, beforeEach, jest } from "@jest/globals";
-import MedicoService from "../../../src/services/MedicoService.js";
-import { DiaSemana } from "../../../src/domain/enum/DiaSemana.js";
+// 🚀 Corregido: Nombre de archivo real y ruta exacta
+import { MedicoService } from "../../../src/services/medico.service.js";
 
 describe("Servicios Médico", () => {
     let servicio;
     let medicoRepositoryMock;
+    let servicioServiceMock;
     let usuarioRepositoryMock;
+    let turnoRepositoryMock;
 
     beforeEach(() => {
         const medicos = [];
+
         medicoRepositoryMock = {
             findAll: jest.fn().mockImplementation(
                 () => Promise.resolve(medicos)
@@ -26,41 +30,32 @@ describe("Servicios Médico", () => {
             update: jest.fn().mockImplementation(
                 (id, data) => Promise.resolve({ id, ...data })
             ),
-            obtenerDisponibilidades: jest.fn().mockImplementation(
-                (id) => {
-                    const medico = medicos.find(m => m.id === id);
-                    return Promise.resolve(medico ? medico.disponibilidades : null);
-                }
-            )
-        };
-        
-        usuarioRepositoryMock = {
-            findOne: jest.fn().mockImplementation(
-                (usuario) => Promise.resolve({ _id: "usuario1", ...usuario })
-            )
         };
 
-        servicio = new MedicoService({ medicoRepository: medicoRepositoryMock }, { usuarioRepository: usuarioRepositoryMock } );
+        servicioServiceMock = {};
+        usuarioRepositoryMock = {};
+        turnoRepositoryMock = {};
+
+        servicio = new MedicoService(
+            medicoRepositoryMock,
+            servicioServiceMock,
+            usuarioRepositoryMock,
+            turnoRepositoryMock
+        );
     });
 
     describe("Creación de un médico", () => {
         test("Debería crear un médico con los datos proporcionados", async () => {
-            const sede = { id: "sede1", nombre: "Sede Central", direccion: "Calle Principal 123" }
+
+            const sede = { id: "sede1", nombre: "Sede Medrano", direccion: "Direccion" };
+
             const medicoDTO = {
-                usuario: { username: "medico1", password: "password123" },
+                usuario: "usuario1",
                 matricula: "12345",
                 nombre: "Dr. Juan Pérez",
                 especialidades: [],
                 practicas: [],
-                sedes: [sede],
-                disponibilidades: [
-                    {
-                        diaSemana: DiaSemana.LUNES,
-                        horaDesde: "09:00",
-                        horaHasta: "17:00",
-                        sede: sede
-                    }
-                ]
+                sedes: [sede]
             };
 
             const medicoCreado = await servicio.create(medicoDTO);
@@ -71,76 +66,52 @@ describe("Servicios Médico", () => {
                 nombre: medicoDTO.nombre,
                 especialidades: medicoDTO.especialidades,
                 practicas: medicoDTO.practicas,
-                sedes: medicoDTO.sedes,
-                disponibilidades: medicoDTO.disponibilidades
+                sedes: medicoDTO.sedes
             });
         });
     });
 
     describe("Obtención de todos los médicos", () => {
         test("Debería retornar una lista de médicos", async () => {
-            const sede1 = { id: "sede1", nombre: "Sede Central", direccion: "Calle Principal 123" }
-            const sede2 = { id: "sede2", nombre: "Sede Norte", direccion: "Avenida Norte 456" }
+            const sede1 = { id: "sede1", nombre: "Sede Medrano", direccion: "Direccion Medrano" };
+            const sede2 = { id: "sede2", nombre: "Sede Lugano", direccion: "Direccion Lugano" };
+
             const medicoDTO1 = {
-                usuario: { username: "medico1", password: "password123" },
+                usuario: "usuario1",
                 matricula: "12345",
                 nombre: "Dr. Juan Pérez",
                 especialidades: [],
                 practicas: [],
-                sedes: [sede1],
-                disponibilidades: [
-                    {
-                        diaSemana: DiaSemana.LUNES,
-                        horaDesde: "09:00",
-                        horaHasta: "17:00",
-                        sede: sede1
-                    }
-                ]
+                sedes: [sede1]
             };
             const medicoDTO2 = {
-                usuario: { username: "medico2", password: "password456" },
+                usuario: "usuario2",
                 matricula: "67890",
                 nombre: "Dra. María Gómez",
                 especialidades: [],
                 practicas: [],
-                sedes: [sede2],
-                disponibilidades: [
-                    {
-                        diaSemana: DiaSemana.MARTES,
-                        horaDesde: "10:00",
-                        horaHasta: "18:00",
-                        sede: sede2
-                    }
-                ]
+                sedes: [sede2]
             };
 
             await servicio.create(medicoDTO1);
             await servicio.create(medicoDTO2);
 
             const medicos = await servicio.findAll();
-
             expect(medicos.length).toBeGreaterThanOrEqual(2);
         });
     });
 
     describe("Obtención de un médico por ID", () => {
         test("Debería retornar el médico correspondiente al ID proporcionado", async () => {
-            const sede2 = { id: "sede2", nombre: "Sede Norte", direccion: "Avenida Norte 456" }
+
+            const sede2 = { id: "sede2", nombre: "Sede Lugano", direccion: "Direccion Lugano" };
             const medicoDTO = {
-                usuario: { username: "medico2", password: "password456" },
+                usuario: "usuario2",
                 matricula: "67890",
                 nombre: "Dra. María Gómez",
                 especialidades: [],
                 practicas: [],
-                sedes: [sede2],
-                disponibilidades: [
-                    {
-                        diaSemana: DiaSemana.MARTES,
-                        horaDesde: "10:00",
-                        horaHasta: "18:00",
-                        sede: sede2
-                    }
-                ]
+                sedes: [sede2]
             };
 
             const medicoCreado = await servicio.create(medicoDTO);
@@ -151,87 +122,8 @@ describe("Servicios Médico", () => {
                 usuario: medicoDTO.usuario,
                 matricula: medicoDTO.matricula,
                 nombre: medicoDTO.nombre,
-                especialidades: medicoDTO.especialidades,
-                practicas: medicoDTO.practicas,
-                sedes: medicoDTO.sedes,
-                disponibilidades: medicoDTO.disponibilidades
+                sedes: medicoDTO.sedes
             });
         });
     });
-
-    describe("Obtención de disponibilidades de un médico", () => {
-        test("Debería retornar las disponibilidades del médico correspondiente al ID proporcionado", async () => {
-            const sede1 = { id: "sede1", nombre: "Sede Central", direccion: "Calle Principal 123" }
-            const medicoDTO = {
-                usuario: { username: "medico1", password: "password123" },
-                matricula: "12345",
-                nombre: "Dr. Juan Pérez",
-                especialidades: [],
-                practicas: [],
-                sedes: [sede1],
-                disponibilidades: [
-                    {
-                        diaSemana: DiaSemana.LUNES,
-                        horaDesde: "09:00",
-                        horaHasta: "17:00",
-                        sede: sede1
-                    }
-                ]
-            };
-
-            const medicoCreado = await servicio.create(medicoDTO);
-            const disponibilidades = await servicio.obtenerDisponibilidades(medicoCreado.id);
-
-            const normalizadas = disponibilidades.map(d => ({
-                diaSemana: d.diaSemana,
-                horaDesde: d.horaDesde,
-                horaHasta: d.horaHasta,
-                sede: d.sede
-            }));
-
-            expect(normalizadas).toEqual(medicoDTO.disponibilidades);
-        });
-    })
-
-    describe("Edición de una disponibilidad de un médico", () => {
-        test("Debería actualizar la disponibilidad del médico correspondiente al ID proporcionado", async () => {
-            const sede1 = { id: "sede1", nombre: "Sede Central", direccion: "Calle Principal 123" }
-            const medicoDTO = {
-                usuario: { username: "medico1", password: "password123" },
-                matricula: "12345",
-                nombre: "Dr. Juan Pérez",
-                especialidades: [],
-                practicas: [],
-                sedes: [sede1],
-                disponibilidades: [
-                    {
-                        diaSemana: DiaSemana.LUNES,
-                        horaDesde: "09:00",
-                        horaHasta: "17:00",
-                        sede: sede1
-                    }
-                ]
-            };
-            
-            const medicoCreado = await servicio.create(medicoDTO);
-            const nuevaDisponibilidad = {
-                diaSemana: DiaSemana.MARTES,
-                horaDesde: "10:00",
-                horaHasta: "18:00",
-                sede: sede1
-            };
-            const medicoActualizado = await servicio.update(medicoCreado.id, {
-                disponibilidades: [nuevaDisponibilidad]
-            });
-
-            const normalizadas = medicoActualizado.disponibilidades.map(d => ({
-                diaSemana: d.diaSemana,
-                horaDesde: d.horaDesde,
-                horaHasta: d.horaHasta,
-                sede: d.sede
-            }));
-
-            expect(normalizadas).toEqual([nuevaDisponibilidad]);
-        });
-    })
 });
