@@ -34,6 +34,7 @@ describe("Turnos", () => {
             const turnosGenerados = medico.generarTurnosPara(practica);
             expect(turnosGenerados.length).toBe(16);
             expect(turnosGenerados[0].fechaHora).toBeDefined();
+            expect(turnosGenerados[0].servicio).toBe(practica);
         });
     });
 
@@ -72,6 +73,7 @@ describe("Turnos", () => {
 
             const turnosGenerados = medico.generarTurnosPara(practica);
             expect(turnosGenerados.length).toBe(4);
+            expect(turnosGenerados[0].servicio).toBe(practica);
         });
     });
 
@@ -113,6 +115,10 @@ describe("Turnos", () => {
 
             const turnosGenerados = medico.generarTurnos(7);
             expect(turnosGenerados.length).toBe(4);
+            expect(turnosGenerados[0].servicio).toBe(practica1);
+            expect(turnosGenerados[1].servicio).toBe(practica1);
+            expect(turnosGenerados[2].servicio).toBe(practica2);
+            expect(turnosGenerados[3].servicio).toBe(practica2);
         });
     });
 });
