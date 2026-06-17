@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
 import LoginPage from './features/LoginPage.jsx';
 import NotificacionPage from './features/NotificacionPage.jsx';
@@ -8,7 +8,9 @@ import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
 import Checkout from './features/checkout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import { ThemeProvider } from '@mui/material';
-import Layout from './features/Layout/Layout.jsx';
+import LayoutPaciente from './features/LayoutPaciente/LayoutPaciente.jsx';
+import LayoutMedico from './features/LayoutMedico/LayoutMedico.jsx';
+import DashboardMedico from './features/DashboardMedico/DashboardMedico.jsx';
 import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
 import Terminos from './features/Terminos/Terminos.jsx';
 import Privacidad from './features/Privacidad/Privacidad.jsx';
@@ -23,80 +25,47 @@ function App() {
     <ThemeProvider theme={theme}>
       <Routes>
 
-        {/*
-    <Route path="/" element={<Layout />}>
-      <Route path="buscar-turnos" element={<BuscarTurnos />} />
-      <Route path="definir-disponibilidad" element={<DefinirDisponibilidad />} />
-      <Route path="agenda-medica" element={<AgendaMedica />} />
-      <Route path="notificaciones/" element={<NotificacionPage />} />
-      <Route path="checkout/" element={<Checkout />} />
-    </Route>
-    */}
-
-        {/* Layout principal autenticado */}
+        {/* PACIENTES */}
         <Route
-          path="/"
+          path="/paciente"
           element={
-            <PrivateRoute>
-              <Layout />
+            <PrivateRoute requiredRole="paciente">
+              <LayoutPaciente />
             </PrivateRoute>
           }
         >
+
           <Route index element={<DashboardPaciente />} />
 
-          {/* Solo pacientes */}
-          <Route
-            path="buscar-turnos"
-            element={
-              <PrivateRoute requiredRole="paciente">
-                <BuscarTurnos />
-              </PrivateRoute>
-            }
-          />
+          <Route path="buscar-turnos" element={<BuscarTurnos />} />
 
-          <Route
-            path="mis-turnos"
-            element={
-              <PrivateRoute requiredRole="paciente">
-                <MisTurnos />
-              </PrivateRoute>
-            }
-          />
+          <Route path="mis-turnos" element={ <MisTurnos /> } />
 
-          {/* Solo médicos */}
-          <Route
-            path="definir-disponibilidad"
-            element={
-              <PrivateRoute requiredRole="medico">
-                <DefinirDisponibilidad />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Solo médicos */}
-          <Route
-            path="agenda-medica"
-            element={
-              <PrivateRoute requiredRole="medico">
-                <AgendaMedica />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="turnos/:id"
-            element={
-              <PrivateRoute requiredRole="paciente">
-                <DetalleTurno />
-              </PrivateRoute>
-            }
-          />
+          <Route path="turnos/:id" element={ <DetalleTurno /> } />
 
           <Route path="notificaciones/" element={<NotificacionPage />} />
 
           {/* Si querés que también requiera login */}
           <Route path="checkout/" element={<Checkout />} />
         </Route>
+
+
+        {/* MEDICOS */}
+        <Route
+          path="/medico"
+          element={
+            <PrivateRoute requiredRole="medico">
+              <LayoutMedico />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<DashboardMedico />} />
+          <Route path="agenda-medica" element={<AgendaMedica />} />
+          <Route path="definir-disponibilidad" element={<DefinirDisponibilidad />} />
+          <Route path="notificaciones" element={<NotificacionPage />} />
+        </Route>
+
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<LoginPage />} />
 

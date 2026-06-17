@@ -38,7 +38,7 @@ export default function DetalleTurno() {
         <Button
           startIcon={<ArrowBackIcon />}
           variant="outlined"
-          onClick={() => navigate('/buscar-turnos')}
+          onClick={() => navigate('/paciente/buscar-turnos')}
         >
           Volver a resultados
         </Button>
@@ -51,7 +51,7 @@ export default function DetalleTurno() {
       <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/buscar-turnos')}
+          onClick={() => navigate('/paciente/buscar-turnos')}
           sx={{ mb: 3, color: 'text.secondary', pl: 0 }}
         >
           Volver a resultados

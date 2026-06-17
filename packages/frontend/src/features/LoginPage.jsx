@@ -10,14 +10,14 @@ import useAuth from "../services/useAuth";
  * Si no, lo redirige automáticamente al login de Keycloak.
  */
 const LoginPage = () => {
-    const { isAuthenticated, isLoading, login } = useAuth();
+    const { isAuthenticated, isLoading, login, hasRole } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!isLoading) {
             if (isAuthenticated) {
                 // Ya tiene sesión, redirigir a la app
-                navigate("/", { replace: true });
+                navigate(hasRole('paciente') ? '/paciente' : '/medico', { replace: true });
             } else {
                 // Redirigir a la página de login de Keycloak
                 login();

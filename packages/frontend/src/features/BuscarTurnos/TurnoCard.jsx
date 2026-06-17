@@ -69,7 +69,7 @@ const TurnoCard = ({ turno }) => {
           <Button variant="outlined" size="small" onClick={() => console.log('preselección', turno.id)}>
             Agregar a preselección
           </Button>
-          <Button variant="contained" size="small" onClick={() => navigate(`/turnos/${turno.id}`)}>
+          <Button variant="contained" size="small" onClick={() => navigate(`/paciente/turnos/${turno.id}`)}>
             Reservar
           </Button>
         </Box>
