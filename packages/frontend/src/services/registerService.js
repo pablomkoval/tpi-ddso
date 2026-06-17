@@ -13,7 +13,8 @@ export const registerService = {
       return response.data;
     } catch (error) {
       console.error(error.response?.data);
-      throw new Error("Error al registrar usuario");
+      const errorMessage = error.response?.data?.message ||"Error al registrar usuario";
+      throw new Error(errorMessage);
     }
   },
 

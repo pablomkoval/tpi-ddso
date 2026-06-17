@@ -45,6 +45,12 @@ export class KeycloakService {
             
             return users[0];
         } catch (error) {
+            if (error.response && error.response.status === 409) {
+                // Lanzamos un error que nuestro controlador pueda entender
+                const customError = new Error("El correo electrónico ya se encuentra registrado en el sistema.");
+                customError.status = 409;
+                throw customError;
+            }
             console.error("Error al crear usuario en Keycloak:", error.message);
             throw error; 
         }

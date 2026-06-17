@@ -19,6 +19,13 @@ export class AuthController {
             });
 
         } catch (error) {
+            if (error.status === 409) {
+                return res.status(409).json({ message: error.message });
+            }
+
+            if (error.name === 'ZodError') {
+                return res.status(400).json({ message: "Datos inválidos", details: error.errors });
+            }
             console.error("ERROR REGISTER", error);
             next(error);
         }
