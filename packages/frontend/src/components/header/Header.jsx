@@ -11,7 +11,7 @@ const Header = () => {
       <Toolbar sx={{ gap: 3 }}>
         <Typography
           component={Link}
-          to="/paciente"
+          to="/home"
           variant="h6"
           fontWeight={700}
           color="primary"

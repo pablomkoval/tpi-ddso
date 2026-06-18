@@ -4,9 +4,9 @@ import HeaderMenuElement from './HeaderMenuElement.jsx';
 const HeaderMenu = () => {
   return (
     <Box component="nav" sx={{ display: 'flex' }}>
-      <HeaderMenuElement text="Buscar Turnos" to="/paciente/buscar-turnos" />
-      <HeaderMenuElement text="Mis Turnos" to="/paciente/mis-turnos" />
-      <HeaderMenuElement text="Notificaciones" to="/paciente/notificaciones" />
+      <HeaderMenuElement text="Buscar Turnos" to="/buscar-turnos" />
+      <HeaderMenuElement text="Mis Turnos" to="/mis-turnos" />
+      <HeaderMenuElement text="Notificaciones" to="/notificaciones" />
     </Box>
   );
 };

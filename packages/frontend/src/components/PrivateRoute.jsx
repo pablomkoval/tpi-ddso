@@ -19,6 +19,7 @@ const PrivateRoute = ({ children, requiredRole }) => {
     const roles = getUserRoles();
 
     if (!roles) {
+        console.log("aca paso 1")
         return <Navigate to="/login" replace />;
     }
 
