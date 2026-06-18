@@ -19,7 +19,7 @@ import {
   PendingActions as PendingActionsIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../../services/useAuth';
+import { getUsernameFromToken } from '../../utils/authUtils';
 
 const proximoTurno = {
   especialidad: 'Cardiología Clínica',
@@ -44,12 +44,10 @@ const datosNotificaciones = {
 };
 
 export default function DashboardPaciente() {
-  const { user } = useAuth();
+  const username = getUsernameFromToken();
   const navigate = useNavigate();
 
-  const nombreCompleto = user
-    ? `${user.nombre ?? ''} ${user.apellido ?? ''}`.trim() || user.username
-    : 'Paciente';
+  const nombreCompleto = username ? username : 'Paciente';
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>

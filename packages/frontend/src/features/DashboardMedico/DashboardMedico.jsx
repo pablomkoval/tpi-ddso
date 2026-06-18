@@ -20,7 +20,7 @@ import {
   NotificationsNone as NotificationsIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../../services/useAuth';
+import { getUsernameFromToken } from '../../utils/authUtils';
 
 const turnosHoy = [
   { id: 1, paciente: 'Carlos Ruiz',     hora: '09:30', motivo: 'Consulta general',   estado: 'completado' },
@@ -36,12 +36,10 @@ const estadoConfig = {
 };
 
 export default function DashboardMedico() {
-  const { user } = useAuth();
+  const username = getUsernameFromToken();
   const navigate = useNavigate();
 
-  const nombreCompleto = user
-    ? `${user.nombre ?? ''} ${user.apellido ?? ''}`.trim() || user.username
-    : 'Médico';
+  const nombreCompleto = username ? username : 'Médico';
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>

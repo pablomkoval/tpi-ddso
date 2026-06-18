@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-
+import { getUserRoles } from '../utils/authUtils';
 /**
  * Componente que protege rutas privadas.
  * - Si Keycloak está cargando: muestra un spinner.
@@ -17,36 +16,24 @@ import { jwtDecode } from 'jwt-decode';
  *   <PrivateRoute requiredRole="paciente"><BuscarTurnos /></PrivateRoute>
  */
 const PrivateRoute = ({ children, requiredRole }) => {
-    const token = localStorage.getItem("token");
-    
+    const roles = getUserRoles();
 
-    if (!token) {
+    if (!roles) {
         return <Navigate to="/login" replace />;
     }
 
-    try {
-        const decoded = jwtDecode(token);
-        
-        //opcional
-        const currentTime = Date.now() / 1000;
-        if (decoded.exp && decoded.exp < currentTime) {
-            localStorage.removeItem("token"); // Limpiamos el token viejo
-            return <Navigate to="/login" replace />;
-        }
+    const esPaciente = roles.includes("paciente");
+    const esMedico = roles.includes("medico");
 
-        if (requiredRole) {
-            const CLIENT_ID = "react-client"; 
-            const rolesDelCliente = decoded.resource_access?.[CLIENT_ID]?.roles || [];
-            
-            if (!rolesDelCliente.includes(requiredRole)) {
-                return <Navigate to="/sin-permiso" replace />;
-            }
-        }
-        return children;
-    } catch (error) {
-        localStorage.removeItem("token");
-        return <Navigate to="/login" replace />;
+    if (esPaciente && esMedico) {
+        return <Navigate to="/sin-permiso" replace />;
     }
+
+    if (requiredRole && !roles.includes(requiredRole)) {
+        return <Navigate to="/sin-permiso" replace />;
+    }
+
+    return children;
 };
 
 export default PrivateRoute;

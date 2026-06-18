@@ -8,17 +8,11 @@ import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
 import Checkout from './features/checkout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import { ThemeProvider } from '@mui/material';
-import LayoutPaciente from './features/LayoutPaciente/LayoutPaciente.jsx';
-import LayoutMedico from './features/LayoutMedico/LayoutMedico.jsx';
-import DashboardMedico from './features/DashboardMedico/DashboardMedico.jsx';
 import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
-import Terminos from './features/Terminos/Terminos.jsx';
-import Privacidad from './features/Privacidad/Privacidad.jsx';
-import Ayuda from './features/Ayuda/Ayuda.jsx';
-import DashboardPaciente from './features/DashboardPaciente/DashboardPaciente.jsx';
 import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
-import { jwtDecode } from 'jwt-decode';
+import HomePage from './features/HomePage.jsx';
+import RoleLayout from './features/RoleLayout.jsx';
 
 const RootRedirect = () => {
   const token = localStorage.getItem("token");
@@ -45,26 +39,15 @@ function App() {
         path="/"
         element={
           <PrivateRoute>
-            <Layout />
+            <RoleLayout />
           </PrivateRoute>
-        }>
+        }
+        >
         <Route index element={<RootRedirect />} />
-        {/* Solo pacientes */}
-        <Route
-          path="/paciente"
-          element={
-            <PrivateRoute requiredRole="paciente">
-              <LayoutPaciente />
-            </PrivateRoute>
-          }
-        />
 
-        <Route index element={
-          <PrivateRoute requiredRole="paciente">
-          <DashboardPaciente />
-          </PrivateRoute>
-          } 
-        />
+        <Route path="home" element={<HomePage/>} />
+
+        {/* Solo pacientes */}
 
         <Route
           path="buscar-turnos"
@@ -108,15 +91,6 @@ function App() {
           }
         />
 
-        {/* Solo médicos */}
-          <Route
-          path="/medico"
-          element={
-            <PrivateRoute requiredRole="medico">
-              <LayoutMedico />
-            </PrivateRoute>
-          }
-
         <Route
           path="agenda-medica"
           element={
@@ -126,42 +100,12 @@ function App() {
           }
         />
 
-        <Route index element={
-          <PrivateRoute requiredRole="medico">
-          <DashboardMedico />
-          </PrivateRoute>
-          } 
-        />
 
-        <Route path="definir-disponibilidad" element={
-          <PrivateRoute requiredRole="medico">
-          <DefinirDisponibilidad />
-          </PrivateRoute>
-          } 
-        />
-
-
-      <Route path="notificaciones/" element={
-          <PrivateRoute>
-            <NotificacionPage />
-          </PrivateRoute>
-        } />
+      <Route path="notificaciones/" element={<NotificacionPage />} />
 
     </Route>
-
-    
-
-    <Route
-      path="/sin-permiso"
-      element={
-        <div style={{ textAlign: "center", padding: "4rem" }}>
-          <h2>Acceso denegado</h2>
-          <p>No tenés permisos para ver esta página.</p>
-        </div>
-      }
-    />
-    </ThemeProvider>
   </Routes>
+  </ThemeProvider>
 );
 }
 
