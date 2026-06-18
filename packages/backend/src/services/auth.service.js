@@ -9,16 +9,11 @@ export class AuthService {
 
     async register(data) {
 
-        // const existeUsuario =
-        //     await this.usuarioService.findByUsername(data.username);
-
-        // if (existeUsuario) {
-        //     throw new Error("Usuario ya existe");
-        // }
 
         const kcUser = await this.keycloakService.createUser({
             username: data.username,
-            password: data.password
+            password: data.password,
+            nombre: data.nombre
         });
 
         await this.keycloakService.assignRole(

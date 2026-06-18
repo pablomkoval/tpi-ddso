@@ -5,7 +5,7 @@ import Navbar from "../../components/headers/Navbar.jsx";
 const Layout = ({ carrito }) => {
     return (
         <>
-          <Header username="Redondito de ricota"></Header>
+          <Header/>
           <Navbar/>
           <Outlet />
         </>

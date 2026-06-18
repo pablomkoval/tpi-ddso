@@ -16,7 +16,7 @@ export class KeycloakService {
         });
     }
 
-    async createUser({ username, password }) {
+    async createUser({ username, password, nombre }) {
         await this.#authenticateAdmin();
 
         try {
@@ -24,7 +24,7 @@ export class KeycloakService {
                 realm: "tpi-realm", 
                 username: username,
                 email: username,
-                firstName: "Usuario", 
+                firstName: nombre, 
                 lastName: "SweetMedical",
                 emailVerified: true,
                 enabled: true,

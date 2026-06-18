@@ -1,9 +1,11 @@
 import './Header.css';
+import { getUsernameFromToken } from '../../utils/authUtils';
 
-const Header = (props) => {
+const Header = () => {
+  const username = getUsernameFromToken();
   return (
     <header className="header">
-      ¡Hola {props.username}, este es un mensaje de prueba!
+      ¡Hola {username}, bienvenido a Sweet Medical!
     </header>
   );
 };
