@@ -14,7 +14,7 @@ const LoginPage = () => {
         const token = localStorage.getItem("token");
         if (token) {
             // Si ya está logueado, lo mandamos al inicio (dashboard)
-            navigate("/home", { replace: true });
+            navigate("/home", { replace: true }); //mantener /home o "/" pero hacer que se renderice condicionalmente segun rol
             console.log(jwtDecode(token));
             console.log(jwtDecode(localStorage.getItem("token")));
             console.log("en loginPage");

@@ -1,33 +1,34 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
-import Layout from './features/layout/Layout.jsx';
 import LoginPage from './features/LoginPage.jsx';
 import NotificacionPage from './features/NotificacionPage.jsx';
-import BuscarTurnos from './features/buscarTurnos/BuscarTurnos.jsx';
+import BuscarTurnos from './features/BuscarTurnos/BuscarTurnos.jsx';
 import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDisponibilidad.jsx';
 import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
 import Checkout from './features/checkout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import { ThemeProvider } from '@mui/material';
+import LayoutPaciente from './features/LayoutPaciente/LayoutPaciente.jsx';
+import LayoutMedico from './features/LayoutMedico/LayoutMedico.jsx';
+import DashboardMedico from './features/DashboardMedico/DashboardMedico.jsx';
+import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
+import Terminos from './features/Terminos/Terminos.jsx';
+import Privacidad from './features/Privacidad/Privacidad.jsx';
+import Ayuda from './features/Ayuda/Ayuda.jsx';
+import DashboardPaciente from './features/DashboardPaciente/DashboardPaciente.jsx';
+import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
+import theme from './theme/theme.js';
 import { jwtDecode } from 'jwt-decode';
 
 const RootRedirect = () => {
   const token = localStorage.getItem("token");
-  if (token) {
-
-    console.log(jwtDecode(token));
-    console.log(jwtDecode(localStorage.getItem("token")));
-    console.log("en app");
-    console.log(jwtDecode(token).realm_access);
-    console.log(jwtDecode(token).resource_access);
-  } else {
-    console.log("caso else app")
-  }
   return token ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />;
 }
 
 function App() {
 
   return (
+    <ThemeProvider theme={theme}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
@@ -50,6 +51,22 @@ function App() {
         <Route index element={<RootRedirect />} />
         {/* Solo pacientes */}
         <Route
+          path="/paciente"
+          element={
+            <PrivateRoute requiredRole="paciente">
+              <LayoutPaciente />
+            </PrivateRoute>
+          }
+        />
+
+        <Route index element={
+          <PrivateRoute requiredRole="paciente">
+          <DashboardPaciente />
+          </PrivateRoute>
+          } 
+        />
+
+        <Route
           path="buscar-turnos"
           element={
             <PrivateRoute requiredRole="paciente">
@@ -57,6 +74,21 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route path="mis-turnos" element={
+          <PrivateRoute requiredRole="paciente">
+           <MisTurnos /> 
+           </PrivateRoute>
+          } 
+        />
+
+        <Route path="turnos/:id" element={
+          <PrivateRoute requiredRole="paciente">
+          <DetalleTurno /> 
+          </PrivateRoute>    
+          } 
+        />
+
         <Route
           path="checkout"
           element={
@@ -77,6 +109,14 @@ function App() {
         />
 
         {/* Solo médicos */}
+          <Route
+          path="/medico"
+          element={
+            <PrivateRoute requiredRole="medico">
+              <LayoutMedico />
+            </PrivateRoute>
+          }
+
         <Route
           path="agenda-medica"
           element={
@@ -86,16 +126,43 @@ function App() {
           }
         />
 
-        <Route path="notificaciones/" element={
+        <Route index element={
+          <PrivateRoute requiredRole="medico">
+          <DashboardMedico />
+          </PrivateRoute>
+          } 
+        />
+
+        <Route path="definir-disponibilidad" element={
+          <PrivateRoute requiredRole="medico">
+          <DefinirDisponibilidad />
+          </PrivateRoute>
+          } 
+        />
+
+
+      <Route path="notificaciones/" element={
           <PrivateRoute>
             <NotificacionPage />
           </PrivateRoute>
         } />
 
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+    </Route>
+
+    
+
+    <Route
+      path="/sin-permiso"
+      element={
+        <div style={{ textAlign: "center", padding: "4rem" }}>
+          <h2>Acceso denegado</h2>
+          <p>No tenés permisos para ver esta página.</p>
+        </div>
+      }
+    />
+    </ThemeProvider>
+  </Routes>
+);
 }
 
 export default App;
