@@ -58,14 +58,14 @@ export default function DashboardMedico() {
           <Button
             variant="outlined"
             startIcon={<EventAvailableIcon />}
-            onClick={() => navigate('/medico/definir-disponibilidad')}
+            onClick={() => navigate('/definir-disponibilidad')}
           >
             Disponibilidad
           </Button>
           <Button
             variant="contained"
             startIcon={<CalendarIcon />}
-            onClick={() => navigate('/medico/agenda-medica')}
+            onClick={() => navigate('/agenda-medica')}
           >
             Ver Agenda
           </Button>
@@ -95,7 +95,7 @@ export default function DashboardMedico() {
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
               <Typography variant="h6" fontWeight={700}>Turnos de hoy</Typography>
-              <Button size="small" onClick={() => navigate('/medico/agenda-medica')}>Ver agenda completa</Button>
+              <Button size="small" onClick={() => navigate('/agenda-medica')}>Ver agenda completa</Button>
             </Box>
 
             <Stack spacing={1.5}>
@@ -166,7 +166,7 @@ export default function DashboardMedico() {
               </Typography>
               <Button
                 variant="contained"
-                onClick={() => navigate('/medico/notificaciones')}
+                onClick={() => navigate('/notificaciones')}
                 sx={{ bgcolor: 'white', color: 'primary.main', boxShadow: 'none', '&:hover': { bgcolor: 'primary.light', boxShadow: 'none' } }}
               >
                 Revisar

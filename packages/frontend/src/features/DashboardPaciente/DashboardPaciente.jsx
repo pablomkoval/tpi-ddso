@@ -71,7 +71,7 @@ export default function DashboardPaciente() {
         <Button
           variant="contained"
           startIcon={<PersonSearchIcon />}
-          onClick={() => navigate('/paciente/buscar-turnos')}
+          onClick={() => navigate('/buscar-turnos')}
           sx={{ flexShrink: 0 }}
         >
           Buscar turno
@@ -211,7 +211,7 @@ export default function DashboardPaciente() {
 
               <Button
                 variant="contained"
-                onClick={() => navigate('/paciente/notificaciones')}
+                onClick={() => navigate('/notificaciones')}
                 sx={{
                   bgcolor: 'white',
                   color: 'primary.main',
