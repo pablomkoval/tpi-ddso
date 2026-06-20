@@ -27,7 +27,7 @@ const Footer = () => {
           Sweet Medical
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          © 2024 Sweet Medical. Todos los derechos reservados.
+          © 2026 Sweet Medical. Todos los derechos reservados.
         </Typography>
       </Box>
 

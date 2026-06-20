@@ -98,67 +98,8 @@ const LoginBox = ({ onRegisterClick }) => {
                         Bienvenido de nuevo
                     </Typography>
 
-                    <Typography color="text.secondary" variant="body2">
-                        Selecciona tu perfil para ingresar
-                    </Typography>
                 </Box>
 
-                <ToggleButtonGroup
-                    exclusive
-                    value={role}
-                    onChange={handleRoleChange}
-                    aria-label="Seleccionar perfil"
-                    sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                        gap: 2,
-                        '& .MuiToggleButtonGroup-grouped': {
-                            margin: 0,
-                            border: '2px solid #f2f3fb !important',
-                            borderRadius: '12px !important',
-                        }
-                    }}
-                >
-                    {roleOptions.map((option) => (
-                        <ToggleButton
-                            key={option.value}
-                            value={option.value}
-                            aria-label={option.label}
-                            sx={{
-                                width: '100%',
-                                p: 2,
-                                color: 'text.primary',
-                                backgroundColor: '#f9f9ff',
-                                textTransform: 'none',
-                                transition: 'all 0.2s ease',
-                                '&:hover, &.Mui-selected, &.Mui-selected:hover': {
-                                    color: 'primary.main',
-                                    backgroundColor: '#f0f7ff',
-                                    borderColor: 'primary.main !important',
-                                }
-                            }}
-                        >
-                            <Stack sx={{ alignItems: 'center', gap: 1 }}>
-                                <Box sx={{
-                                    display: 'grid',
-                                    width: '40px',
-                                    height: '40px',
-                                    placeItems: 'center',
-                                    backgroundColor: 'background.paper',
-                                    borderRadius: '50%',
-                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                                    color: 'inherit'
-                                }}>
-                                    {option.icon}
-                                </Box>
-
-                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                                    {option.label}
-                                </Typography>
-                            </Stack>
-                        </ToggleButton>
-                    ))}
-                </ToggleButtonGroup>
 
                 <Box component="form" onSubmit={handleSubmit} noValidate>
                     <Stack sx={{ gap: 3 }}>
