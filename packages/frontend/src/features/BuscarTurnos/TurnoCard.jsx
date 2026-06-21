@@ -3,15 +3,24 @@ import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 const estadoStyles = {
   Parcial:  { bgcolor: 'primary.light',  color: 'primary.main' },
   Completa: { bgcolor: '#e0f5f5',        color: 'secondary.main' },
 };
 
+
+
 const TurnoCard = ({ turno }) => {
   const { nombre, especialidad, fecha, hora, sede, estado, precio } = turno;
   const navigate = useNavigate();
+  const { agregarTurno } = useCart();
+
+  const handleAgregar = () => {
+    console.log("agregando", turno);
+    agregarTurno(turno);
+  };
 
   return (
     <Box
@@ -66,7 +75,7 @@ const TurnoCard = ({ turno }) => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" size="small" onClick={() => console.log('preselección', turno.id)}>
+          <Button onClick={handleAgregar} variant="outlined" size="small">
             Agregar a preselección
           </Button>
           <Button variant="contained" size="small" onClick={() => navigate(`/paciente/turnos/${turno.id}`)}>

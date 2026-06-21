@@ -32,7 +32,7 @@ const Header = () => {
           <InputBase placeholder="Buscar..." sx={{ fontSize: '0.875rem' }} />
         </Box>
 
-        <IconButton color="primary" size="small">
+        <IconButton color="primary" size="small" component={Link} to="/checkout">
           <ShoppingCartOutlinedIcon />
         </IconButton>
         <IconButton color="primary" size="small">

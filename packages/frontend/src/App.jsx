@@ -80,6 +80,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        
 
         {/* Solo médicos */}
         <Route
