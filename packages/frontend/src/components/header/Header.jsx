@@ -1,11 +1,13 @@
-import { AppBar, Toolbar, Typography, Box, InputBase, IconButton } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, InputBase, IconButton, Badge } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { Link } from 'react-router-dom';
 import HeaderMenu from './HeaderMenu.jsx';
+import { useCart } from '../../context/CartContext.jsx';
 
 const Header = () => {
+  const { carrito } = useCart();
   return (
     <AppBar position="static" elevation={1} sx={{ bgcolor: 'background.paper' }}>
       <Toolbar sx={{ gap: 3 }}>
@@ -33,7 +35,13 @@ const Header = () => {
         </Box>
 
         <IconButton color="primary" size="small" component={Link} to="/checkout">
-          <ShoppingCartOutlinedIcon />
+          <Badge
+            badgeContent={carrito.length}
+            color="error"
+            invisible={carrito.length === 0}
+          >
+            <ShoppingCartOutlinedIcon />
+          </Badge>
         </IconButton>
         <IconButton color="primary" size="small">
           <AccountCircleOutlinedIcon />
