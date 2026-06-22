@@ -18,36 +18,33 @@ import {
   NotificationsNone as NotificationsNoneIcon,
   PendingActions as PendingActionsIcon,
 } from '@mui/icons-material';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
+import { proximoTurnoData, turnosPendientesData, notificacionesPacienteData } from '../../mockdata/dashboardPacienteMock';
 
-const proximoTurno = {
-  especialidad: 'Cardiología Clínica',
-  medico: 'Dr. Alberto Rodríguez',
-  iniciales: 'AR',
-  fecha: 'Sábado, 20 de Junio',
-  fechaLabel: 'Fecha confirmada',
-  hora: '10:00 AM',
-  duracion: '30 min',
-  lugar: 'Sede Central - Banfield',
-  ciudad: 'Buenos Aires, Argentina',
-};
 
-const turnosPendientes = [
-  { id: 1, especialidad: 'Dermatología', estado: 'Esperando confirmación médica' },
-  { id: 2, especialidad: 'Laboratorio', estado: 'Solicitud enviada hoy' },
-];
-
-const datosNotificaciones = {
-  count: 3,
-  mensaje: 'Su último estudio de laboratorio ya está disponible para descargar.',
-};
 
 export default function DashboardPaciente() {
+
+  const [proximoTurno, setProximoTurno] = useState(null);
+  const [turnosPendientes, setTurnosPendientes] = useState([]);
+  const [datosNotificaciones, setNotificaciones] = useState(null);
+
+  useEffect(() => {
+    setProximoTurno(proximoTurnoData);
+    setTurnosPendientes(turnosPendientesData);
+    setNotificaciones(notificacionesPacienteData);
+  }, []);
+
   const username = getUsernameFromToken();
   const navigate = useNavigate();
 
   const nombreCompleto = username ? username : 'Paciente';
+
+  if (!proximoTurno || !datosNotificaciones) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>

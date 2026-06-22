@@ -21,13 +21,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
-
-const turnosHoy = [
-  { id: 1, paciente: 'Carlos Ruiz',     hora: '09:30', motivo: 'Consulta general',   estado: 'completado' },
-  { id: 2, paciente: 'Elena Gómez',     hora: '11:00', motivo: 'Control post-op',     estado: 'reservado'  },
-  { id: 3, paciente: 'Mateo Sosa',      hora: '15:00', motivo: 'Primera consulta',    estado: 'pendiente'  },
-  { id: 4, paciente: 'Lucía Ferreyra',  hora: '16:30', motivo: 'Recetas',             estado: 'reservado'  },
-];
+import { turnosHoyData, dashboardStats, proximoTurnoData, notificacionesData } from '../../mockdata/dashboardMedicoMock';
 
 const estadoConfig = {
   completado: { label: 'Completado', color: 'success' },
@@ -81,10 +75,10 @@ export default function DashboardMedico() {
           mb: 3,
         }}
       >
-        <StatCard icon={<CheckCircleIcon />} iconColor="#2e7d32" bg="#e8f5e9" value={24} label="Atendidos este mes" />
-        <StatCard icon={<CalendarIcon />}    iconColor="#1565c0" bg="#e3f2fd" value={12} label="Próximas citas"      />
-        <StatCard icon={<PendingIcon />}     iconColor="#e65100" bg="#fff3e0" value={3}  label="Cambios solicitados" />
-        <StatCard icon={<ClockIcon />}       iconColor="#6a1b9a" bg="#f3e5f5" value={4}  label="Turnos de hoy"       />
+        <StatCard icon={<CheckCircleIcon />} iconColor="#2e7d32" bg="#e8f5e9" value={dashboardStats.atendidosMes} label="Atendidos este mes" />
+        <StatCard icon={<CalendarIcon />}    iconColor="#1565c0" bg="#e3f2fd" value={dashboardStats.proximasCitas} label="Próximas citas"      />
+        <StatCard icon={<PendingIcon />}     iconColor="#e65100" bg="#fff3e0" value={dashboardStats.cambiosSolicitados}  label="Cambios solicitados" />
+        <StatCard icon={<ClockIcon />}       iconColor="#6a1b9a" bg="#f3e5f5" value={dashboardStats.turnosHoy}  label="Turnos de hoy"       />
       </Box>
 
       {/* Cuerpo principal */}
@@ -99,7 +93,7 @@ export default function DashboardMedico() {
             </Box>
 
             <Stack spacing={1.5}>
-              {turnosHoy.map((t) => {
+              {turnosHoyData.map((t) => {
                 const cfg = estadoConfig[t.estado];
                 return (
                   <Box
@@ -141,11 +135,19 @@ export default function DashboardMedico() {
                 <ClockIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                 <Typography variant="body1" fontWeight={700}>Próximo turno</Typography>
               </Box>
-              <Typography variant="h6" fontWeight={700}>Elena Gómez</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Control post-op</Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {proximoTurnoData.paciente}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {proximoTurnoData.motivo}
+              </Typography>
               <Divider sx={{ my: 1.5 }} />
-              <Typography variant="h4" fontWeight={700} color="primary">11:00</Typography>
-              <Typography variant="caption" color="text.secondary">En 1 hora 30 min</Typography>
+              <Typography variant="h4" fontWeight={700} color="primary">
+                {proximoTurnoData.hora}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {proximoTurnoData.tiempoRestante}
+              </Typography>
             </CardContent>
           </Card>
 
@@ -159,7 +161,7 @@ export default function DashboardMedico() {
                 </Typography>
               </Box>
               <Typography variant="h6" fontWeight={700} sx={{ color: 'white', mb: 1 }}>
-                3 cambios pendientes
+                {notificacionesData.cantidadPendientes} cambios pendientes
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mb: 2.5, lineHeight: 1.5 }}>
                 Pacientes que solicitaron modificar su turno esta semana.

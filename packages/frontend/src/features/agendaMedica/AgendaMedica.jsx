@@ -1,12 +1,12 @@
 // src/features/medico/AgendaMedica.jsx
 import React from 'react';
-import { 
-    Typography, 
-    Card, 
-    CardContent, 
-    Avatar, 
-    Box, 
-    Stack 
+import {
+    Typography,
+    Card,
+    CardContent,
+    Avatar,
+    Box,
+    Stack
 } from '@mui/material';
 
 // Íconos oficiales de Material-UI
@@ -18,50 +18,26 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
 
 import './AgendaMedica.css';
+import { horasAgenda, turnosMedicos, agendaStats, agendaSemana } from '../../mockdata/agendaMedicaData.js'
 
-// Rango de horas que atiende el Dr. Martínez
-const horasAgenda = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+const formatearSemana = (inicio) => {
+    const fechaInicio = new Date(inicio);
 
-const turnosMedicos = [
-    {
-        id: 1,
-        paciente: 'Carlos Ruiz',
-        motivo: 'Consulta Gral.',
-        estado: 'completado',
-        columna: 1, // Lunes
-        top: 30,    // 09:30 AM (Mitad de la primera celda de 60px)
-        height: 60  // 1 hora de duración
-    },
-    {
-        id: 2,
-        paciente: 'Elena Gómez',
-        motivo: 'Control Post-Op',
-        estado: 'reservado',
-        columna: 2, // Martes
-        top: 120,   // 11:00 AM
-        height: 90  // 1 hora y media
-    },
-    {
-        id: 3,
-        paciente: 'Mateo Sosa',
-        motivo: 'Primera vez',
-        estado: 'pendiente',
-        columna: 3, // Miércoles
-        top: 360,   // 15:00 PM
-        height: 60
-    },
-    {
-        id: 4,
-        paciente: 'Lucía Ferreyra',
-        motivo: 'Recetas',
-        estado: 'reservado',
-        columna: 5, // Viernes
-        top: 60,    // 10:00 AM
-        height: 60
-    }
-];
+    const fechaFin = new Date(inicio);
+    fechaFin.setDate(fechaInicio.getDate() + 4);
+
+    const mes = fechaInicio.toLocaleDateString("es-AR", {
+        month: "long"
+    });
+
+    const anio = fechaInicio.getFullYear();
+
+    return `Semana del ${fechaInicio.getDate()} al ${fechaFin.getDate()} de ${mes}, ${anio}`;
+};
 
 const AgendaMedica = () => {
+    //const [turnosMedicos, setTurnosMedicos] = useState([]);
+    //conexion con back a futuro
 
     // Función auxiliar para pintar el color del bloque según el estado del turno
     const obtenerEstilosEstado = (estado) => {
@@ -79,20 +55,20 @@ const AgendaMedica = () => {
     return (
         <div className="agenda-container">
             <main className="agenda-main-content">
-                
+
                 {/* 📊 Encabezado Simple */}
                 <Box sx={{ mb: 4, textAlign: 'left' }}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                         Agenda Médica
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        Semana del 20 al 24 de Mayo, 2026
+                        {formatearSemana(agendaSemana.inicio)}
                     </Typography>
                 </Box>
 
                 {/* 📅 Estructura del Calendario Semanal */}
                 <div className="calendar-wrapper">
-                    
+
                     {/* Encabezado de los días */}
                     <div className="calendar-grid-structure" style={{ backgroundColor: '#f2f3fb' }}>
                         <div className="calendar-header-day"></div> {/* Celda vacía de la esquina */}
@@ -120,7 +96,7 @@ const AgendaMedica = () => {
 
                     {/* Cuerpo del Calendario con las Horas y bloques absolutos */}
                     <div className="calendar-grid-structure" style={{ height: `${horasAgenda.length * 60}px` }}>
-                        
+
                         {/* Renderizamos las líneas de fondo del calendario */}
                         {horasAgenda.map((hora, indice) => (
                             <React.Fragment key={hora}>
@@ -186,7 +162,9 @@ const AgendaMedica = () => {
                                 <TaskAltIcon />
                             </Avatar>
                             <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>24</Typography>
+                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                                    {agendaStats.completados}
+                                </Typography>
                                 <Typography variant="body2" color="text.secondary">Turnos Completados</Typography>
                             </Box>
                         </CardContent>
@@ -199,7 +177,9 @@ const AgendaMedica = () => {
                                 <CalendarTodayIcon />
                             </Avatar>
                             <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>12</Typography>
+                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                                    {agendaStats.proximasCitas}
+                                </Typography>
                                 <Typography variant="body2" color="text.secondary">Próximas Citas</Typography>
                             </Box>
                         </CardContent>
@@ -212,7 +192,9 @@ const AgendaMedica = () => {
                                 <NotificationImportantIcon />
                             </Avatar>
                             <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>3</Typography>
+                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                                    {agendaStats.cambiosSolicitados}
+                                </Typography>
                                 <Typography variant="body2" color="text.secondary">Cambios Solicitados</Typography>
                             </Box>
                         </CardContent>

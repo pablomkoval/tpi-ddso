@@ -68,6 +68,7 @@ const LoginBox = ({ onRegisterClick }) => {
             const data = await loginService.login(username, password);
             
             localStorage.setItem("token", data.access_token);
+            localStorage.setItem("refreshToken", data.refresh_token);
             
             console.log("¡Login Exitoso como " + role + "!");
             navigate('/home');

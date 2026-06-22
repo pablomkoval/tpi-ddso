@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Select, MenuItem, FormControl, Pagination } from '@mui/material';
 import TurnoCard from './TurnoCard.jsx';
+import { turnosData } from '../../mockdata/turnosData.js';
 
-const LIMITE = 10;
+const LIMITE = 10; //Revisar hardcodeo aca
 
-const turnosMock = [
-  { id: 1, nombre: 'Dr. Juan Pérez',   especialidad: 'CARDIOLOGÍA',  fecha: '15/06/2026', hora: '15:30', sede: 'Sede Palermo',  estado: 'Parcial',  precio: 3500 },
-  { id: 2, nombre: 'Dra. Elena Rossi', especialidad: 'CARDIOLOGÍA',  fecha: '16/06/2026', hora: '10:00', sede: 'Sede Palermo',  estado: 'Completa', precio: 4200 },
-  { id: 3, nombre: 'Dr. Marcos Silva', especialidad: 'NEUROLOGÍA',   fecha: '17/06/2026', hora: '09:00', sede: 'Sede Belgrano', estado: 'Parcial',  precio: 2800 },
-  { id: 4, nombre: 'Dra. Laura Gómez', especialidad: 'DERMATOLOGÍA', fecha: '18/06/2026', hora: '14:00', sede: 'Sede Centro',   estado: 'Completa', precio: 3100 },
-];
+const turnos = turnosData 
 
 const filtrarTurnos = (turnos, filtros) => {
   return turnos.filter((t) => {
@@ -46,7 +42,7 @@ const TurnosResults = ({ filtros = {} }) => {
     setPagina(1);
     // TODO: reemplazar con fetch real:
     // fetch(`/api/turnos?${new URLSearchParams(filtros)}`).then(...)
-    const filtrados = filtrarTurnos(turnosMock, filtros);
+    const filtrados = filtrarTurnos(turnos, filtros);
     setTurnos(filtrados);
     setTotal(filtrados.length);
   }, [filtros]);

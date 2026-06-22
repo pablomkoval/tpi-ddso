@@ -1,22 +1,8 @@
 const turnosData = [
-  {
-    id: "6470abc123",
-    medico: "Dr. Roberto Pérez",
-    fechaHora: "2026-06-20T10:00:00Z",
-    servicio: "Cardiología Clínica",
-    sede: "Sede Central - Banfield",
-    costo: 15000,
-    estado: "RESERVADO"
-  },
-  {
-    id: "6470abc456",
-    medico: "Dra. María Gómez",
-    fechaHora: "2026-06-25T16:30:00Z",
-    servicio: "Ecografía Doppler",
-    sede: "Sede Norte - Lomas de Zamora",
-    costo: 22000,
-    estado: "RESERVADO"
-  }
+  { id: 1, nombre: 'Dr. Juan Pérez',   especialidad: 'CARDIOLOGÍA',  fecha: '15/06/2026', hora: '15:30', sede: 'Sede Palermo',  estado: 'Parcial',  precio: 3500 },
+  { id: 2, nombre: 'Dra. Elena Rossi', especialidad: 'CARDIOLOGÍA',  fecha: '16/06/2026', hora: '10:00', sede: 'Sede Palermo',  estado: 'Completa', precio: 4200 },
+  { id: 3, nombre: 'Dr. Marcos Silva', especialidad: 'NEUROLOGÍA',   fecha: '17/06/2026', hora: '09:00', sede: 'Sede Belgrano', estado: 'Parcial',  precio: 2800 },
+  { id: 4, nombre: 'Dra. Laura Gómez', especialidad: 'DERMATOLOGÍA', fecha: '18/06/2026', hora: '14:00', sede: 'Sede Centro',   estado: 'Completa', precio: 3100 },
 ];
 
 async function obtenerTurnos() {

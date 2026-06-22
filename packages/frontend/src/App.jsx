@@ -13,6 +13,7 @@ import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
 import HomePage from './features/HomePage.jsx';
 import RoleLayout from './features/RoleLayout.jsx';
+import SessionManager from './components/sessionComponents/SessionManager.jsx';
 
 const RootRedirect = () => {
   const token = localStorage.getItem("token");
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+    <SessionManager/>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
