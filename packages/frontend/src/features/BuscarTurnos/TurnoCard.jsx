@@ -85,7 +85,7 @@ const TurnoCard = ({ turno }) => {
             Agregar a preselección
           </Button>
           <Button variant="contained" size="small" onClick={() => navigate(`/turnos/${turno.id}`)}>
-            Reservar
+            Ver detalles
           </Button>
         </Box>
       </Box>

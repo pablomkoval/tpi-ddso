@@ -40,7 +40,7 @@ export default function DetalleTurno() {
     return () => clearTimeout(timer);
   }, [id]);
 
-  const turno = detalleTurnosData[id];
+  const turno = detalleTurnosData[id - 1];
 
   const handleAgregar = () => {
     console.log("agregando", turno);
