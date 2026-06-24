@@ -61,11 +61,17 @@ const TurnoCard = ({ turno }) => {
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1.5 }}>
-        <Chip
+        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', gap: 1.5 }}>
+          <Typography variant="body2" color="text.secondary" letterSpacing={0.5}>
+            Cobertura:
+          </Typography>
+          <Chip
           label={estado}
           size="small"
           sx={{ ...estadoStyles[estado], fontWeight: 600 }}
         />
+        </Box>
+        
         <Box sx={{ textAlign: 'right' }}>
           <Typography variant="h5" fontWeight={700} color="primary">
             ${precio.toLocaleString('es-AR')}
@@ -78,7 +84,7 @@ const TurnoCard = ({ turno }) => {
           <Button onClick={handleAgregar} variant="outlined" size="small">
             Agregar a preselección
           </Button>
-          <Button variant="contained" size="small" onClick={() => navigate(`/paciente/turnos/${turno.id}`)}>
+          <Button variant="contained" size="small" onClick={() => navigate(`/turnos/${turno.id}`)}>
             Reservar
           </Button>
         </Box>

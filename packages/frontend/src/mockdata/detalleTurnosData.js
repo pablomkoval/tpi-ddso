@@ -1,6 +1,6 @@
-const detalleTurnosData = {
-  "1": {
-    id: "1",
+const detalleTurnosData = [
+  {
+    id: 1,
     nombre: "Dr. Juan Pérez",
     iniciales: "JP",
     especialidad: "Cardiología",
@@ -17,6 +17,7 @@ const detalleTurnosData = {
     cobertura: "OSDE 410 / 510",
     precio: 3500,
     precioOriginal: 5000,
+    estado: 'Parcial',
     notaPago: "Valor del copago según su plan vigente.",
     requisitos: [
       "Traer estudios previos (si posee).",
@@ -24,8 +25,8 @@ const detalleTurnosData = {
       "Ayuno no requerido para esta consulta.",
     ],
   },
-  "2": {
-    id: "2",
+  {
+    id: 2,
     nombre: "Dra. Elena Rossi",
     iniciales: "ER",
     especialidad: "Cardiología",
@@ -42,6 +43,7 @@ const detalleTurnosData = {
     cobertura: "Swiss Medical / OSDE",
     precio: 4200,
     precioOriginal: 6500,
+    estado: 'Parcial',
     notaPago: "Valor del copago según su plan vigente.",
     requisitos: [
       "Traer electrocardiograma reciente (si posee).",
@@ -49,8 +51,8 @@ const detalleTurnosData = {
       "No se requiere ayuno.",
     ],
   },
-  "3": {
-    id: "3",
+  {
+    id: 3,
     nombre: "Dr. Marcos Silva",
     iniciales: "MS",
     especialidad: "Neurología",
@@ -67,6 +69,7 @@ const detalleTurnosData = {
     cobertura: "GALENO / IOMA",
     precio: 2800,
     precioOriginal: 4200,
+    estado: 'Parcial',
     notaPago: "Valor del copago según su plan vigente.",
     requisitos: [
       "Traer resonancias o tomografías previas.",
@@ -74,8 +77,8 @@ const detalleTurnosData = {
       "Listar medicación actual al llegar.",
     ],
   },
-  "4": {
-    id: "4",
+  {
+    id: 4,
     nombre: "Dra. Laura Gómez",
     iniciales: "LG",
     especialidad: "Dermatología",
@@ -90,8 +93,9 @@ const detalleTurnosData = {
     sede: "Sede Centro",
     direccion: "Corrientes 1234, Piso 3, CABA",
     cobertura: "OSDE / Swiss Medical",
-    precio: 3100,
+    precio: 0,
     precioOriginal: 4800,
+    estado: 'Completa',
     notaPago: "Valor del copago según su plan vigente.",
     requisitos: [
       "No aplicar cremas ni maquillaje en zonas a evaluar.",
@@ -99,6 +103,6 @@ const detalleTurnosData = {
       "Ayuno no requerido.",
     ],
   },
-};
+]
 
 export { detalleTurnosData };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Select, MenuItem, FormControl, Pagination, Skeleton } from '@mui/material';
 import TurnoCard from './TurnoCard.jsx';
-import { turnosData } from '../../mockdata/turnosData.js';
+import { detalleTurnosData } from '../../mockdata/detalleTurnosData.js';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
 const LIMITE = 10; //Revisar hardcodeo aca
@@ -43,10 +43,10 @@ const TurnosResults = ({ filtros = {} }) => {
     setLoading(1);
     // TODO: reemplazar con fetch real:
     // fetch(`/api/turnos?${new URLSearchParams(filtros)}`).then(...)
-
+    
     // para el skeleton
     const timer = setTimeout(() => {
-      const filtrados = filtrarTurnos(turnosData, filtros); 
+      const filtrados = filtrarTurnos(detalleTurnosData, filtros); 
       setTurnos(filtrados);
       setTotal(filtrados.length);
       setLoading(false);

@@ -23,11 +23,13 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { detalleTurnosData } from '../../mockdata/detalleTurnosData';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
+import { useCart } from '../../context/CartContext.jsx';
 
 export default function DetalleTurno() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const { agregarTurno } = useCart();
 
   // para el skeleton
   useEffect(() => {
@@ -39,6 +41,11 @@ export default function DetalleTurno() {
   }, [id]);
 
   const turno = detalleTurnosData[id];
+
+  const handleAgregar = () => {
+    console.log("agregando", turno);
+    agregarTurno(turno);
+  };
 
   if (loading) {
     return (
@@ -57,7 +64,7 @@ export default function DetalleTurno() {
         <Button
           startIcon={<ArrowBackIcon />}
           variant="outlined"
-          onClick={() => navigate('/paciente/buscar-turnos')}
+          onClick={() => navigate('/buscar-turnos')}
         >
           Volver a resultados
         </Button>
@@ -70,7 +77,7 @@ export default function DetalleTurno() {
       <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/paciente/buscar-turnos')}
+          onClick={() => navigate('/buscar-turnos')}
           sx={{ mb: 3, color: 'text.secondary', pl: 0 }}
         >
           Volver a resultados
@@ -333,15 +340,9 @@ export default function DetalleTurno() {
         <Button
           variant="outlined"
           startIcon={<PersonSearchIcon />}
-          onClick={() => console.log('Agregar a preselección', turno.id)}
+          onClick={handleAgregar}
         >
           Agregar a preselección
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => console.log('Reservar turno', turno.id)}
-        >
-          Reservar Turno
         </Button>
       </Box>
     </Box>
