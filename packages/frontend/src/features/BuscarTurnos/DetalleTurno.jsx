@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -22,12 +22,31 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { detalleTurnosData } from '../../mockdata/detalleTurnosData';
+import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
 export default function DetalleTurno() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  // para el skeleton
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const turno = detalleTurnosData[id];
+
+  if (loading) {
+    return (
+      <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
+        <CustomSkeleton type="detail" count={1} />
+      </Box>
+    );
+  }
 
   if (!turno) {
     return (

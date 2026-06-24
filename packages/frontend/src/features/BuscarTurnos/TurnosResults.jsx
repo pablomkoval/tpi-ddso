@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Select, MenuItem, FormControl, Pagination } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, Pagination, Skeleton } from '@mui/material';
 import TurnoCard from './TurnoCard.jsx';
 import { turnosData } from '../../mockdata/turnosData.js';
+import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
 const LIMITE = 10; //Revisar hardcodeo aca
-
-const turnos = turnosData 
 
 const filtrarTurnos = (turnos, filtros) => {
   return turnos.filter((t) => {
@@ -37,14 +36,23 @@ const TurnosResults = ({ filtros = {} }) => {
   const [total, setTotal] = useState(0);
   const [pagina, setPagina] = useState(1);
   const [orden, setOrden] = useState('precio_asc');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setPagina(1);
+    setLoading(1);
     // TODO: reemplazar con fetch real:
     // fetch(`/api/turnos?${new URLSearchParams(filtros)}`).then(...)
-    const filtrados = filtrarTurnos(turnos, filtros);
-    setTurnos(filtrados);
-    setTotal(filtrados.length);
+
+    // para el skeleton
+    const timer = setTimeout(() => {
+      const filtrados = filtrarTurnos(turnosData, filtros); 
+      setTurnos(filtrados);
+      setTotal(filtrados.length);
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
   }, [filtros]);
 
   const turnosOrdenados = ordenarTurnos(turnos, orden);
@@ -55,7 +63,8 @@ const TurnosResults = ({ filtros = {} }) => {
         <Box>
           <Typography variant="h4" fontWeight={700}>Turnos Disponibles</Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
-            Se encontraron {total} turnos que coinciden con su búsqueda.
+            {/* Si esta cargando se muestra un skeleton para conteo*/}
+            {loading ? <Skeleton width={250} /> : `Se encontraron ${total} turnos que coinciden con su búsqueda.`}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -65,6 +74,7 @@ const TurnosResults = ({ filtros = {} }) => {
               value={orden}
               onChange={(e) => setOrden(e.target.value)}
               sx={{ minWidth: 160 }}
+              disabled={loading}
             >
               {ordenarOpciones.map((op) => (
                 <MenuItem key={op.value} value={op.value}>{op.label}</MenuItem>
@@ -75,9 +85,13 @@ const TurnosResults = ({ filtros = {} }) => {
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {turnosOrdenados.map((turno) => (
-          <TurnoCard key={turno.id} turno={turno} />
-        ))}
+        {loading ? (
+          <CustomSkeleton type="list" count={3} />
+        ) : (
+          turnosOrdenados.map((turno) => (
+            <TurnoCard key={turno.id} turno={turno} />
+          ))
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -86,6 +100,7 @@ const TurnosResults = ({ filtros = {} }) => {
           page={pagina}
           onChange={(_, p) => setPagina(p)}
           color="primary"
+          disabled={loading}
         />
       </Box>
     </Box>
