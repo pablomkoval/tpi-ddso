@@ -15,7 +15,7 @@ import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { turnosData } from "../mockdata/turnosData";
+import { useCart } from "../context/CartContext";
 
 
 
@@ -26,13 +26,14 @@ const formatearFecha = (fechaString) => {
 };
 
 const Checkout = () => {
-  const [turnosSeleccionados, setTurnosSeleccionados] = useState(turnosData);
+  const { carrito, agregarTurno, eliminarTurno, limpiarCarrito } = useCart();
 
   const handleRemoveItem = (id) => {
-    setTurnosSeleccionados((prevItems) => prevItems.filter((item) => item.id !== id));
+    eliminarTurno(id);
   };
 
-  const total = turnosSeleccionados.reduce((acc, item) => acc + item.costo, 0);
+  const total = carrito.reduce((acc, item) => acc + item.precio, 0);
+
 
   return (
     <Box
@@ -54,10 +55,10 @@ const Checkout = () => {
           sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}
         >
           <EventAvailableIcon color="primary" fontSize="large" />
-          Tus Turnos a Confirmar ({turnosSeleccionados.length})
+          Tus Turnos a Confirmar ({carrito.length})
         </Typography>
 
-        {turnosSeleccionados.length === 0 ? (
+        {carrito.length === 0 ? (
           <Paper variant="outlined" sx={{ p: 5, textAlign: "center", borderRadius: "12px" }}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No tenés turnos pendientes de confirmación.
@@ -68,7 +69,7 @@ const Checkout = () => {
           </Paper>
         ) : (
           <Stack sx={{ gap: 2 }}>
-            {turnosSeleccionados.map((turno) => (
+            {carrito.map((turno) => (
               <Paper
                 key={turno.id}
                 variant="outlined"
@@ -102,15 +103,15 @@ const Checkout = () => {
                   
                   <Box>
                     <Typography variant="h6" fontWeight="bold" sx={{ lineHeight: 1.2, mb: 0.5 }}>
-                      {turno.servicio}
+                      {turno.especialidad}
                     </Typography>
                     
                     <Stack spacing={0.5} sx={{ mt: 1 }}>
                       <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <PersonIcon fontSize="small" /> {turno.medico}
+                        <PersonIcon fontSize="small" /> {turno.nombre}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1, textTransform: 'capitalize' }}>
-                        <CalendarMonthIcon fontSize="small" /> {formatearFecha(turno.fechaHora)}
+                        <CalendarMonthIcon fontSize="small" /> {turno.fecha} - {turno.hora}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <LocationOnIcon fontSize="small" /> {turno.sede}
@@ -132,7 +133,7 @@ const Checkout = () => {
                   }}
                 >
                   <Typography variant="h6" fontWeight="bold" color="primary.main" sx={{ minWidth: "100px", textAlign: "right" }}>
-                    ${turno.costo.toLocaleString("es-AR")}
+                    ${turno.precio.toLocaleString("es-AR")}
                   </Typography>
                   <IconButton 
                     color="error" 
@@ -166,7 +167,7 @@ const Checkout = () => {
           <Stack sx={{ gap: 2, mb: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Typography variant="body2" color="text.secondary">
-                Subtotal ({turnosSeleccionados.length} turnos)
+                Subtotal ({carrito.length} turnos)
               </Typography>
               <Typography variant="body2" fontWeight="600">
                 ${total.toLocaleString("es-AR")}
@@ -189,7 +190,7 @@ const Checkout = () => {
             variant="contained"
             size="large"
             fullWidth
-            disabled={turnosSeleccionados.length === 0}
+            disabled={carrito.length === 0}
             sx={{
               borderRadius: "12px",
               py: 1.5,

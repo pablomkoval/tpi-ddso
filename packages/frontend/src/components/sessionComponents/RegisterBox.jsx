@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     Box,
@@ -11,7 +11,11 @@ import {
     TextField,
     ToggleButton,
     ToggleButtonGroup,
-    Typography
+    Typography,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import BadgeIcon from '@mui/icons-material/Badge';
 import EmailIcon from '@mui/icons-material/Email';
@@ -22,6 +26,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { registerService } from "../../services/registerService";
 
 const roleOptions = [
     {
@@ -43,82 +48,121 @@ const initialForm = {
     dni: '',
     obraSocial: '',
     plan: '',
-    matricula: ''
+    matricula: '',
+    especialidades: '',
+    practicas: '',
+    sedes: ''
 };
 
 const splitIds = (value) =>
     value
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean);
+        ? value.split(',').map((item) => item.trim()).filter(Boolean)
+        : [];
 
 const buildRegisterPayload = (role, form) => {
-    const basePayload = {
-        usuario: form.usuario,
-        password: form.password,
-        nombre: form.nombre
-    };
-
-    if (role === 'paciente') {
-        return {
-            tipoPerfil: role,
-            endpoint: '/pacientes',
-            body: {
-                ...basePayload,
-                dni: form.dni,
-                obraSocial: form.obraSocial || null,
-                plan: form.plan || null
-            }
-        };
-    }
-
     return {
-        tipoPerfil: role,
-        endpoint: '/medicos',
+        endpoint: '/auth/register',
         body: {
-            ...basePayload,
-            matricula: form.matricula,
-            especialidades: splitIds(form.especialidades),
-            practicas: splitIds(form.practicas),
-            sedes: splitIds(form.sedes)
+            role,
+            username: form.usuario,
+            password: form.password,
+            nombre: form.nombre,
+
+            ...(role === 'paciente' && {
+                dni: form.dni,
+                obraSocial: form.obraSocial,
+                plan: form.plan
+            }),
+
+            ...(role === 'medico' && {
+                matricula: form.matricula,
+                especialidades: splitIds(form.especialidades),
+                practicas: splitIds(form.practicas),
+                sedes: splitIds(form.sedes)
+            })
         }
     };
 };
 
 const RegisterBox = ({ onLoginClick, onRegister }) => {
+    const [listaObrasSociales, setListaObrasSociales] = useState([]);
+    const [listaPlanes, setListaPlanes] = useState([]);
     const [role, setRole] = useState('paciente');
     const [form, setForm] = useState(initialForm);
     const [showPassword, setShowPassword] = useState(false);
-    const [submittedPayload, setSubmittedPayload] = useState(null);
+    
+    // Estados para alertas
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    useEffect(() => {
+        const fetchObrasSociales = async () => {
+            try {
+                const data = await registerService.getObrasSociales();
+                setListaObrasSociales(data);
+            } catch (error) {
+                console.error("Error cargando obras sociales:", error);
+            }
+        };
+        fetchObrasSociales();
+    }, []);
 
     const handleRoleChange = (_event, nextRole) => {
         if (nextRole !== null) {
             setRole(nextRole);
-            setSubmittedPayload(null);
+            setErrorMsg(null);
+            setIsSuccess(false);
         }
     };
 
     const handleFieldChange = (event) => {
         const { name, value } = event.target;
-
         setForm((currentForm) => ({
             ...currentForm,
             [name]: value
         }));
     };
 
+    const handleObraSocialChange = (event) => {
+        const osId = event.target.value;
+
+        setForm(prev => ({ ...prev, obraSocial: osId, plan: '' }));
+
+        const osEncontrada = listaObrasSociales.find(os => os._id === osId);
+        if (osEncontrada) {
+            setListaPlanes(osEncontrada.planes || []);
+        } else {
+            setListaPlanes([]);
+        }
+    };
+
     const handleTogglePassword = () => {
         setShowPassword((currentValue) => !currentValue);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        setErrorMsg(null); 
+        setIsSuccess(false);
+
+        if (role === 'paciente' && (!form.obraSocial || !form.plan)) {
+            setErrorMsg("Por favor, seleccione una Obra Social y un Plan.");
+            return;
+        }
 
         const registerPayload = buildRegisterPayload(role, form);
-        setSubmittedPayload(registerPayload);
 
-        if (onRegister) {
-            onRegister(registerPayload);
+        try {
+            await registerService.register(registerPayload);
+            setIsSuccess(true);
+
+            // Redirige al login después de 2 segundos de éxito
+            setTimeout(() => {
+                if (onLoginClick) onLoginClick();
+            }, 2000);
+
+        } catch (error) {
+            setErrorMsg(error.message || "Error inesperado al registrar el usuario");
         }
     };
 
@@ -205,6 +249,19 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                     ))}
                 </ToggleButtonGroup>
 
+                {/* ALERTAS DE ERROR Y ÉXITO */}
+                {errorMsg && (
+                    <Alert severity="error" sx={{ alignItems: 'center' }}>
+                        {errorMsg}
+                    </Alert>
+                )}
+
+                {isSuccess && (
+                    <Alert severity="success" sx={{ alignItems: 'center' }}>
+                        ¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...
+                    </Alert>
+                )}
+
                 <Box component="form" onSubmit={handleSubmit} noValidate>
                     <Stack sx={{ gap: 2.5 }}>
                         <TextField
@@ -240,18 +297,10 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                                     <InputAdornment position="end">
                                         <IconButton
                                             edge="end"
-                                            aria-label={
-                                                showPassword
-                                                    ? 'Ocultar contraseña'
-                                                    : 'Mostrar contraseña'
-                                            }
+                                            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                                             onClick={handleTogglePassword}
                                         >
-                                            {showPassword ? (
-                                                <VisibilityOffIcon />
-                                            ) : (
-                                                <VisibilityIcon />
-                                            )}
+                                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                                         </IconButton>
                                     </InputAdornment>
                                 )
@@ -289,22 +338,39 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                                         )
                                     }}
                                 />
+                                <FormControl fullWidth required>
+                                    <InputLabel id="os-label">Obra social</InputLabel>
+                                    <Select
+                                        labelId="os-label"
+                                        name="obraSocial"
+                                        value={form.obraSocial}
+                                        label="Obra social"
+                                        onChange={handleObraSocialChange}
+                                    >
+                                        {listaObrasSociales.map((os) => (
+                                            <MenuItem key={os._id} value={os._id}>
+                                                {os.nombre}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
 
-                                <TextField
-                                    label="Obra social"
-                                    name="obraSocial"
-                                    value={form.obraSocial}
-                                    onChange={handleFieldChange}
-                                    helperText="Por ejemplo: OSDE"
-                                />
-
-                                <TextField
-                                    label="Numero de plan"
-                                    name="plan"
-                                    value={form.plan}
-                                    onChange={handleFieldChange}
-                                    helperText="Por ejemplo: 210"
-                                />
+                                <FormControl fullWidth required disabled={!form.obraSocial}>
+                                    <InputLabel id="plan-label">Plan</InputLabel>
+                                    <Select
+                                        labelId="plan-label"
+                                        name="plan"
+                                        value={form.plan}
+                                        label="Plan"
+                                        onChange={handleFieldChange}
+                                    >
+                                        {listaPlanes.map((plan) => (
+                                            <MenuItem key={plan._id} value={plan._id}>
+                                                {plan.nombre}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </>
                         ) : (
                             <>
@@ -330,6 +396,7 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                             variant="contained"
                             endIcon={<PersonAddIcon />}
                             fullWidth
+                            disabled={isSuccess} // Deshabilitamos si se está redirigiendo
                             sx={{
                                 boxShadow: '0 10px 25px rgba(0, 94, 184, 0.15)',
                                 '&:hover': {
@@ -341,12 +408,6 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
                         </Button>
                     </Stack>
                 </Box>
-
-                {submittedPayload && (
-                    <Alert severity="success" sx={{ alignItems: 'center' }}>
-                        Datos preparados para enviar a {submittedPayload.endpoint}
-                    </Alert>
-                )}
 
                 <Typography color="text.secondary" variant="body2" sx={{ textAlign: 'center' }}>
                     ¿Ya tenés cuenta?{' '}

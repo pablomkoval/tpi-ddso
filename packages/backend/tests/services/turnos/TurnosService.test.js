@@ -1,113 +1,183 @@
-// packages/backend/tests/services/turnos/TurnosService.test.js
-import { describe, test, expect, beforeEach, jest } from "@jest/globals";
-import { TurnoService } from "../../../src/services/turno.service.js";
-import { NivelCobertura } from "../../../src/domain/enum/NivelCobertura.js";
-import AppError from "../../../src/shared/errors/AppError.js";
+/**
+ * Tests de integración — TurnoRepository con MongoDB en memoria
+ * Usamos `mongodb-memory-server` para levantar una instancia real de Mongo
+ */
+import { describe, test, expect, beforeAll, afterAll, beforeEach } from "@jest/globals";
+import mongoose from "mongoose";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import "../../../src/schemas/prestacion.schema.js";
+import "../../../src/schemas/medico.schema.js";
+import { TurnoModel } from "../../../src/schemas/turno.schema.js";
+import { TurnoRepository } from "../../../src/domain/models/repositories/turno.repository.js";
 
-describe("Turnos Service tests", () => {
-    let service;
-    let turnoRepositoryMock;
-    let medicoServiceMock;
-    let pacienteServiceMock;
-    let servicioServiceMock;
+let mongod;
+let repo;
 
-    beforeEach(() => {
-        turnoRepositoryMock = {
-            buscarDisponibles: jest.fn().mockResolvedValue({
-                turnos: [
-                    {
-                        _id: "turno1",
-                        costo: 2000,
-                        servicio: { _id: "practica1", tipoServicio: "practica", costo: 2000 }
-                    }
-                ],
-                total: 1
-            }),
-            findById: jest.fn(),
-            update: jest.fn()
-        };
+const buildTurnoData = (overrides = {}) => ({
+    medico: new mongoose.Types.ObjectId(),
+    servicio: new mongoose.Types.ObjectId(),
+    fechaHora: new Date("2026-09-15T10:00:00Z"),
+    costo: 2500,
+    estado: "DISPONIBLE",
+    disponibilidadOrigen: {
+        diaSemana: "LUNES",
+        horaDesde: "09:00",
+        horaHasta: "13:00",
+        sede: new mongoose.Types.ObjectId(),
+        prestacion: new mongoose.Types.ObjectId(),
+    },
+    ...overrides,
+});
 
-        medicoServiceMock = { findById: jest.fn() };
-        pacienteServiceMock = { findById: jest.fn() };
-        servicioServiceMock = { findOriginalServicioById: jest.fn(), findPrestacionById: jest.fn() };
+beforeAll(async () => {
+    mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
 
-        service = new TurnoService(
-            turnoRepositoryMock,
-            medicoServiceMock,
-            pacienteServiceMock,
-            servicioServiceMock
+    await mongoose.connect(uri);
+
+    repo = new TurnoRepository();
+});
+
+afterAll(async () => {
+    await mongoose.disconnect();
+    await mongod.stop();
+});
+
+beforeEach(async () => {
+    await TurnoModel.deleteMany({});
+});
+
+describe("TurnoRepository — integración con MongoDB en memoria", () => {
+
+
+    test("save() persiste un turno y findById() lo recupera correctamente", async () => {
+        const datos = buildTurnoData({ costo: 1800 });
+        const turnoGuardado = await repo.save(datos);
+
+        expect(turnoGuardado._id).toBeDefined();
+        expect(turnoGuardado.estado).toBe("DISPONIBLE");
+
+        const encontrado = await repo.findById(turnoGuardado._id);
+        expect(encontrado).not.toBeNull();
+        expect(encontrado.costo).toBe(1800);
+    });
+
+
+    test("saveAll() inserta múltiples turnos de una vez", async () => {
+        const turnos = [
+            buildTurnoData({ fechaHora: new Date("2026-09-15T08:00:00Z") }),
+            buildTurnoData({ fechaHora: new Date("2026-09-15T09:00:00Z") }),
+            buildTurnoData({ fechaHora: new Date("2026-09-15T10:00:00Z") }),
+        ];
+
+        const guardados = await repo.saveAll(turnos);
+        expect(guardados).toHaveLength(3);
+
+        const total = await TurnoModel.countDocuments();
+        expect(total).toBe(3);
+    });
+
+
+    test("buscarDisponibles() devuelve sólo los turnos en estado DISPONIBLE", async () => {
+        const servicioId = new mongoose.Types.ObjectId();
+
+        await repo.saveAll([
+            buildTurnoData({ servicio: servicioId, estado: "DISPONIBLE" }),
+            buildTurnoData({ servicio: servicioId, estado: "RESERVADO" }),
+        ]);
+
+        const { turnos, total } = await repo.buscarDisponibles(
+            { prestacion: servicioId },
+            { skip: 0, limit: 10, sort: { fechaHora: 1 } }
         );
+
+        expect(total).toBe(1);
+        expect(turnos).toHaveLength(1);
+        expect(turnos[0].estado).toBe("DISPONIBLE");
     });
 
-    describe("buscarDisponibles() valida los filtros", () => {
-        test("Debería lanzar un error si no se especifica una prestación", async () => {
-            await expect(service.buscarDisponibles({ paciente: "paciente1" }))
-                .rejects
-                .toThrow(AppError);
-        });
+    test("buscarDisponibles() filtra por medico correctamente", async () => {
+        const medicoA = new mongoose.Types.ObjectId();
+        const medicoB = new mongoose.Types.ObjectId();
+        const servicio = new mongoose.Types.ObjectId();
 
-        test("Debería lanzar un error si las fechas están invertidas", async () => {
-            servicioServiceMock.findPrestacionById.mockResolvedValue({ _id: "practica1" });
+        await repo.saveAll([
+            buildTurnoData({ medico: medicoA, servicio }),
+            buildTurnoData({ medico: medicoA, servicio }),
+            buildTurnoData({ medico: medicoB, servicio }),
+        ]);
 
-            await expect(
-                service.buscarDisponibles({
-                    prestacion: "practica1",
-                    paciente: "paciente1",
-                    fechaDesde: "2026-06-20",
-                    fechaHasta: "2026-06-10"
-                })
-            ).rejects.toThrow("La fecha de inicio no puede ser posterior a la fecha de fin");
-        });
+        const { total } = await repo.buscarDisponibles(
+            { medico: medicoA },
+            { skip: 0, limit: 10, sort: { fechaHora: 1 } }
+        );
+
+        expect(total).toBe(2);
     });
 
-    describe("buscarDisponibles() calcula las coberturas", () => {
-        test("Debería calcular costo 0 si el paciente tiene cobertura total para la práctica", async () => {
+    test("buscarDisponibles() filtra por rango de fechas", async () => {
+        const servicio = new mongoose.Types.ObjectId();
 
-            servicioServiceMock.findPrestacionById.mockResolvedValue({
-                _id: "practica1",
-                tipoServicio: "practica"
-            });
+        await repo.saveAll([
+            buildTurnoData({ servicio, fechaHora: new Date("2026-08-01T08:00:00Z") }),
+            buildTurnoData({ servicio, fechaHora: new Date("2026-09-10T08:00:00Z") }),
+            buildTurnoData({ servicio, fechaHora: new Date("2026-09-20T08:00:00Z") }),
+            buildTurnoData({ servicio, fechaHora: new Date("2026-10-05T08:00:00Z") }),
+        ]);
 
-            pacienteServiceMock.findById.mockResolvedValue({
-                _id: "paciente1",
-                plan: {
-                    coberturasPractica: [
-                        { practica: "practica1", nivel: NivelCobertura.TOTAL }
-                    ]
-                }
-            });
+        const { total } = await repo.buscarDisponibles(
+            {
+                fechaDesde: "2026-09-01",
+                fechaHasta: "2026-09-30",
+            },
+            { skip: 0, limit: 10, sort: { fechaHora: 1 } }
+        );
 
-            const resultado = await service.buscarDisponibles({
-                prestacion: "practica1",
-                paciente: "paciente1"
-            });
+        expect(total).toBe(2);
+    });
 
-            expect(resultado.turnos[0].cobertura).toBe(NivelCobertura.TOTAL);
-            expect(resultado.turnos[0].costoPaciente).toBe(0);
-        });
+  
+    test("findAllByDisponibilidad() retorna sólo los turnos de esa disponibilidad", async () => {
+        const dispId = new mongoose.Types.ObjectId();
+        const otroDispId = new mongoose.Types.ObjectId();
 
-        test("Debería aplicar 50% de descuento si el paciente tiene cobertura parcial", async () => {
-            servicioServiceMock.findPrestacionById.mockResolvedValue({
-                _id: "practica1",
-                tipoServicio: "practica"
-            });
+        await repo.saveAll([
+            buildTurnoData({ disponibilidadOrigen: { ...buildTurnoData().disponibilidadOrigen, _id: dispId } }),
+            buildTurnoData({ disponibilidadOrigen: { ...buildTurnoData().disponibilidadOrigen, _id: dispId } }),
+            buildTurnoData({ disponibilidadOrigen: { ...buildTurnoData().disponibilidadOrigen, _id: otroDispId } }),
+        ]);
 
-            pacienteServiceMock.findById.mockResolvedValue({
-                _id: "paciente1",
-                plan: {
-                    coberturasPractica: [
-                        { practica: "practica1", nivel: NivelCobertura.PARCIAL }
-                    ]
-                }
-            });
+        const encontrados = await repo.findAllByDisponibilidad(dispId);
+        expect(encontrados).toHaveLength(2);
+    });
 
-            const resultado = await service.buscarDisponibles({
-                prestacion: "practica1",
-                paciente: "paciente1"
-            });
+    test("borrarTurnosPorDisponibilidad() elimina sólo los DISPONIBLES de esa disponibilidad", async () => {
+        const dispId = new mongoose.Types.ObjectId();
 
-            expect(resultado.turnos[0].cobertura).toBe(NivelCobertura.PARCIAL);
-            expect(resultado.turnos[0].costoPaciente).toBe(1000);
-        });
+        await repo.saveAll([
+            buildTurnoData({ estado: "DISPONIBLE", disponibilidadOrigen: { ...buildTurnoData().disponibilidadOrigen, _id: dispId } }),
+            buildTurnoData({ estado: "DISPONIBLE", disponibilidadOrigen: { ...buildTurnoData().disponibilidadOrigen, _id: dispId } }),
+            buildTurnoData({ estado: "RESERVADO",  disponibilidadOrigen: { ...buildTurnoData().disponibilidadOrigen, _id: dispId } }),
+        ]);
+
+        await repo.borrarTurnosPorDisponibilidad(dispId);
+
+        const restantes = await TurnoModel.find({ "disponibilidadOrigen._id": dispId });
+        expect(restantes).toHaveLength(1);
+        expect(restantes[0].estado).toBe("RESERVADO");
+    });
+
+    test("findByPaciente() retorna los turnos asociados a un paciente", async () => {
+        const pacienteId = "usuario-keycloak-abc123";
+
+        await repo.saveAll([
+            buildTurnoData({ paciente: pacienteId, estado: "RESERVADO" }),
+            buildTurnoData({ paciente: pacienteId, estado: "COMPLETADO" }),
+            buildTurnoData({ paciente: "otro-paciente", estado: "RESERVADO" }),
+        ]);
+
+        const turnos = await repo.findByPaciente(pacienteId);
+        expect(turnos).toHaveLength(2);
+        turnos.forEach((t) => expect(t.paciente).toBe(pacienteId));
     });
 });

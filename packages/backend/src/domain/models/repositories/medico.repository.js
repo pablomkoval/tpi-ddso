@@ -18,19 +18,37 @@ export class MedicoRepository {
         return await this.model.find().populate(['especialidades', 'practicas', 'sedes', 'turnos']);
     }
 
-    async findById(id) { // implementar session despues
-        const medico = await this.model.findById(id)
-        if (!medico) {
-            return null // lanzar error?
-        }
-        await medico.populate('especialidades');
-        await medico.populate('practicas');
-        await medico.populate('sedes')
-        return medico;
-    }
+    async findById(id) {
+    return await this.model
+        .findById(id)
+        .populate({
+            path: 'especialidades',
+            populate: {
+                path: 'servicioUnico'
+            }
+        })
+        .populate({
+            path: 'practicas',
+            populate: {
+                path: 'servicioUnico'
+            }
+        })
+        .populate('sedes');
+}
 
     async guardar(medico) {
         return await medico.save(/* { session } */)
+    }
+
+    async update(idMedico, data) {
+        return await MedicoModel.findByIdAndUpdate(
+            idMedico,
+            { $set: data },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
     }
 
     /* async findDisponibilidadesById(id) {

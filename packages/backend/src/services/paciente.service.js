@@ -6,6 +6,7 @@ import { SolicitudCambioTurno } from "../domain/models/entities/turnos/Solicitud
 const MINUTOS_MINIMOS_CANCELACION = 60;
 
 export class PacienteService {
+  usuarioService
   constructor(
     pacienteRepository,
     turnoRepository,
@@ -47,6 +48,15 @@ export class PacienteService {
     }
     return paciente;
   }
+
+  async findByIdUsuario(id){
+    const usuario = await this.usuarioService.findById(id);
+    if(!usuario){
+      throw BadRequestError("Id de usuario invalida");
+    }
+    return await this.pacienteRepository.findByIdUsuario(id);
+  }
+
 
   async consultarHistorial(pacienteId) {
     await this.findById(pacienteId);

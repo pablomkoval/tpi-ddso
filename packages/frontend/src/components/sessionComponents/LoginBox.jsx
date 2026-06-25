@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginService } from '../../services/loginService';
 import {
     Box,
     Button,
@@ -10,9 +12,10 @@ import {
     TextField,
     ToggleButton,
     ToggleButtonGroup,
-    Typography
+    Typography,
+    Alert
 } from '@mui/material';
-import EmailIcon from '@mui/icons-material/Email';
+import { Email } from '@mui/icons-material';
 import LockIcon from '@mui/icons-material/Lock';
 import LoginIcon from '@mui/icons-material/Login';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
@@ -34,17 +37,47 @@ const roleOptions = [
 ];
 
 const LoginBox = ({ onRegisterClick }) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
     const [role, setRole] = useState('paciente');
     const [showPassword, setShowPassword] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleRoleChange = (_event, nextRole) => {
         if (nextRole !== null) {
             setRole(nextRole);
+            setError(null);
         }
     };
 
     const handleTogglePassword = () => {
         setShowPassword((currentValue) => !currentValue);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const data = await loginService.login(username, password);
+            
+            localStorage.setItem("token", data.access_token);
+            localStorage.setItem("refreshToken", data.refresh_token);
+            
+            console.log("¡Login Exitoso como " + role + "!");
+            navigate('/home');
+
+        } catch (err) {
+            setError(err.message || "Usuario o contraseña incorrectos");
+        } finally {
+            setIsLoading(false); 
+        }
     };
 
     return (
@@ -66,78 +99,27 @@ const LoginBox = ({ onRegisterClick }) => {
                         Bienvenido de nuevo
                     </Typography>
 
-                    <Typography color="text.secondary" variant="body2">
-                        Selecciona tu perfil para ingresar
-                    </Typography>
                 </Box>
 
-                <ToggleButtonGroup
-                    exclusive
-                    value={role}
-                    onChange={handleRoleChange}
-                    aria-label="Seleccionar perfil"
-                    sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                        gap: 2,
-                        '& .MuiToggleButtonGroup-grouped': {
-                            margin: 0,
-                            border: '2px solid #f2f3fb !important',
-                            borderRadius: '12px !important',
-                        }
-                    }}
-                >
-                    {roleOptions.map((option) => (
-                        <ToggleButton
-                            key={option.value}
-                            value={option.value}
-                            aria-label={option.label}
-                            sx={{
-                                width: '100%',
-                                p: 2,
-                                color: 'text.primary',
-                                backgroundColor: '#f9f9ff',
-                                textTransform: 'none',
-                                transition: 'all 0.2s ease',
-                                '&:hover, &.Mui-selected, &.Mui-selected:hover': {
-                                    color: 'primary.main',
-                                    backgroundColor: '#f0f7ff',
-                                    borderColor: 'primary.main !important',
-                                }
-                            }}
-                        >
-                            <Stack sx={{ alignItems: 'center', gap: 1 }}>
-                                <Box sx={{
-                                    display: 'grid',
-                                    width: '40px',
-                                    height: '40px',
-                                    placeItems: 'center',
-                                    backgroundColor: 'background.paper',
-                                    borderRadius: '50%',
-                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                                    color: 'inherit'
-                                }}>
-                                    {option.icon}
-                                </Box>
 
-                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                                    {option.label}
-                                </Typography>
-                            </Stack>
-                        </ToggleButton>
-                    ))}
-                </ToggleButtonGroup>
-
-                <Box component="form" noValidate>
+                <Box component="form" onSubmit={handleSubmit} noValidate>
                     <Stack sx={{ gap: 3 }}>
+
+                        {error && (
+                            <Alert severity="error" onClose={() => setError(null)}>
+                                {error}
+                            </Alert>
+                        )}
                         <TextField
                             label="Correo electrónico"
                             type="email"
                             required
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <EmailIcon color="action" />
+                                        <Email color="action" />
                                     </InputAdornment>
                                 )
                             }}
@@ -147,6 +129,8 @@ const LoginBox = ({ onRegisterClick }) => {
                             label="Contraseña"
                             type={showPassword ? 'text' : 'password'}
                             required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -177,6 +161,7 @@ const LoginBox = ({ onRegisterClick }) => {
 
                         <Button
                             type="submit"
+                            disabled={isLoading}
                             variant="contained"
                             endIcon={<LoginIcon />}
                             fullWidth
@@ -187,7 +172,7 @@ const LoginBox = ({ onRegisterClick }) => {
                                 }
                             }}
                         >
-                            Ingresar a Sweet Medical
+                            {isLoading ? 'Ingresando...' : 'Ingresar a Sweet Medical'}
                         </Button>
                     </Stack>
                 </Box>

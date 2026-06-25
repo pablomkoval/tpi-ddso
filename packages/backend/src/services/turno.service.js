@@ -4,6 +4,7 @@ import medicoRepository from "../repositories (deprecado)/medicoRepository.js";
 import pacienteRepository from "../repositories (deprecado)/pacienteRepository.js"; */
 import { NivelCobertura } from "../domain/enum/NivelCobertura.js";
 import AppError from "../shared/errors/AppError.js";
+
 // enviar a un .env
 const PORCENTAJE_PAGO_PARCIAL = 0.5;
 
@@ -80,30 +81,17 @@ export class TurnoService {
     medicoService,
     pacienteService,
     servicioService,
-    medicoRepository = null,
   ) {
     this.turnoRepository = turnoRepository;
     this.medicoService = medicoService;
     this.pacienteService = pacienteService;
     this.servicioService = servicioService;
-    this.medicoRepository = medicoRepository;
   }
 
-  async buscarDisponibles(params) {
-    const {
-      prestacion,
-      profesional,
-      sede,
-      fechaDesde,
-      fechaHasta,
-      paciente,
-      page = 1,
-      limit = 10,
-      sortBy = "fechaHora",
-      sortOrder = "asc",
-    } = params;
 
-    if (!prestacion) {
+  //agregar parametro estado o rehacer, en cualquier caso utilizar zod para verificar los datos que llegan
+  async buscarDisponibles(paginacion, filtros, paciente) {
+    if (!filtros.servicioId) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
         400,
@@ -111,19 +99,19 @@ export class TurnoService {
       );
     }
 
-    const prestacionExistente = await this.servicioService.findPrestacionById(prestacion);
-
-
-    if (!prestacionExistente) {
+    const prestacionesValidas = await this.servicioService.findPrestacionesByServicioId(filtros.servicioId);
+    if (!prestacionesValidas || prestacionesValidas.length === 0) {
       throw new AppError(
-        "La especialidad especificada no existe",
+        "No existen prestaciones de el servicio dado",
         404,
         "ESPECIALIDAD_NO_ENCONTRADA",
       );
     }
 
-    if (profesional) {
-      const medicoExistente = await this.medicoService.findById(profesional);
+    const prestacionesValidasIds = prestacionesValidas.map(p => p._id);
+
+    if (filtros.medicoId) {
+      const medicoExistente = await this.medicoService.findById(filtros.medicoId);
       if (!medicoExistente) {
         throw new AppError(
           "El profesional especificado no existe",
@@ -133,22 +121,10 @@ export class TurnoService {
       }
     }
 
-    if (fechaDesde && isNaN(Date.parse(fechaDesde))) {
-      throw new AppError(
-        "La fecha de inicio no es válida",
-        400,
-        "FECHA_INVALIDA",
-      );
-    }
-
-    if (fechaHasta && isNaN(Date.parse(fechaHasta))) {
-      throw new AppError("La fecha de fin no es válida", 400, "FECHA_INVALIDA");
-    }
-
     if (
-      fechaDesde &&
-      fechaHasta &&
-      new Date(fechaDesde) > new Date(fechaHasta)
+      filtros.fechaDesde &&
+      filtros.fechaHasta &&
+      new Date(filtros.fechaDesde) > new Date(filtros.fechaHasta)
     ) {
       throw new AppError(
         "La fecha de inicio no puede ser posterior a la fecha de fin",
@@ -156,7 +132,6 @@ export class TurnoService {
         "RANGO_FECHA_INVALIDO",
       );
     }
-
     if (!paciente) {
       throw new AppError(
         "Debe especificar un paciente para calcular la cobertura",
@@ -165,67 +140,26 @@ export class TurnoService {
       );
     }
 
-    const pacienteExistente = await this.pacienteService.findById(paciente);
-    if (!pacienteExistente) {
-      throw new AppError(
-        "El paciente especificado no existe",
-        404,
-        "PACIENTE_NO_ENCONTRADO",
-      );
-    }
 
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
-    const skip = (pageNum - 1) * limitNum;
-
-    const camposOrdenamiento = ["fechaHora", "costo"];
-    const sortField = camposOrdenamiento.includes(sortBy)
-      ? sortBy
-      : "fechaHora";
-    const sortDirection = sortOrder === "desc" ? -1 : 1;
-    const sort = { [sortField]: sortDirection };
-
-    const filtros = {
-      prestacion: prestacion || null,
-      medico: profesional || null,
-      sede: sede || null,
-      fechaDesde: fechaDesde || null,
-      fechaHasta: fechaHasta || null,
+    const filtroArmado = {
+      servicios: prestacionesValidasIds,
+      medico: filtros.medicoId || null,
+      sede: filtros.sedeId || null,
+      fechaDesde: filtros.fechaDesde || null,
+      fechaHasta: filtros.fechaHasta || null,
     };
-
-    const { turnos, total } = await this.turnoRepository.buscarDisponibles(
-      filtros,
-      {
-        skip,
-        limit: limitNum,
-        sort,
-      },
-    );
-
-    const turnosEnriquecidos = turnos.map((turno) => {
-      const nivelCobertura = obtenerNivelCobertura(
-        turno,
-        pacienteExistente.plan,
-      );
-      const costoBase = obtenerCostoBase(turno);
-      const costoPaciente = calcularCostoPaciente(costoBase, nivelCobertura);
-
-      return {
-        ...turno,
-        cobertura: nivelCobertura,
-        costoPaciente,
-      };
-    });
-
-    const totalPages = Math.ceil(total / limitNum);
+    const { turnos, totalTurnos } = await this.turnoRepository.buscarDisponibles(filtroArmado);
+    const turnosConCostos = this.popularCostosTurnos(turnos, paciente);
+    const turnosOrdenados = this.ordenarYPaginarTurnos(turnosConCostos, filtros, paginacion);
+    const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / paginacion.limitePorPagina)
 
     return {
-      turnos: turnosEnriquecidos,
+      turnos: turnosOrdenados,
       pagination: {
-        total,
-        page: pageNum,
-        limit: limitNum,
-        totalPages,
+        totalTurnos,
+        page: paginacion.numeroPagina,
+        limit: paginacion.limitePorPagina,
+        totalPaginas,
       },
     };
   }
@@ -327,7 +261,7 @@ export class TurnoService {
 
   }
 
-  async findAllByDisponibilidad (disponibilidadId){
+  async findAllByDisponibilidad(disponibilidadId) {
     try {
       //const turnosAfectados = this.turnoRepository.findByDisponibilidad(disponibilidadId)
       return await this.turnoRepository.findAllByDisponibilidad(disponibilidadId)
@@ -337,5 +271,89 @@ export class TurnoService {
     }
   }
 
+  /* 
+  
+    async buscarDisponiblesFiltrados({ numeroPagina = 1, limitePorPagina = 10, filtros = {} } = {}) {
+  
+      validarPaginacion(numeroPagina, limitePorPagina)
+  
+      const filtrosArmados = {};
+      if (filtros?.trim()) {
+        filtrosArmados.nombre = {
+          $regex: filtroNombre,
+          $options: "i"
+        };
+      }
+  
+      const { turnos, totalTurnos } = await this.servicioRepository.findAllPaginated(
+        numeroPagina,
+        limitePorPagina,
+        filtrosArmados
+      )
+  
+      const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / limitePorPagina)
+  
+      return {
+        turnos,
+        numeroPagina,
+        limitePorPagina,
+        totalPaginas,
+        totalServicios
+      }
+    } */
+
+  popularCostosTurnos(turnos, paciente) {
+    return turnos.map((turno) => {
+      const nivelCobertura = obtenerNivelCobertura(
+        turno,
+        paciente.plan,
+      );
+      const costoBase = obtenerCostoBase(turno);
+      const costoPaciente = calcularCostoPaciente(costoBase, nivelCobertura);
+
+      return {
+        ...turno,
+        cobertura: nivelCobertura,
+        costoPaciente,
+      };
+    });
+  }
+
+  ordenarYPaginarTurnos(turnos, filtros, paginacion) {
+    const { numeroPagina, limitePorPagina } = paginacion
+
+    const { sortBy = "fechaHora", sortOrder = 1 } = filtros;
+
+    // ORDENAR
+    const ordenados = [...turnos].sort((a, b) => {
+
+      let valueA;
+      let valueB;
+
+      switch (sortBy) {
+
+        case "costo":
+          valueA = a.costo;
+          valueB = b.costo;
+          break;
+
+        case "fechaHora":
+        default:
+          valueA = new Date(a.fechaHora);
+          valueB = new Date(b.fechaHora);
+          break;
+      }
+
+      if (valueA < valueB) return -1 * sortOrder;
+      if (valueA > valueB) return 1 * sortOrder;
+      return 0;
+    });
+    // PAGINACION
+    const start = (numeroPagina - 1) * limitePorPagina;
+    const end = start + limitePorPagina;
+
+    const paginados = ordenados.slice(start, end);
+    return paginados;
+  }
 
 }

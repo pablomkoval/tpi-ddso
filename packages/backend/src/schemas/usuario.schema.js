@@ -2,14 +2,16 @@ import mongoose from 'mongoose';
 import { Usuario } from '../domain/models/entities/Usuario.js';
 
 const usuarioSchema = new mongoose.Schema({
-    nombre: {
+    username: {
         type: String,
         required: true,
+        unique: true,
         trim: true
     },
-    contraseña: {
+    keycloakId: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     }
 }, {
     timestamps: true,

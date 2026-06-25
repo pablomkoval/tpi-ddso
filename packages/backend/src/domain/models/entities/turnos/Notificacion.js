@@ -3,7 +3,6 @@ export class Notificacion{
     leida = false;
     
     constructor(destinatario, remitente, mensaje){
-        this.id = "placeholder";
         this.destinatario = destinatario;
         this.remitente = remitente;
         this.mensaje = mensaje;

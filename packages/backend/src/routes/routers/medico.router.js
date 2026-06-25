@@ -59,6 +59,9 @@ export class MedicoRouter {
          *              description: Médico no encontrado
          */
         this.medicoRouter.get("/:idMedico", (req, res, next) => { this.controller.findById(req, res, next); });
+        this.medicoRouter.patch("/:idMedico", (req, res, next) => { this.controller.update(req, res, next); });
+        
+        
         //método patch si hacemos disponibilidades sin path
 
         /**

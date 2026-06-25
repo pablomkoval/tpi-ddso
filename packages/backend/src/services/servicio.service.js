@@ -5,7 +5,7 @@ import {
     UnprocessableEntityError
 } from "../shared/errors/AppError.js"
 import { createServicioSchema } from "../validators/servicio.schema.zod.js";
-import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js";
+import { validarPaginacion } from "../utils/validarPaginacion.js";
 
 export class ServicioService {
     constructor(servicioRepository, prestacionRepository) {
@@ -15,14 +15,21 @@ export class ServicioService {
 
 
     // Numero y limite, si no están 1 o 10 respectivamente. Sin paginacion, findAll normal
-    async findAll({ numeroPagina = 1, limitePorPagina = 10/* , filtros = {}  */ } = {}) {
-        this.validarPaginacion(numeroPagina, limitePorPagina)
-        //this.validarFiltros(filtros)
+    async findAll({ numeroPagina = 1, limitePorPagina = 10, filtroNombre = "" } = {}) {
+        
+        validarPaginacion(numeroPagina, limitePorPagina)
+        const filtro = {};
+        if (filtroNombre?.trim()) {
+            filtro.nombre = {
+                $regex: filtroNombre,
+                $options: "i"
+            };
+        }
 
         const { servicios, totalServicios } = await this.servicioRepository.findAllPaginated(
             numeroPagina,
-            limitePorPagina/* ,
-            filtros */
+            limitePorPagina,
+            filtro
         )
 
         const totalPaginas = totalServicios === 0 ? 0 : Math.ceil(totalServicios / limitePorPagina)
@@ -37,7 +44,6 @@ export class ServicioService {
     }
 
     async findById(id) {
-        validarEnteroPositivo(id, "Id")
 
         const servicio = await this.servicioRepository.findById(id)
 
@@ -84,7 +90,6 @@ export class ServicioService {
     }
 
     async delete(id) {
-        validarEnteroPositivo(id, "Id")
         const servicioABorrar = await this.servicioRepository.findById(id)
 
         if (!servicioABorrar) {
@@ -133,15 +138,11 @@ export class ServicioService {
         }
     } */
 
-    validarPaginacion(numeroPagina, limitePorPagina) {
-        validarEnteroPositivo(numeroPagina, "Numero de página")
-        validarEnteroPositivo(limitePorPagina, "Límite por página")
-    }
+    
 
-    ////////////////////// SERVICIOS MED ////////////////////////
+    ////////////////////// PRESTACIONES ////////////////////////
 
     async findPrestacionById(idPrestacion, session = null) {
-        //validarEnteroPositivo(idPrestacion, "Id")
         const prestacion = await this.prestacionRepository.findById(idPrestacion, session)
         if (!prestacion) {
             throw new NotFoundError("Servicio no encontrado")
@@ -149,6 +150,15 @@ export class ServicioService {
 
         return prestacion //no toTDO porque: 1. Otro formato, 2. Lo hace medicoService
     }
+
+    async findPrestacionesByServicioId(idServicio){
+        const servicio = await this.servicioRepository.findById(idServicio)
+        if (!servicio){
+            throw new BadRequestError("No existe servicio con la id dada")
+        }
+        return await this.prestacionRepository.findByServicioId(idServicio)
+    }
+
 
     async createPrestacion(datosPrestacion, session = null) {
         //this.validarDatosPrestacion(datosPrestacion)

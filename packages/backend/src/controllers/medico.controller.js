@@ -1,7 +1,7 @@
 import { parsearId } from "../utils/parsearId.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
 import { createPrestacionSchema } from "../validators/prestacion.schema.zod.js";
-import { createMedicoSchema } from "../validators/medico.schema.zod.js";
+import { createMedicoSchema, patchMedicoSchema } from "../validators/medico.schema.zod.js";
 
 export class MedicoController {
     constructor(medicoService) {
@@ -24,7 +24,7 @@ export class MedicoController {
 
     async create(req, res, next) {
         try {
-            const datosMedico = this.extraerYValidarBodyMedico(req.body)
+            const datosMedico = this.extraerYValidarBodyMedico(req.body, createMedicoSchema)
             const medico = await this.medicoService.create(datosMedico);
             res.status(201).json(this.medicoToDTO(medico));
         } catch (error) {
@@ -35,7 +35,7 @@ export class MedicoController {
     async update(req, res, next) {
         try {
             const idMedico = parsearId(req.params.idMedico)
-            const dataMedico = this.extraerYValidarBodyMedico(req.body)
+            const dataMedico = this.extraerYValidarBodyMedico(req.body, patchMedicoSchema)
             const medicoActualizado = await this.medicoService.update(idMedico, dataMedico);
             res.status(200).json(this.medicoToDTO(medicoActualizado));
         } catch (error) {
@@ -223,8 +223,8 @@ export class MedicoController {
         return resultado.data
     }
 
-    extraerYValidarBodyMedico(body) {
-        const resultado = createMedicoSchema.safeParse(body)
+    extraerYValidarBodyMedico(body, schema) {
+        const resultado = schema.safeParse(body)
         if (!resultado.success) {
             throw new BadRequestError(
                 resultado.error.issues.map(i => i.message).join(", ")

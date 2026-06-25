@@ -41,7 +41,7 @@ npm run dev
 4. Verificar que esté funcionando abriendo:
 
 ```bash
-http://localhost:3000/healthcheck
+http://localhost:4000/healthcheck
 ```
 
 Si todo está bien, la respuesta debería indicar que el estado es `ok`.

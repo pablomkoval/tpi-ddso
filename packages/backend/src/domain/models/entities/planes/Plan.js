@@ -3,7 +3,6 @@ import { Practica } from "./Practica"; */
 
 export class Plan {
     constructor (nombre, cobEsp, cobPrac){
-        this.id = "placeholder";
         this.nombre = nombre;
         this.coberturasEspecialidad = cobEsp;
         this.coberturasPractica = cobPrac;

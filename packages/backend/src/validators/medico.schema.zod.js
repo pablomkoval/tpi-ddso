@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { createIdMongoSchema } from "./id.schema.zod.js";
+import { idMongoSchema } from "./id.schema.zod.js";
 
 
 const disponibilidadSchema = z.object({
     diaSemana: z.string(),
     horaDesde: z.string(),
     horaHasta: z.string(),
-    sede: createIdMongoSchema,
-    prestacion: createIdMongoSchema
+    sede: idMongoSchema,
+    prestacion: idMongoSchema
 
 })
 
@@ -19,15 +19,29 @@ export const createMedicoSchema = z.object({
 
     nombre: z.string().min(1),
 
-    especialidades: z.array(createIdMongoSchema)
+    especialidades: z.array(idMongoSchema)
         .default([]),
 
-    practicas: z.array(createIdMongoSchema)
+    practicas: z.array(idMongoSchema)
         .default([]),
 
-    sedes: z.array(createIdMongoSchema)
+    sedes: z.array(idMongoSchema)
         .default([]),
 
     disponibilidades: z.array(disponibilidadSchema)
         .default([])
 });
+
+export const patchMedicoSchema = createMedicoSchema
+    .pick({
+        nombre: true,
+        sedes: true
+    })
+    .partial()
+    .strict()
+    .refine(
+        data => Object.keys(data).length > 0,
+        {
+            message: "Se debe enviar al menos un campo a actualizar."
+        }
+    )

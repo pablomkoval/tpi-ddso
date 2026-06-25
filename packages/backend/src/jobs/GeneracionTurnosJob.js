@@ -5,12 +5,14 @@ import { turnoService } from "../dependencies.js";
 dotenv.config({ path: new URL("../.env", import.meta.url) });
 
 const intervalMs = parseInt(process.env.JOBS_GENERAR_TURNOS_INTERVAL_MS || 86400000);
+const diasACubrir = process.env.DIAS_A_CUBRIR_GEN_TURNOS;
+
 
 const ejecutarGeneracionTurnos = async () => {
 
     try {
         console.log("Generando turnos...");
-        await turnoService.generarTurnos();
+        await turnoService.generarTurnos(diasACubrir);
         console.log("Turnos generados exitosamente.");
     } catch (error) {
         console.error("Error al generar turnos:", error);

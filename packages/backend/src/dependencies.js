@@ -28,6 +28,16 @@ import { SedeRepository } from "./domain/models/repositories/sede.repository.js"
 import { SedeService } from "./services/sede.service.js";
 import { SedeController } from "./controllers/sede.controller.js";
 import { SedeRouter } from "./routes/routers/sede.router.js";
+import { UsuarioService } from "./services/usuario.service.js";
+import { AuthService } from "./services/auth.service.js";
+import { KeycloakService } from "./services/keycloak.service.js";
+import { AuthController } from "./controllers/auth.controller.js";
+import { AuthRouter } from "./routes/routers/auth.router.js";
+import { ObraSocialRepository } from "./domain/models/repositories/obraSocial.repository.js";
+import { ObraSocialService } from "./services/obraSocial.service.js";
+import { ObraSocialController } from "./controllers/obraSocial.controller.js";
+import { ObraSocialRouter } from "./routes/routers/obraSocial.router.js";
+import { verifyToken } from "./middlewares/auth.middleware.js";
 
 //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
 const notiRepository = new NotificacionesRepository();
@@ -39,6 +49,7 @@ const usuarioRepository = new UsuarioRepository(); //definir si se usa realmente
 const medicoRepository = new MedicoRepository();
 const pacienteRepository = new PacienteRepository();
 const sedeRepository = new SedeRepository();
+const obraSocialRepository = new ObraSocialRepository();
 
 //////////////////////////////// SERVICES /////////////////////////////////////////////////////////////
 const notiService = new NotificacionesService(notiRepository);
@@ -49,15 +60,22 @@ export const turnoService = new TurnoService(turnoRepository, medicoService, pac
 medicoService.turnoService = turnoService
 const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
 const sedeService = new SedeService(sedeRepository);
+const keycloakService = new KeycloakService();
+const usuarioService = new UsuarioService(usuarioRepository);
+pacienteService.usuarioService = usuarioService;
+const authService = new AuthService(keycloakService, usuarioService, pacienteService, medicoService);
+const obraSocialService = new ObraSocialService(obraSocialRepository);
 
 //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
 const notiController = new NotificacionesController(notiService);
 const servicioController = new ServiciosController(servicioService);
-const turnoController = new TurnoController(turnoService);
+const turnoController = new TurnoController(turnoService, pacienteService);
 const solicitudCambioTurnoController = new SolicitudCambioTurnoController(solicitudCambioTurnoService);
 const pacienteController = new PacienteController(pacienteService);
 const medicoController = new MedicoController(medicoService);
 const sedeController = new SedeController(sedeService);
+const authController = new AuthController(authService);
+const obraSocialController = new ObraSocialController(obraSocialService);
 
 //////////////////////////////// ROUTERS /////////////////////////////////////////////////////////////
 const notiRouter = new NotificacionesRouter(notiController);
@@ -67,14 +85,18 @@ const solicitudCambioTurnoRouter = new SolicitudCambioTurnoRouter(solicitudCambi
 const pacienteRouter = new PacienteRouter(pacienteController);
 const medicoRouter = new MedicoRouter(medicoController);
 const sedeRouter = new SedeRouter(sedeController);
+const authRouter = new AuthRouter(authController);
+const obraSocialRouter = new ObraSocialRouter(obraSocialController);
 
 export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
     routerGeneral.use("/pacientes", pacienteRouter.getRouter())
-    routerGeneral.use("/turnos", turnoRouter.getRouter())
+    routerGeneral.use("/turnos", verifyToken,turnoRouter.getRouter())
     routerGeneral.use("/solicitudes-cambio", solicitudCambioTurnoRouter.getRouter())
     routerGeneral.use("/notificaciones", notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())
     routerGeneral.use("/sedes", sedeRouter.getRouter())
+    routerGeneral.use("/auth", authRouter.getRouter())
+    routerGeneral.use("/obras-sociales", obraSocialRouter.getRouter())
 }
 

@@ -1,6 +1,6 @@
 import express from "express";
 import healthcheckRouter from "./routers/healthcheck.router.js";
-import { verifyToken } from "../middlewares/auth.middleware.js";
+//import { verifyToken } from "../middlewares/auth.middleware.js";
 //import notificacionesRouter from "./routers/notificaciones.router.js";
 /* import serviciosRouter from "./routers/servicio.router.js";
 import medicoRouter from "./routers/medico.router.js";

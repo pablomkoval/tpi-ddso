@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 import { Paciente } from "../domain/models/entities/paciente/Paciente.js";
 
 const pacienteSchema = new mongoose.Schema({
+    /* usuario: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Usuario",
+        required: true
+    } */
     usuario: {
         type: String,
         required: true

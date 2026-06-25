@@ -1,9 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { MedicalServices } from '@mui/icons-material';
-import useAuth from '../services/useAuth';
-
+import { getUserRoles } from '../utils/authUtils';
 /**
  * Componente que protege rutas privadas.
  * - Si Keycloak está cargando: muestra un spinner.
@@ -19,35 +16,20 @@ import useAuth from '../services/useAuth';
  *   <PrivateRoute requiredRole="paciente"><BuscarTurnos /></PrivateRoute>
  */
 const PrivateRoute = ({ children, requiredRole }) => {
-    const { isAuthenticated, isLoading, hasRole } = useAuth();
+    const roles = getUserRoles();
 
-    if (isLoading) {
-        return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100vh',
-                    gap: 2,
-                }}
-            >
-                <MedicalServices color="primary" sx={{ fontSize: 48 }} />
-                <CircularProgress color="primary" />
-                <Typography variant="body1" color="text.secondary">
-                    Verificando sesión...
-                </Typography>
-            </Box>
-        );
-    }
-
-    if (!isAuthenticated) {
+    if (!roles) {
         return <Navigate to="/login" replace />;
     }
 
-    // Si se requiere un rol específico y el usuario no lo tiene
-    if (requiredRole && !hasRole(requiredRole)) {
+    const esPaciente = roles.includes("paciente");
+    const esMedico = roles.includes("medico");
+
+    if (esPaciente && esMedico) {
+        return <Navigate to="/sin-permiso" replace />;
+    }
+
+    if (requiredRole && !roles.includes(requiredRole)) {
         return <Navigate to="/sin-permiso" replace />;
     }
 

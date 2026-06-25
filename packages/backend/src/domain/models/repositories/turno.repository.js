@@ -53,7 +53,7 @@ export class TurnoRepository {
       .sort({ fechaHora: -1 });
   }
 
-  async buscarDisponibles(filtros, opciones = {}) {
+  /* async buscarDisponibles(filtros, opciones = {}) {
     const { skip = 0, limit = 10, sort = { fechaHora: 1 } } = opciones;
 
     const query = { estado: "DISPONIBLE" };
@@ -88,5 +88,57 @@ export class TurnoRepository {
     ]);
 
     return { turnos, total };
+  } */
+  async buscarDisponibles(filtros) {
+    const query = { estado: "DISPONIBLE" };
+
+
+    if (filtros.servicios?.length > 0) {//deberia ser ya mayor a cero pero no vaya a ser
+        query.servicio = {
+            $in: filtros.servicios
+        };
+    }
+
+    if (filtros.medico) {
+        query.medico = filtros.medico;
+    }
+
+    if (filtros.sedeId) {
+        query.sede = filtros.sedeId;
+    }
+
+    if (filtros.fechaDesde || filtros.fechaHasta) {
+        query.fechaHora = {};
+
+        if (filtros.fechaDesde) {
+            query.fechaHora.$gte = new Date(filtros.fechaDesde);
+        }
+
+        if (filtros.fechaHasta) {
+            query.fechaHora.$lte = new Date(filtros.fechaHasta);
+        }
+    }
+
+    const turnosQuery = this.model
+        .find(query)
+        .populate("medico")
+        .populate({
+            path: "servicio",
+            populate: {
+                path: "servicioUnico"
+            }
+        })
+        .populate("sede")
+        .lean();
+
+    const [turnos, total] = await Promise.all([
+        turnosQuery,
+        this.model.countDocuments(query)
+    ]);
+
+    return { turnos, total };
   }
+
+
+
 }
