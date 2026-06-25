@@ -21,9 +21,11 @@ export class PrestacionRepository {
         return await this.models["prestacion"].findById(id).populate('servicioUnico')
     }
 
-    /* async findByName(nombre) {
-        return await this.model.findOne({ nombre }).populate('servicioUnico')
-    } */
+    async findByServicioId(servicioId) {
+        return await this.models["prestacion"]
+        .find({ servicioUnico: servicioId })
+        .populate("servicioUnico");
+    }
 
     async save(datosPrestacion, session = null) {
         const prestacionCreado = await this.models[datosPrestacion.tipoServicio].create(datosPrestacion)

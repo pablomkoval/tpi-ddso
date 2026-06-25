@@ -63,11 +63,11 @@ export class MedicoService {
     }
 
     async update(idMedico, data) {
-        const medicoExistente = await this.medicoRepository.findById(idMedico);
+        /* const medicoExistente = await this.medicoRepository.findById(idMedico);
 
         if (!medicoExistente) {
             throw new NotFoundError("No se puede actualizar, médico con Id " + idMedico + " no encontrado", "MEDICO_UPDATE_FAIL");
-        }
+        } */
 
         const actualizado = await this.medicoRepository.update(idMedico, data);
         if (!actualizado) {
@@ -181,13 +181,9 @@ export class MedicoService {
 
         medico.disponibilidades = medico.disponibilidades.filter(d => !d._id.equals(disponibilidadId));
         const turnosABorrar = await this.turnoRepository.findAllByDisponibilidad(disponibilidadId)
-        console.error("hola1")
         turnosABorrar.forEach(t => medico.quitarTurno(t))
-        console.error("hola2")
         await this.turnoService.actualizarTurnosDisponibles(disponibilidadId)
-        console.error("hola3")
         await medico.save();
-        console.error("hola4")
         return medico;
     }
 

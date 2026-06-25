@@ -1,8 +1,8 @@
 import { z } from "zod"
-import { createIdMongoSchema } from "./id.schema.zod.js"
+import { idMongoSchema } from "./id.schema.zod.js"
 
 const baseSchema = {
-    servicioUnico: createIdMongoSchema,
+    servicioUnico: idMongoSchema,
 
     costo: z
         .number()

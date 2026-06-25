@@ -1,9 +1,8 @@
 import { BadRequestError } from "../shared/errors/AppError.js";
 import { parsearId } from "../utils/parsearId.js";
-import { validarEnteroPositivo } from "../utils/validarEnteroPositivo.js"
 //import { createPrestacionSchema } from "../validators/prestacion.schema.js";
 import { createServicioSchema } from "../validators/servicio.schema.zod.js";
-
+import { extraerPaginacion } from "../utils/extraerPaginacion.js";
 
 export class ServiciosController {
     constructor(servicioService) {
@@ -22,9 +21,9 @@ export class ServiciosController {
     findAll = async (req, res, next) => { //listar todos los servicios, un médico solo realmente no buscaria todos los servicios de otros médicos
         try {
             
-            const paginacion = this.extraerPaginacion(req.query)
-            //const filtros = this.extraerFiltros(req.query)
-            const resultado = await this.servicioService.findAll({ ...paginacion/* , filtros */ })
+            const paginacion = extraerPaginacion(req.query)
+            const filtroNombre = req.query.nombre // usar para filtrar servicios por nombre
+            const resultado = await this.servicioService.findAll({ ...paginacion, filtroNombre})
             return res.status(200).json({
                 status: "success",
                 data: resultado.servicios.map(s => this.servicioToDTO(s)),
@@ -143,15 +142,5 @@ export class ServiciosController {
 
         return filtros
     } */
-
-    extraerPaginacion(query) {
-        const numeroPagina = query?.page === undefined ? 1 : Number(query.page)
-        const limitePorPagina = query?.limit === undefined ? 10 : Number(query.limit)
-
-        validarEnteroPositivo(numeroPagina, "page")
-        validarEnteroPositivo(limitePorPagina, "limit")
-
-        return { numeroPagina, limitePorPagina }
-    }
 }
 

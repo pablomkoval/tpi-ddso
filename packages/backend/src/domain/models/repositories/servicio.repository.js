@@ -30,27 +30,28 @@ export class ServicioRepository {
         return await this.model.findByIdAndDelete(id);
     }
 
-    async count() {
-        const contado = await this.model.countDocuments({ eliminado: false })
-        return contado
-    }
 
     async saveAll(listaServicios) {
         return await this.model.insertMany(listaServicios)
     }
 
 
-    async findAllPaginated(numeroPagina, limitePorPagina/* , filtros = {} */) {
+    async findAllPaginated(numeroPagina, limitePorPagina, filtro = {}) {
         const skip = (numeroPagina - 1) * limitePorPagina
+
+        const filtroCompleto = {
+            eliminado: false,
+            ...filtro
+        }
 
         const servicios =
             await this.model
-                .find({ eliminado: false })
+                .find(filtroCompleto)
                 .skip(skip)
                 .limit(limitePorPagina)
 
-        // logica de filtros si se necesitase
-        const totalServicios = await this.count()
+
+        const totalServicios = await this.model.countDocuments(filtroCompleto)
         return {
             servicios,
             totalServicios,
