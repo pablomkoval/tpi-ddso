@@ -5,11 +5,12 @@ import FiltrosBusqueda from './FiltrosBusqueda.jsx';
 
 const FILTROS_INICIALES = {
   profesional: '',
+  sede: '',
   especialidad: '',
-  consultorio: '',
-  sedes: [],
   fechaDesde: '',
   fechaHasta: '',
+  sortBy: '',
+  sortOrder: '',
 };
 
 const BuscarTurnos = () => {
@@ -21,7 +22,12 @@ const BuscarTurnos = () => {
   };
 
   const handleAplicar = () => {
+    if (!filtrosPendientes.especialidad) {
+        alert("Por favor, selecciona una especialidad/servicio para buscar.");
+        return;
+    }
     setFiltrosAplicados({ ...filtrosPendientes });
+    
   };
 
   return (

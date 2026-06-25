@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -16,32 +16,54 @@ import {
 import {
   PersonOutlined as PersonIcon,
   MedicalServicesOutlined as EspecialidadIcon,
-  ApartmentOutlined as ConsultorioIcon,
   LocationOnOutlined as UbicacionIcon,
   CalendarMonthOutlined as CalendarIcon,
+  SortOutlined as SortIcon,
 } from '@mui/icons-material';
-
-const ESPECIALIDADES = [
-  'Cardiología',
-  'Dermatología',
-  'Neurología',
-  'Traumatología',
-  'Laboratorio',
-  'Ecografía',
-];
-
-const CONSULTORIOS = ['Clínica Médica', 'Cirugía', 'Diagnóstico por imagen'];
-
-const SEDES = ['Sede Palermo', 'Sede Belgrano', 'Sede Centro'];
+import { buscarEspecialidades, buscarMedicos, buscarSedes } from '../../services/filtrosBusquedaService';
 
 export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
-  const handleSede = (sede) => {
-    const actuales = filtros.sedes;
-    const nuevas = actuales.includes(sede)
-      ? actuales.filter((s) => s !== sede)
-      : [...actuales, sede];
-    onChange('sedes', nuevas);
-  };
+  const [loading, setLoading] = useState(true);
+  const [errorApi, setErrorApi] = useState(false);
+  const [especialidades, setEspecialidades] = useState([]);
+  const [sedes, setSedes] = useState([]);
+  const [medicos, setMedicos] = useState([]);
+
+  useEffect(() => {
+    setLoading(1);
+    setErrorApi(false);
+
+    try {
+      const especialidades = await buscarEspecialidades();
+      setEspecialidades(especialidades);
+      const sedes = await buscarSedes();
+      setSedes(sedes);
+      const medicos = await buscarMedicos()
+      setMedicos(medicos);
+
+      setLoading(false);
+    } catch (e) {
+      setEspecialidades([]);
+      setSedes([]);
+      setMedicos([]);
+      setErrorApi(true);
+      setLoading(false);
+      //TODO: agregar un renderizado de un texto que diga que hubo error de conexion
+    }
+    
+  }, []);
+
+  try {
+
+    setTurnos(filtrados);
+    setTotal(filtrados.length);
+    setLoading(false);
+  } catch (e) {
+    setTurnos([]);
+    setErrorApi(true);
+    setLoading(false);
+    //TODO: agregar un renderizado de un texto que diga que hubo error de conexion
+  }
 
   return (
     <Box
@@ -92,45 +114,26 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
             displayEmpty
           >
             <MenuItem value="">Todas las especialidades</MenuItem>
-            {ESPECIALIDADES.map((e) => (
+            {especialidades.map((e) => (
               <MenuItem key={e} value={e}>{e}</MenuItem>
             ))}
           </Select>
         </FormControl>
       </SeccionFiltro>
 
-      <SeccionFiltro icon={<ConsultorioIcon fontSize="small" />} label="Consultorio">
+      <SeccionFiltro icon={<UbicacionIcon fontSize="small" />} label="Ubicación">
         <FormControl size="small" fullWidth>
           <Select
-            value={filtros.consultorio}
-            onChange={(e) => onChange('consultorio', e.target.value)}
+            value={filtros.sede}
+            onChange={(e) => onChange('sede', e.target.value)}
             displayEmpty
           >
-            <MenuItem value="">Cualquier práctica</MenuItem>
-            {CONSULTORIOS.map((c) => (
-              <MenuItem key={c} value={c}>{c}</MenuItem>
+            <MenuItem value="">Todas las sedes</MenuItem>
+            {sedes.map((s) => (
+              <MenuItem key={s} value={s}>{s}</MenuItem>
             ))}
           </Select>
         </FormControl>
-      </SeccionFiltro>
-
-      <SeccionFiltro icon={<UbicacionIcon fontSize="small" />} label="Ubicación">
-        <FormGroup>
-          {SEDES.map((sede) => (
-            <FormControlLabel
-              key={sede}
-              label={<Typography variant="body2">{sede}</Typography>}
-              control={
-                <Checkbox
-                  size="small"
-                  checked={filtros.sedes.includes(sede)}
-                  onChange={() => handleSede(sede)}
-                />
-              }
-              sx={{ ml: 0 }}
-            />
-          ))}
-        </FormGroup>
       </SeccionFiltro>
 
       <SeccionFiltro icon={<CalendarIcon fontSize="small" />} label="Fecha">
@@ -149,6 +152,36 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
             onChange={(e) => onChange('fechaHasta', e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
+        </Box>
+      </SeccionFiltro>
+
+      {/* Ordenamiento */}
+      <SeccionFiltro icon={<SortIcon fontSize="small" />} label="Ordenamiento">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <FormControl size="small" fullWidth>
+            <Select
+              value={filtros.sortBy}
+              onChange={(e) => onChange('sortBy', e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Sin asignar orden</MenuItem>
+              <MenuItem value="fechaHora">Fecha y Hora</MenuItem>
+              <MenuItem value="costo">Costo del Turno</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Solo habilitamos la dirección del orden si ya se seleccionó un criterio */}
+          <FormControl size="small" fullWidth disabled={!filtros.sortBy}>
+            <Select
+              value={filtros.sortOrder}
+              onChange={(e) => onChange('sortOrder', e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Dirección...</MenuItem>
+              <MenuItem value="1">Ascendente (Menor a Mayor)</MenuItem>
+              <MenuItem value="-1">Descendente (Mayor a Menor)</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
       </SeccionFiltro>
 
