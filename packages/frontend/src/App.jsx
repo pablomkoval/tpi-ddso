@@ -4,7 +4,7 @@ import LoginPage from './features/LoginPage.jsx';
 import NotificacionPage from './features/NotificacionPage.jsx';
 import BuscarTurnos from './features/BuscarTurnos/BuscarTurnos.jsx';
 import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDisponibilidad.jsx';
-import AgendaMedica from './features/AgendaMedica/AgendaMedica.jsx';
+import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
 import Checkout from './features/checkout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import { ThemeProvider } from '@mui/material';

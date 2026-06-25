@@ -19,6 +19,10 @@ export class PacienteRepository {
         return await this.model.findById(id).populate('plan');
     }
 
+    async findByIdUsuario(idUsuario){
+        return await this.model.findOne({usuario: idUsuario}).populate('plan')
+    }
+
     async findByIdConPlan(id) {
         return await this.model.findById(id).populate('plan');
     }

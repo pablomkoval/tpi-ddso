@@ -15,10 +15,9 @@ export class ServicioService {
 
 
     // Numero y limite, si no están 1 o 10 respectivamente. Sin paginacion, findAll normal
-    async findAll({ numeroPagina = 1, limitePorPagina = 10, filtroNombre = {} } = {}) {
+    async findAll({ numeroPagina = 1, limitePorPagina = 10, filtroNombre = "" } = {}) {
         
         validarPaginacion(numeroPagina, limitePorPagina)
-        
         const filtro = {};
         if (filtroNombre?.trim()) {
             filtro.nombre = {

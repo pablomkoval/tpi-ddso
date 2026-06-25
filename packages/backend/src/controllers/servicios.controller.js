@@ -24,6 +24,7 @@ export class ServiciosController {
             const paginacion = extraerPaginacion(req.query)
             const filtroNombre = req.query.nombre // usar para filtrar servicios por nombre
             const resultado = await this.servicioService.findAll({ ...paginacion, filtroNombre})
+            
             return res.status(200).json({
                 status: "success",
                 data: resultado.servicios.map(s => this.servicioToDTO(s)),

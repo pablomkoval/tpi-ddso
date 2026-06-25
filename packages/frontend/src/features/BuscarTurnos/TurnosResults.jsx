@@ -34,8 +34,35 @@ const TurnosResults = ({ filtros = {} }) => {
   const [errorApi, setErrorApi] = useState(false);
 
   useEffect(() => {
+    const cargarTurnos = async () => {
+      setPagina(1);
+      setLoading(true);
+      setErrorApi(false);
+
+      try {
+        const filtrados = await buscarTurnos(filtros);
+
+        setTurnos(filtrados);
+        setTotal(filtrados.length);
+      } catch (e) {
+        setTurnos([]);
+        setTotal(0);
+        setErrorApi(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarTurnos();
+
+    return () => {
+    };
+  }, [filtros]);
+
+
+  /* useEffect(() => {
     setPagina(1);
-    setLoading(1);
+    setLoading(true);
     setErrorApi(false);
     // TODO: reemplazar con fetch real:
     // fetch(`/api/turnos?${new URLSearchParams(filtros)}`).then(...)
@@ -55,7 +82,7 @@ const TurnosResults = ({ filtros = {} }) => {
     }
 
     return () => clearTimeout(timer);
-  }, [filtros]);
+  }, [filtros]); */
 
 
   return (

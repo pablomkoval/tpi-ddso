@@ -19,6 +19,13 @@ try {
         ServicioModel.deleteMany({}),
         PlanModel.deleteMany({}),
         ObraSocialModel.deleteMany({})
+        /*
+        sedes
+        medicos
+        prestaciones
+        disponibilidades       
+        
+        */
     ]);
 
     const serviciosIniciales = [

@@ -5,7 +5,7 @@ import { idMongoSchema } from "./id.schema.zod.js"
 
 //para la busqueda de turnos del paciente
 export const filtroBusqTurnoPaciente = z.object({
-    
+
     servicioId: idMongoSchema, //servicios se intentan autocompletar en la busqueda
     medicoId: idMongoSchema.optional(), //medico se intentan autocompletar en la busqueda
     //turnos disponibles no tienen paciente asignado
@@ -17,12 +17,12 @@ export const filtroBusqTurnoPaciente = z.object({
         .enum(["fechaHora", "costo"])
         .default("fechaHora"),
 
-    sortOrder: z
-        .union([
-            z.literal(1),
-            z.literal(-1)
-        ])
-        .default(1)
+    sortOrder: z.coerce.number().refine(
+        (val) => val === 1 || val === -1,
+        {
+            message: "sortOrder debe ser 1 o -1"
+        }
+    ).default(1)
 })
 
 

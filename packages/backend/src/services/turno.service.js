@@ -90,8 +90,7 @@ export class TurnoService {
 
 
   //agregar parametro estado o rehacer, en cualquier caso utilizar zod para verificar los datos que llegan
-  async buscarDisponibles(paginacion, filtros, pacienteId) {
-
+  async buscarDisponibles(paginacion, filtros, paciente) {
     if (!filtros.servicioId) {
       throw new AppError(
         "Debe especificar al menos una especialidad o práctica para buscar turnos",
@@ -122,7 +121,6 @@ export class TurnoService {
       }
     }
 
-
     if (
       filtros.fechaDesde &&
       filtros.fechaHasta &&
@@ -134,7 +132,7 @@ export class TurnoService {
         "RANGO_FECHA_INVALIDO",
       );
     }
-    if (!pacienteId) {
+    if (!paciente) {
       throw new AppError(
         "Debe especificar un paciente para calcular la cobertura",
         400,
@@ -142,14 +140,6 @@ export class TurnoService {
       );
     }
 
-    const pacienteExistente = await this.pacienteService.findById(pacienteId);
-    if (!pacienteExistente) {
-      throw new AppError(
-        "El paciente especificado no existe",
-        404,
-        "PACIENTE_NO_ENCONTRADO",
-      );
-    }
 
     const filtroArmado = {
       servicios: prestacionesValidasIds,
@@ -158,9 +148,9 @@ export class TurnoService {
       fechaDesde: filtros.fechaDesde || null,
       fechaHasta: filtros.fechaHasta || null,
     };
-
+    console.error("hola5")
     const { turnos, totalTurnos } = await this.turnoRepository.buscarDisponibles(filtroArmado);
-    const turnosConCostos = this.popularCostosTurnos(turnos, pacienteExistente);
+    const turnosConCostos = this.popularCostosTurnos(turnos, paciente);
     const turnosOrdenados = this.ordenarYPaginarTurnos(turnosConCostos, filtros, paginacion);
     const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / paginacion.limitePorPagina)
 
@@ -331,7 +321,6 @@ export class TurnoService {
   }
 
   ordenarYPaginarTurnos(turnos, filtros, paginacion) {
-    console.error("hola1")
     const { numeroPagina, limitePorPagina } = paginacion
 
     const { sortBy = "fechaHora", sortOrder = 1 } = filtros;
@@ -366,7 +355,6 @@ export class TurnoService {
     const end = start + limitePorPagina;
 
     const paginados = ordenados.slice(start, end);
-    console.error("hola3")
     return paginados;
   }
 

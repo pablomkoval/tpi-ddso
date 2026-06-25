@@ -5,8 +5,11 @@ import { BadRequestError } from "../shared/errors/AppError.js";
 
 
 export class TurnoController {
-  constructor(turnoService) {
+  
+
+  constructor(turnoService, pacienteService) {
     this.turnoService = turnoService;
+    this.pacienteService = pacienteService;
   }
 
 
@@ -15,12 +18,15 @@ export class TurnoController {
 
   async getDisponibles(req, res, next) {
     try {
-      //const idPaciente = req.user.id;
-      const idPaciente = "6a3710000bb14dbb9967836f"
+
+      
+      const paciente = this.pacienteService.findByIdUsuario(req.user.id);
+      //const idPaciente = "6a3710000bb14dbb9967836f"
+      console.error("Paciente id: " + paciente._id);
       const paginacion = extraerPaginacion(req.query);
       const filtros = this.validarFiltros(req.query);
-      const resultado = await this.turnoService.buscarDisponibles(paginacion, filtros, idPaciente);
-
+      const resultado = await this.turnoService.buscarDisponibles(paginacion, filtros, paciente);
+      console.error("holafinal")
       res.status(200).json({
         status: "success",
         data:{

@@ -37,6 +37,7 @@ import { ObraSocialRepository } from "./domain/models/repositories/obraSocial.re
 import { ObraSocialService } from "./services/obraSocial.service.js";
 import { ObraSocialController } from "./controllers/obraSocial.controller.js";
 import { ObraSocialRouter } from "./routes/routers/obraSocial.router.js";
+import { verifyToken } from "./middlewares/auth.middleware.js";
 
 //////////////////////////////// REPOSITORYS /////////////////////////////////////////////////////////////
 const notiRepository = new NotificacionesRepository();
@@ -61,13 +62,14 @@ const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCam
 const sedeService = new SedeService(sedeRepository);
 const keycloakService = new KeycloakService();
 const usuarioService = new UsuarioService(usuarioRepository);
+pacienteService.usuarioService = usuarioService;
 const authService = new AuthService(keycloakService, usuarioService, pacienteService, medicoService);
 const obraSocialService = new ObraSocialService(obraSocialRepository);
 
 //////////////////////////////// CONTROLLERS /////////////////////////////////////////////////////////////
 const notiController = new NotificacionesController(notiService);
 const servicioController = new ServiciosController(servicioService);
-const turnoController = new TurnoController(turnoService);
+const turnoController = new TurnoController(turnoService, pacienteService);
 const solicitudCambioTurnoController = new SolicitudCambioTurnoController(solicitudCambioTurnoService);
 const pacienteController = new PacienteController(pacienteService);
 const medicoController = new MedicoController(medicoService);
@@ -89,7 +91,7 @@ const obraSocialRouter = new ObraSocialRouter(obraSocialController);
 export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
     routerGeneral.use("/pacientes", pacienteRouter.getRouter())
-    routerGeneral.use("/turnos", turnoRouter.getRouter())
+    routerGeneral.use("/turnos", verifyToken,turnoRouter.getRouter())
     routerGeneral.use("/solicitudes-cambio", solicitudCambioTurnoRouter.getRouter())
     routerGeneral.use("/notificaciones", notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())

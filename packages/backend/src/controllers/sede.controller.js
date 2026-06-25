@@ -6,7 +6,10 @@ export class SedeController {
     findAll = async (req, res, next) => {
         try {
             const sedes = await this.sedeService.findAll();
-            res.json(sedes);
+            res.json({
+                status: "success",
+                data: sedes
+            });
         } catch (error) {
             next(error);
         }
