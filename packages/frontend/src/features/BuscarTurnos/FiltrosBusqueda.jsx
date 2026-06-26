@@ -84,7 +84,7 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
       sx={{
         width: 260,
         flexShrink: 0,
-        borderRight: '1px solid',
+        borderRight: { xs: 'none', md: '1px solid' },
         borderColor: 'divider',
         p: 3,
         display: 'flex',

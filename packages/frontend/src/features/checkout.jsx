@@ -32,7 +32,7 @@ const Checkout = () => {
     eliminarTurno(id);
   };
 
-  const total = carrito.reduce((acc, item) => acc + item.precio, 0);
+    const total = carrito.reduce((acc, item) => acc + (item.costoPaciente ?? 0), 0);
 
 
   return (
@@ -103,18 +103,18 @@ const Checkout = () => {
                   
                   <Box>
                     <Typography variant="h6" fontWeight="bold" sx={{ lineHeight: 1.2, mb: 0.5 }}>
-                      {turno.especialidad}
+                      {turno.servicio?.nombre}
                     </Typography>
-                    
+
                     <Stack spacing={0.5} sx={{ mt: 1 }}>
                       <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <PersonIcon fontSize="small" /> {turno.nombre}
+                        <PersonIcon fontSize="small" /> {turno.medico?.nombre}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1, textTransform: 'capitalize' }}>
-                        <CalendarMonthIcon fontSize="small" /> {turno.fecha} - {turno.hora}
+                        <CalendarMonthIcon fontSize="small" /> {formatearFecha(turno.fechaHora)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <LocationOnIcon fontSize="small" /> {turno.sede}
+                        <LocationOnIcon fontSize="small" /> {turno.sede?.nombre}
                       </Typography>
                     </Stack>
                   </Box>
@@ -133,7 +133,7 @@ const Checkout = () => {
                   }}
                 >
                   <Typography variant="h6" fontWeight="bold" color="primary.main" sx={{ minWidth: "100px", textAlign: "right" }}>
-                    ${turno.precio.toLocaleString("es-AR")}
+                    ${(turno.costoPaciente ?? 0).toLocaleString("es-AR")}
                   </Typography>
                   <IconButton 
                     color="error" 

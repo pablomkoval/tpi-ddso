@@ -11,8 +11,6 @@ const coberturaStyles = {
   COMPLETA:    { bgcolor: '#e0f5f5', color: 'secondary.main', label: 'Completa' },
 };
 
-
-
 const TurnoCard = ({ turno }) => {
   const { id, fechaHora, medico, sede, servicio, cobertura, costoPaciente } = turno;
   const navigate = useNavigate();
@@ -41,6 +39,7 @@ const TurnoCard = ({ turno }) => {
     <Box
       sx={{
         display: 'flex',
+        flexWrap: 'wrap',
         alignItems: 'flex-start',
         gap: 2,
         p: 3,
@@ -54,7 +53,7 @@ const TurnoCard = ({ turno }) => {
         <PersonIcon fontSize="large" />
       </Avatar>
 
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="h6" fontWeight={700}>{medico?.nombre || 'Profesional no asignado'}</Typography>
         <Typography
           variant="caption"
@@ -75,31 +74,63 @@ const TurnoCard = ({ turno }) => {
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1.5 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', gap: 1.5 }}>
-          <Typography variant="body2" color="text.secondary" letterSpacing={0.5}>
-            Cobertura:
-          </Typography>
-          <Chip
-          label={estiloActual.label}
-          size="small"
-          sx={{ bgcolor: estiloActual.bgcolor, color: estiloActual.color, fontWeight: 600 }}
-        />
+      {/* Sección precio + botones: wrappea a nueva fila en mobile */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: { xs: 'stretch', sm: 'flex-end' },
+          gap: 1.5,
+          width: { xs: '100%', sm: 'auto' },
+        }}
+      >
+        {/* Cobertura y precio: lado a lado en mobile, apilados en desktop */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'row', sm: 'column' },
+            alignItems: { xs: 'center', sm: 'flex-end' },
+            justifyContent: { xs: 'space-between', sm: 'flex-start' },
+            gap: 1.5,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Typography variant="body2" color="text.secondary" letterSpacing={0.5}>
+              Cobertura:
+            </Typography>
+            <Chip
+              label={estiloActual.label}
+              size="small"
+              sx={{ bgcolor: estiloActual.bgcolor, color: estiloActual.color, fontWeight: 600 }}
+            />
+          </Box>
+
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="h5" fontWeight={700} color="primary">
+              ${(costoPaciente ?? 0).toLocaleString('es-AR')}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" letterSpacing={0.5}>
+              COSTO DEL TURNO
+            </Typography>
+          </Box>
         </Box>
-        
-        <Box sx={{ textAlign: 'right' }}>
-          <Typography variant="h5" fontWeight={700} color="primary">
-            ${(costoPaciente ?? 0).toLocaleString('es-AR')}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" letterSpacing={0.5}>
-            COSTO DEL TURNO
-          </Typography>
-        </Box>
+
+        {/* Botones: se estiran en mobile */}
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button onClick={handleAgregar} variant="outlined" size="small">
+          <Button
+            onClick={handleAgregar}
+            variant="outlined"
+            size="small"
+            sx={{ flex: { xs: 1, sm: 'initial' } }}
+          >
             Agregar a preselección
           </Button>
-          <Button variant="contained" size="small" onClick={() => navigate(`/turnos/${turno.id}`)}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => navigate(`/turnos/${turno.id}`)}
+            sx={{ flex: { xs: 1, sm: 'initial' } }}
+          >
             Ver detalles
           </Button>
         </Box>
