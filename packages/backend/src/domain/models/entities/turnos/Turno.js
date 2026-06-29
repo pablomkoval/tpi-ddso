@@ -27,7 +27,7 @@ export class Turno {
     // Le pasamos this.id en vez de this — evita la referencia circular
     const cambio = new CambioEstadoTurno(
       nuevoEstado,
-      this.id ?? this._id,
+      this._id,
       quien,
       motivoCambio,
     );
