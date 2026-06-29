@@ -17,7 +17,6 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
-import './AgendaMedica.css';
 import { horasAgenda, turnosMedicos, agendaStats, agendaSemana } from '../../mockdata/agendaMedicaData.js'
 
 const formatearSemana = (inicio) => {

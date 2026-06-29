@@ -15,8 +15,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SaveIcon from '@mui/icons-material/Save';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
-import './DefinirDisponibilidad.css'; 
-
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 const DefinirDisponibilidad = () => {

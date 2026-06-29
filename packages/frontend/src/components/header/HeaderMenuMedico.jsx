@@ -3,7 +3,7 @@ import HeaderMenuElement from './HeaderMenuElement.jsx';
 
 const HeaderMenuMedico = () => {
   return (
-    <Box component="nav" sx={{ display: 'flex' }}>
+    <Box component="nav" sx={{ display: { xs: 'none', md: 'flex' } }}>
       <HeaderMenuElement text="Agenda Médica" to="/agenda-medica" />
       <HeaderMenuElement text="Disponibilidad" to="/definir-disponibilidad" />
       <HeaderMenuElement text="Notificaciones" to="/notificaciones" />

@@ -18,11 +18,13 @@ const Footer = () => {
         py: 2,
         px: 4,
         display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: { xs: 2, sm: 0 },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 1.5, textAlign: { xs: 'center', sm: 'left' } }}>
         <Typography variant="body2" fontWeight={700} color="primary">
           Sweet Medical
         </Typography>
@@ -31,7 +33,7 @@ const Footer = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 3 }}>
+      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
         {footerLinks.map(({ text, to }) => (
           <Typography
             key={to}
