@@ -1,4 +1,5 @@
 import express from "express";
+import { verifyToken } from "../../middlewares/auth.middleware.js";
 
 export class MedicoRouter {
     constructor(controller) {
@@ -9,6 +10,7 @@ export class MedicoRouter {
 
     initRoutes() {
 
+        this.medicoRouter.get("/me", verifyToken, (req, res, next) => { this.controller.findMe(req, res, next); });
         /**
          * @swagger
          * /medicos:
@@ -35,6 +37,8 @@ export class MedicoRouter {
          *      responses:
          *          201:
          *              description: Médico creado exitosamente
+         *          400:
+         *              description: Datos inválidos
          */
         this.medicoRouter.get("/", (req, res, next) => { this.controller.findAll(req, res, next); }); //findAllPaginated
         this.medicoRouter.post("/", (req, res, next) => { this.controller.create(req, res, next); });

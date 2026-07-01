@@ -7,6 +7,7 @@ import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDispo
 import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
 import Checkout from './features/checkout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import GestionarPrestaciones from './features/gestionarPrestaciones/GestionarPrestaciones.jsx';
 import { ThemeProvider } from '@mui/material';
 import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
 import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
@@ -99,6 +100,15 @@ function App() {
           element={
             <PrivateRoute requiredRole="medico">
               <AgendaMedica />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="gestionar-prestaciones"
+          element={
+            <PrivateRoute requiredRole="medico">
+              <GestionarPrestaciones />
             </PrivateRoute>
           }
         />

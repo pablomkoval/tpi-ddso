@@ -92,6 +92,16 @@ export class MedicoService {
         return medico;
     }
 
+    async findByIdUsuario(idUsuario) {
+        const medico = await this.medicoRepository.findByIdUsuario(idUsuario);
+
+        if (!medico) {
+            throw new NotFoundError("Médico no encontrado para el usuario actual", "MEDICO_NO_ENCONTRADO");
+        }
+
+        return medico;
+    }
+
     async obtenerDisponibilidades(idMedico) {
         try {
             const medico = await this.medicoRepository.findById(idMedico);

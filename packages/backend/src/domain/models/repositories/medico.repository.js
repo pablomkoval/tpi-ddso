@@ -36,6 +36,24 @@ export class MedicoRepository {
         .populate('sedes');
 }
 
+    async findByIdUsuario(idUsuario) {
+        return await this.model
+            .findOne({ usuario: idUsuario })
+            .populate({
+                path: 'especialidades',
+                populate: {
+                    path: 'servicioUnico'
+                }
+            })
+            .populate({
+                path: 'practicas',
+                populate: {
+                    path: 'servicioUnico'
+                }
+            })
+            .populate('sedes');
+    }
+
     async guardar(medico) {
         return await medico.save(/* { session } */)
     }

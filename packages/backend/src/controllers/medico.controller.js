@@ -63,6 +63,15 @@ export class MedicoController {
         }
     }
 
+    async findMe(req, res, next) {
+        try {
+            const medico = await this.medicoService.findByIdUsuario(req.user.id);
+            res.status(200).json(this.medicoToDTO(medico));
+        } catch (error) {
+            return next(error);
+        }
+    }
+
     // Disponibilidades ///////////////////////////////////////////////////////////////////
 
     disponibilidadToDTO(disponibilidad) {

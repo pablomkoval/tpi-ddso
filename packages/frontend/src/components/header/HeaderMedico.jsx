@@ -8,6 +8,7 @@ import HeaderMenuMedico from './HeaderMenuMedico.jsx';
 const navItems = [
   { text: 'Agenda Médica', to: '/agenda-medica' },
   { text: 'Disponibilidad', to: '/definir-disponibilidad' },
+  { text: 'Prestaciones', to: '/gestionar-prestaciones' },
   { text: 'Notificaciones', to: '/notificaciones' },
 ];
 
