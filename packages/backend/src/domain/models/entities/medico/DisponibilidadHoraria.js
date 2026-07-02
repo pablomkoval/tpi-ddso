@@ -82,7 +82,9 @@ export class DisponibilidadHoraria {
         if (this.diaSemana !== otraDisponibilidad.diaSemana) {
             return false; // No se solapan si son en días diferentes
         }
-        if (this._id.equals(otraDisponibilidad._id)) {
+        const thisId = this._id || this.id;
+        const otraId = otraDisponibilidad._id || otraDisponibilidad.id;
+        if (thisId && otraId && String(thisId) === String(otraId)) {
             return false; // No se solapan si son la misma disponibilidad (útil para edición)
         }
 

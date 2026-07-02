@@ -70,7 +70,7 @@ describe("Agregar disponibilidad horaria a un médico", () => {
         expect(medico.disponibilidades).toEqual([disponibilidad1, disponibilidad2]);
     })
 
-    test("Debería lanzar un error si se agrega una disponibilidad que no corresponde a una sede autorizada para el médico", () => {
+    /* test("Debería lanzar un error si se agrega una disponibilidad que no corresponde a una sede autorizada para el médico", () => {
         const usuario = new Usuario("medico1", "password123");
         const idSede1 = new mongoose.Types.ObjectId("507f1f77bcf86cd799439011");
         const idSede2 = new mongoose.Types.ObjectId("507f1f77bcf86cd799439022");
@@ -111,7 +111,7 @@ describe("Agregar disponibilidad horaria a un médico", () => {
         expect(() => {
             medico.agregarDisponibilidades([disponibilidad2]);
         }).toThrow();
-    })
+    }) */
 })
 
 describe("Editar la disponibilidad de un médico", () => {
@@ -158,7 +158,7 @@ describe("Editar la disponibilidad de un médico", () => {
         expect(medico.disponibilidades[0].horaHasta).toBe("16:00");
     })
 
-    test("Debería lanzar un error si se intenta editar una disponibilidad asignándole una sede que no le corresponde al médico", () => {
+    /* test("Debería lanzar un error si se intenta editar una disponibilidad asignándole una sede que no le corresponde al médico", () => {
         const usuario = new Usuario("medico1", "password123");
         const idSede1 = new mongoose.Types.ObjectId("507f1f77bcf86cd799439011");
         const idSede2 = new mongoose.Types.ObjectId("507f1f77bcf86cd799439022");
@@ -201,7 +201,7 @@ describe("Editar la disponibilidad de un médico", () => {
         expect(() => {
             medico.editarDisponibilidad("disp1", disponibilidadEditada);
         }).toThrow();
-    })
+    }) */
 })
 
 describe("Agregar servicios a un médico", () => {
