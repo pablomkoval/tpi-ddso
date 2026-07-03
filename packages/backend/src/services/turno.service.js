@@ -148,7 +148,7 @@ export class TurnoService {
       fechaDesde: filtros.fechaDesde || null,
       fechaHasta: filtros.fechaHasta || null,
     };
-    console.error("hola5")
+    
     const { turnos, totalTurnos } = await this.turnoRepository.buscarDisponibles(filtroArmado);
     const turnosConCostos = this.popularCostosTurnos(turnos, paciente);
     const turnosOrdenados = this.ordenarYPaginarTurnos(turnosConCostos, filtros, paginacion);
@@ -349,7 +349,7 @@ export class TurnoService {
       if (valueA > valueB) return 1 * sortOrder;
       return 0;
     });
-    console.error("hola2")
+    
     // PAGINACION
     const start = (numeroPagina - 1) * limitePorPagina;
     const end = start + limitePorPagina;
