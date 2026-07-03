@@ -53,15 +53,6 @@ const Header = () => {
           <InputBase placeholder="Buscar..." sx={{ fontSize: '0.875rem' }} />
         </Box>
 
-        <IconButton color="primary" size="small" component={Link} to="/checkout">
-          <Badge
-            badgeContent={carrito.length}
-            color="error"
-            invisible={carrito.length === 0}
-          >
-            <ShoppingCartOutlinedIcon />
-          </Badge>
-        </IconButton>
 
         <IconButton color="error" size="small" onClick={handleLogout}>
           <LogoutIcon />

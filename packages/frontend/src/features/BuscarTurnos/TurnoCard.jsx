@@ -14,12 +14,6 @@ const coberturaStyles = {
 const TurnoCard = ({ turno }) => {
   const { id, fechaHora, medico, sede, servicio, cobertura, costoPaciente } = turno;
   const navigate = useNavigate();
-  const { agregarTurno } = useCart();
-
-  const handleAgregar = () => {
-    console.log("agregando", turno);
-    agregarTurno(turno);
-  };
 
   const obtenerFechaFormateada = (isoString) => {
     if (!isoString) return '';
@@ -117,14 +111,6 @@ const TurnoCard = ({ turno }) => {
 
         {/* Botones: se estiran en mobile */}
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            onClick={handleAgregar}
-            variant="outlined"
-            size="small"
-            sx={{ flex: { xs: 1, sm: 'initial' } }}
-          >
-            Agregar a preselección
-          </Button>
           <Button
             variant="contained"
             size="small"
