@@ -20,7 +20,7 @@ export class TurnoController {
     try {
 
       
-      const paciente = this.pacienteService.findByIdUsuario(req.user.id);
+      const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
       
       const paginacion = extraerPaginacion(req.query);
       const filtros = this.validarFiltros(req.query);
