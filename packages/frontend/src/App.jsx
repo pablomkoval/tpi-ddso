@@ -4,7 +4,7 @@ import LoginPage from './features/LoginPage.jsx';
 import NotificacionPage from './features/NotificacionPage.jsx';
 import BuscarTurnos from './features/BuscarTurnos/BuscarTurnos.jsx';
 import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDisponibilidad.jsx';
-import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
+import AgendaMedica from './features/AgendaMedica/AgendaMedica.jsx';
 import Checkout from './features/checkout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import { ThemeProvider } from '@mui/material';
@@ -13,7 +13,6 @@ import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
 import HomePage from './features/HomePage.jsx';
 import RoleLayout from './features/RoleLayout.jsx';
-import SessionManager from './components/sessionComponents/SessionManager.jsx';
 
 const RootRedirect = () => {
   const token = localStorage.getItem("token");
@@ -24,7 +23,6 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-    <SessionManager/>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 

@@ -21,7 +21,7 @@ import {
   PersonSearch as PersonSearchIcon,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { detalleTurnosData } from '../../mockdata/detalleTurnosData';
+import { detalleTurnosData } from '../../mockdata/detalleTurnosData.js';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 import { useCart } from '../../context/CartContext.jsx';
 

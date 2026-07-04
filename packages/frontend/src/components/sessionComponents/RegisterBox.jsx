@@ -27,6 +27,8 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { registerService } from "../../services/registerService";
+import { loginService } from '../../services/loginService';
+import { useNavigate } from 'react-router-dom';
 
 const roleOptions = [
     {
@@ -90,6 +92,7 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
     const [role, setRole] = useState('paciente');
     const [form, setForm] = useState(initialForm);
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
     
     // Estados para alertas
     const [errorMsg, setErrorMsg] = useState(null);
@@ -156,11 +159,14 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
             await registerService.register(registerPayload);
             setIsSuccess(true);
 
-            // Redirige al login después de 2 segundos de éxito
-            setTimeout(() => {
-                if (onLoginClick) onLoginClick();
-            }, 2000);
+            const loginData = await loginService.login(
+                form.usuario,
+                form.password
+            );
 
+            localStorage.setItem("token", loginData.access_token);
+
+            navigate("/home");
         } catch (error) {
             setErrorMsg(error.message || "Error inesperado al registrar el usuario");
         }
@@ -258,7 +264,7 @@ const RegisterBox = ({ onLoginClick, onRegister }) => {
 
                 {isSuccess && (
                     <Alert severity="success" sx={{ alignItems: 'center' }}>
-                        ¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...
+                        ¡Cuenta creada con éxito! Ingresando...
                     </Alert>
                 )}
 

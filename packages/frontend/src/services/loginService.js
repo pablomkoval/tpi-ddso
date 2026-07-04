@@ -10,7 +10,7 @@ export const loginService = {
   login: async (username, password) => {
 
     if (USE_MOCK) {
-      console.warn("⚠️ Usando MOCK API para el Login. No se conecta a Keycloak.");
+      console.warn("Usando MOCK API para el Login. No se conecta a Keycloak.");
       await new Promise(resolve => setTimeout(resolve, 1000));
 
 
@@ -44,31 +44,6 @@ export const loginService = {
     } catch (error) {
       console.error("Error en Keycloak:", error.response?.data);
       throw new Error("Credenciales inválidas");
-    }
-  },
-  refreshToken: async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
-
-    const params = new URLSearchParams();
-    params.append("grant_type", "refresh_token");
-    params.append("client_id", CLIENT_ID);
-    params.append("refresh_token", refreshToken);
-
-    try {
-      const response = await axios.post(
-        `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`,
-        params,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("No se pudo refrescar token");
-      throw error;
     }
   }
 };
