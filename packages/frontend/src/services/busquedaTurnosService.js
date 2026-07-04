@@ -13,7 +13,9 @@ export const buscarTurnos = async (filtros) => {
             fechaDesde: filtros.fechaDesde || undefined,
             fechaHasta: filtros.fechaHasta || undefined,
             sortBy: filtros.sortBy || undefined,
-            sortOrder: filtros.sortOrder || undefined
+            sortOrder: filtros.sortOrder || undefined,
+            page: filtros.page || 1,
+            limit: filtros.limit || 10
         };
         const response = await axios.get(API_URL, {
             params: queryParams,
@@ -22,7 +24,7 @@ export const buscarTurnos = async (filtros) => {
             }
         });
 
-        return response.data.data.turnos;
+        return response.data.data;
     } catch (error) {
         console.error("Error al conectar con la API de turnos:", error);
         throw error;

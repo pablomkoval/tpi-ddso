@@ -86,12 +86,11 @@ describe("TurnoRepository — integración con MongoDB en memoria", () => {
             buildTurnoData({ servicio: servicioId, estado: "RESERVADO" }),
         ]);
 
-        const { turnos, total } = await repo.buscarDisponibles(
-            { prestacion: servicioId },
-            { skip: 0, limit: 10, sort: { fechaHora: 1 } }
-        );
+        const { turnos, totalTurnos } = await repo.buscarDisponibles({
+            servicios: [servicioId]
+        });
 
-        expect(total).toBe(1);
+        expect(totalTurnos).toBe(1);
         expect(turnos).toHaveLength(1);
         expect(turnos[0].estado).toBe("DISPONIBLE");
     });
@@ -107,12 +106,11 @@ describe("TurnoRepository — integración con MongoDB en memoria", () => {
             buildTurnoData({ medico: medicoB, servicio }),
         ]);
 
-        const { total } = await repo.buscarDisponibles(
-            { medico: medicoA },
-            { skip: 0, limit: 10, sort: { fechaHora: 1 } }
-        );
+        const { totalTurnos } = await repo.buscarDisponibles({
+            medico: medicoA 
+        });
 
-        expect(total).toBe(2);
+        expect(totalTurnos).toBe(2);
     });
 
     test("buscarDisponibles() filtra por rango de fechas", async () => {
@@ -125,15 +123,12 @@ describe("TurnoRepository — integración con MongoDB en memoria", () => {
             buildTurnoData({ servicio, fechaHora: new Date("2026-10-05T08:00:00Z") }),
         ]);
 
-        const { total } = await repo.buscarDisponibles(
-            {
+        const { totalTurnos } = await repo.buscarDisponibles({
                 fechaDesde: "2026-09-01",
                 fechaHasta: "2026-09-30",
-            },
-            { skip: 0, limit: 10, sort: { fechaHora: 1 } }
-        );
+            });
 
-        expect(total).toBe(2);
+        expect(totalTurnos).toBe(2);
     });
 
   

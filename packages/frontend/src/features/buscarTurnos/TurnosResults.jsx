@@ -1,52 +1,46 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Select, MenuItem, FormControl, Pagination, Skeleton } from '@mui/material';
+import { Box, Typography, Pagination, Skeleton } from '@mui/material';
 import TurnoCard from './TurnoCard.jsx';
-import { detalleTurnosData } from '../../mockdata/detalleTurnosData.js';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 import { buscarTurnos } from '../../services/busquedaTurnosService.js';
 
-const LIMITE = 10; //Revisar hardcodeo aca
+const LIMITE = 10;
 
-// const filtrarTurnos = (turnos, filtros) => {
-//   return turnos.filter((t) => {
-//     if (filtros.profesional && !t.nombre.toLowerCase().includes(filtros.profesional.toLowerCase()))
-//       return false;
-//     if (filtros.especialidad && t.especialidad.toLowerCase() !== filtros.especialidad.toLowerCase())
-//       return false;
-//     if (filtros.sedes?.length > 0 && !filtros.sedes.includes(t.sede))
-//       return false;
-//     return true;
-//   });
-// };
-
-const ordenarOpciones = [
-  { value: 'precio_asc', label: 'Menor Precio' },
-  { value: 'precio_desc', label: 'Mayor Precio' },
-  { value: 'fecha_asc', label: 'Fecha más próxima' },
-];
+const PAGINATION_INICIAL = {
+  totalTurnos: 0,
+  page: 1,
+  limit: LIMITE,
+  totalPaginas: 0,
+};
 
 const TurnosResults = ({ filtros = {} }) => {
   const [turnos, setTurnos] = useState([]);
-  const [total, setTotal] = useState(0);
+  const [pagination, setPagination] = useState(PAGINATION_INICIAL);
   const [pagina, setPagina] = useState(1);
-  const [orden, setOrden] = useState('precio_asc');
   const [loading, setLoading] = useState(true);
   const [errorApi, setErrorApi] = useState(false);
 
   useEffect(() => {
+    setPagina(1);
+  }, [filtros]);
+
+  useEffect(() => {
     const cargarTurnos = async () => {
-      setPagina(1);
       setLoading(true);
       setErrorApi(false);
 
       try {
-        const filtrados = await buscarTurnos(filtros);
+        const resultado = await buscarTurnos({
+          ...filtros,
+          page: pagina,
+          limit: LIMITE,
+        });
 
-        setTurnos(filtrados);
-        setTotal(filtrados.length);
+        setTurnos(resultado.turnos || []);
+        setPagination(resultado.pagination || PAGINATION_INICIAL);
       } catch (e) {
         setTurnos([]);
-        setTotal(0);
+        setPagination(PAGINATION_INICIAL);
         setErrorApi(true);
       } finally {
         setLoading(false);
@@ -54,36 +48,7 @@ const TurnosResults = ({ filtros = {} }) => {
     };
 
     cargarTurnos();
-
-    return () => {
-    };
-  }, [filtros]);
-
-
-  /* useEffect(() => {
-    setPagina(1);
-    setLoading(true);
-    setErrorApi(false);
-    // TODO: reemplazar con fetch real:
-    // fetch(`/api/turnos?${new URLSearchParams(filtros)}`).then(...)
-
-
-    //const filtrados = filtrarTurnos(detalleTurnosData, filtros); 
-    try {
-      const filtrados = await buscarTurnos(filtros);
-      setTurnos(filtrados);
-      setTotal(filtrados.length);
-      setLoading(false);
-    } catch (e) {
-      setTurnos([]);
-      setErrorApi(true);
-      setLoading(false);
-      //TODO: agregar un renderizado de un texto que diga que hubo error de conexion
-    }
-
-    return () => clearTimeout(timer);
-  }, [filtros]); */
-
+  }, [filtros, pagina]);
 
   return (
     <Box sx={{ flex: 1, p: 3 }}>
@@ -91,8 +56,11 @@ const TurnosResults = ({ filtros = {} }) => {
         <Box>
           <Typography variant="h4" fontWeight={700}>Turnos Disponibles</Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
-            {/* Si esta cargando se muestra un skeleton para conteo*/}
-            {loading ? <Skeleton width={250} /> : `Se encontraron ${total} turnos que coinciden con su búsqueda.`}
+            {loading ? (
+              <Skeleton width={250} />
+            ) : (
+              `Se encontraron ${pagination.totalTurnos} turnos que coinciden con su busqueda.`
+            )}
           </Typography>
         </Box>
       </Box>
@@ -100,6 +68,12 @@ const TurnosResults = ({ filtros = {} }) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {loading ? (
           <CustomSkeleton type="list" count={3} />
+        ) : errorApi ? (
+          <Typography color="error">No se pudieron cargar los turnos.</Typography>
+        ) : turnos.length === 0 ? (
+          <Typography color="text.secondary">
+            No hay turnos disponibles para los filtros seleccionados.
+          </Typography>
         ) : (
           turnos.map((turno) => (
             <TurnoCard key={turno.id} turno={turno} />
@@ -109,11 +83,11 @@ const TurnosResults = ({ filtros = {} }) => {
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Pagination
-          count={Math.ceil(total / LIMITE)}
+          count={pagination.totalPaginas}
           page={pagina}
           onChange={(_, p) => setPagina(p)}
           color="primary"
-          disabled={loading}
+          disabled={loading || pagination.totalPaginas <= 1}
         />
       </Box>
     </Box>

@@ -89,6 +89,12 @@ export class TurnoRepository {
 
     return { turnos, total };
   } */
+  normalizarFechaHasta(fechaHasta) {
+    const fecha = new Date(fechaHasta);
+    fecha.setHours(23, 59, 59, 999);
+    return fecha;
+  }
+
   async buscarDisponibles(filtros) {
     const query = { estado: "DISPONIBLE" };
 
@@ -103,8 +109,8 @@ export class TurnoRepository {
         query.medico = filtros.medico;
     }
 
-    if (filtros.sedeId) {
-        query.sede = filtros.sedeId;
+    if (filtros.sede) {
+        query.sede = filtros.sede;
     }
 
     if (filtros.fechaDesde || filtros.fechaHasta) {
@@ -115,7 +121,7 @@ export class TurnoRepository {
         }
 
         if (filtros.fechaHasta) {
-            query.fechaHora.$lte = new Date(filtros.fechaHasta);
+            query.fechaHora.$lte = this.normalizarFechaHasta(filtros.fechaHasta);
         }
     }
 
@@ -136,7 +142,7 @@ export class TurnoRepository {
         this.model.countDocuments(query)
     ]);
 
-    return { turnos, total };
+    return { turnos, totalTurnos: total };
   }
 
 

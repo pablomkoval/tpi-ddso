@@ -165,7 +165,7 @@ export default class Medico {
         const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
         this.disponibilidades.forEach(disponibilidad => {
             if (!disponibilidad.prestacion._id.equals(servicio._id)) {
-                console.log("La disponibilidad no corresponde al servicio, no se generan turnos para esta disponibilidad");
+                //console.log("La disponibilidad no corresponde al servicio, no se generan turnos para esta disponibilidad");
                 return;
             }
             for (let fechaActual = siguienteFechaParaDia(fechaInicio, disponibilidad.diaSemana);

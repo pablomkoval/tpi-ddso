@@ -19,8 +19,10 @@ export class TurnoController {
   async getDisponibles(req, res, next) {
     try {
 
-      
-      const paciente = this.pacienteService.findByIdUsuario(req.user.id);
+      //console.log("1. Lo que viene en req.user:", req.user);
+      //console.log("2. El ID que le paso a Mongo:", req.user?.id);
+      const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
+      //console.log("3. Paciente encontrado en la BD:", paciente);
       const paginacion = extraerPaginacion(req.query);
       const filtros = this.validarFiltros(req.query);
       const resultado = await this.turnoService.buscarDisponibles(paginacion, filtros, paciente);
