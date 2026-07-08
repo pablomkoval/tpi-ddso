@@ -115,7 +115,7 @@ export class PacienteService {
       destinatario: turno.medico,
       remitente: pacienteId,
       mensaje: `El paciente ${paciente.nombre} reservó un turno para ${nombreServicio}.`,
-    });
+    }); //!!utilizar metodo estático de clase notificacion 
 
     return turnoGuardado;
   }

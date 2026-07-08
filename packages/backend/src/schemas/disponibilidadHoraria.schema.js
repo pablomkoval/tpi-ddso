@@ -3,11 +3,7 @@ import { DisponibilidadHoraria } from "../domain/models/entities/medico/Disponib
 
 export const disponibilidadHorariaSchema = new mongoose.Schema(
     {
-        /* id: {
-            type: String,
-            required: true,
-            unique: false
-        }, */
+
         diaSemana: {
             type: String,
             required: true,

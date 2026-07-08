@@ -25,9 +25,9 @@ const BuscarTurnos = () => {
 
   const handleAplicar = () => {
     if (!filtrosPendientes.especialidad) {
-      console.error("Cuidado aca en buscarTurnos.jsx");
-      alert("Por favor, selecciona una especialidad/servicio para buscar.");
-      return;
+        //console.error("Cuidado aca en buscarTurnos.jsx");
+        alert("Por favor, selecciona una especialidad/servicio para buscar.");
+        return;
     }
     setFiltrosAplicados({ ...filtrosPendientes });
     setDrawerOpen(false);

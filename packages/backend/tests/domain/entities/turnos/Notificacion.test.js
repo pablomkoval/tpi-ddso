@@ -22,21 +22,21 @@ describe("Capa de dominio - Notificacion", () => {
     })
 
     test("Debe crear una notificacion para el medico si el ultimo cambio lo hizo el paciente", () => {
-       const mockTurno = {
-        paciente: "6470abc12345678901234567",
-        medico: "647012398765432109876543",
-        historialEstados: [
-            { estado: "Solicitado", motivo: "Control anual", usuario: "6470abc12345678901234567" },
-            { estado: "Confirmado", motivo: "Paciente confirma asistencia", usuario: "6470abc12345678901234567" }
-        ]
-       };
+        const mockTurno = {
+            paciente: "6470abc12345678901234567",
+            medico: "647012398765432109876543",
+            historialEstados: [
+                { estado: "Solicitado", motivo: "Control anual", usuario: "6470abc12345678901234567" },
+                { estado: "Confirmado", motivo: "Paciente confirma asistencia", usuario: "6470abc12345678901234567" }
+            ]
+        };
 
-       const notificacion = Notificacion.crearSegunEstadoTurno(mockTurno);
+        const notificacion = Notificacion.crearSegunEstadoTurno(mockTurno);
 
-       expect(notificacion.destinatario).toBe("647012398765432109876543");
-       expect(notificacion.remitente).toBe("6470abc12345678901234567");
-       expect(notificacion.mensaje).toBe("El turno esta en estado: Confirmado por el motivo: Paciente confirma asistencia");
-       expect(notificacion.leida).toBe(false);
-       expect(notificacion.fechaHoraCreacion).toBeInstanceOf(Date);
+        expect(notificacion.destinatario).toBe("647012398765432109876543");
+        expect(notificacion.remitente).toBe("6470abc12345678901234567");
+        expect(notificacion.mensaje).toBe("El turno esta en estado: Confirmado por el motivo: Paciente confirma asistencia");
+        expect(notificacion.leida).toBe(false);
+        expect(notificacion.fechaHoraCreacion).toBeInstanceOf(Date);
     });
 })

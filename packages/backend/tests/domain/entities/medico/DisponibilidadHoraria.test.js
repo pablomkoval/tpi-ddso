@@ -1,5 +1,5 @@
 import { describe, test, expect } from "@jest/globals";
-import { DiaSemana} from "../../../../src/domain/enum/DiaSemana.js";
+import { DiaSemana } from "../../../../src/domain/enum/DiaSemana.js";
 import { DisponibilidadHoraria } from "../../../../src/domain/models/entities/medico/DisponibilidadHoraria";
 import mongoose from "mongoose";
 
@@ -53,7 +53,7 @@ describe("DisponibilidadHoraria", () => {
             }).toThrow('La hora de inicio (17:00) debe ser anterior a la hora de fin (09:00)');
         })
     })
-    
+
     describe("Validar que la disponibilidad se solape con otra", () => {
         test("Debería retornar true si las disponibilidades se solapan", () => {
             const disponibilidad1 = new DisponibilidadHoraria({

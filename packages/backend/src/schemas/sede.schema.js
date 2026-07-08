@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 const sedeSchema = new mongoose.Schema(
     {
-        id: {
-            type: String,
-            required: true,
-            trim: true
-        },
         nombre: {
             type: String,
             required: true,

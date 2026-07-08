@@ -65,7 +65,7 @@ export const verifyToken = (req, res, next) => {
                 keycloakId: decoded.sub,
                 username: decoded.preferred_username,
                 //email: decoded.email,
-                nombre: usuarioMongo.nombre,
+                nombre: decoded.given_name,
                 apellido: decoded.family_name,
                 roles: rolesDelCliente,
                 token: decoded,

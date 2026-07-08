@@ -2,18 +2,17 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
 import LoginPage from './features/LoginPage.jsx';
 import NotificacionPage from './features/NotificacionPage.jsx';
-import BuscarTurnos from './features/BuscarTurnos/BuscarTurnos.jsx';
+import BuscarTurnos from './features/buscarTurnos/BuscarTurnos.jsx';
 import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDisponibilidad.jsx';
 import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import GestionarPrestaciones from './features/gestionarPrestaciones/GestionarPrestaciones.jsx';
 import { ThemeProvider } from '@mui/material';
 import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
-import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
+import DetalleTurno from './features/buscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
 import HomePage from './features/HomePage.jsx';
 import RoleLayout from './features/RoleLayout.jsx';
-import SessionManager from './components/sessionComponents/SessionManager.jsx';
 
 const RootRedirect = () => {
   const token = localStorage.getItem("token");
@@ -24,7 +23,6 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-    <SessionManager/>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 

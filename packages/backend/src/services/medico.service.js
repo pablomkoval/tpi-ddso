@@ -385,6 +385,7 @@ export class MedicoService {
 
     async consultarHistorialPaciente(pacienteId) {
         await this.findById(pacienteId);
+
         return await this.turnoRepository.findByPaciente(pacienteId);
     }
 

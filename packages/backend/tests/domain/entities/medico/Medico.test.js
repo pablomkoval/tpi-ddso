@@ -1,11 +1,12 @@
 import { describe, test, expect } from "@jest/globals";
 import Medico from "../../../../src/domain/models/entities/medico/Medico";
 import { DisponibilidadHoraria } from "../../../../src/domain/models/entities/medico/DisponibilidadHoraria";
-import { Usuario } from "../../../../src/domain/models/entities/Usuario"
+import { Usuario } from "../../../../src/domain/models/entities/Usuario";
 import { DiaSemana } from "../../../../src/domain/enum/DiaSemana.js";
 import { Practica } from "../../../../src/domain/models/entities/medico/Practica.js";
 import mongoose from "mongoose";
 
+describe("Medico Entity Tests", () => {
 
 describe("Creación de un médico", () => {
     test("Debería crear un médico con los datos proporcionados", () => {
@@ -276,4 +277,5 @@ describe("Generar turnos de un médico", () => {
         console.log("Médico al que se generaron los turnos", medico);
         expect(turnosGenerados.length).toBe(4);
     })
+})
 })

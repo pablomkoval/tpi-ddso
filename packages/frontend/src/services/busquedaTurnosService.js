@@ -14,8 +14,8 @@ export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
             fechaHasta: filtros.fechaHasta || undefined,
             sortBy: filtros.sortBy || undefined,
             sortOrder: filtros.sortOrder || undefined,
-            page: pagina,
-            limit: limite,
+            page: filtros.page || pagina,
+            limit: filtros.limit || limite
         };
         const response = await axios.get(API_URL, {
             params: queryParams,

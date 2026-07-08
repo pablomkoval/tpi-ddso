@@ -169,14 +169,18 @@ export class TurnoService {
     const { turnos, totalTurnos } = await this.turnoRepository.buscarDisponibles(filtroArmado);
     const turnosConCostos = this.popularCostosTurnos(turnos, paciente);
     const turnosOrdenados = this.ordenarYPaginarTurnos(turnosConCostos, filtros, paginacion);
-    const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / paginacion.limitePorPagina)
+    
+    const pagina = Number(paginacion.numeroPagina || paginacion.page || 1);
+    const limite = Number(paginacion.limitePorPagina || paginacion.limit || 10);
+
+    const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / limite);
 
     return {
       turnos: turnosOrdenados,
       pagination: {
         totalTurnos,
-        page: paginacion.numeroPagina,
-        limit: paginacion.limitePorPagina,
+        page: pagina,
+        limit: limite,
         totalPaginas,
       },
     };
@@ -338,9 +342,11 @@ export class TurnoService {
   }
 
   ordenarYPaginarTurnos(turnos, filtros, paginacion) {
-    const { numeroPagina, limitePorPagina } = paginacion
+    const pagina = Number(paginacion.numeroPagina || paginacion.page || 1);
+    const limite = Number(paginacion.limitePorPagina || paginacion.limit || 10);
 
     const { sortBy = "fechaHora", sortOrder = 1 } = filtros;
+    const orden = Number(sortOrder);
 
     // ORDENAR
     const ordenados = [...turnos].sort((a, b) => {
@@ -357,19 +363,19 @@ export class TurnoService {
 
         case "fechaHora":
         default:
-          valueA = new Date(a.fechaHora);
-          valueB = new Date(b.fechaHora);
+          valueA = new Date(a.fechaHora).getTime();
+          valueB = new Date(b.fechaHora).getTime();
           break;
       }
 
-      if (valueA < valueB) return -1 * sortOrder;
-      if (valueA > valueB) return 1 * sortOrder;
+      if (valueA < valueB) return -1 * orden;
+      if (valueA > valueB) return 1 * orden;
       return 0;
     });
     
     // PAGINACION
-    const start = (numeroPagina - 1) * limitePorPagina;
-    const end = start + limitePorPagina;
+    const start = (pagina - 1) * limite;
+    const end = start + limite;
 
     const paginados = ordenados.slice(start, end);
     return paginados;

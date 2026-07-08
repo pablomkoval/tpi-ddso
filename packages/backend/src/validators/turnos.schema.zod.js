@@ -29,6 +29,7 @@ export const filtroBusqTurnoPaciente = z.object({
 export const filtroBusqTurnoMedico = z.object({
     /* pacienteId: z.string().optional(),*/ //plantear cual usar
     nombrePaciente: z.string().optional(), //plantear cual usar
+    
     //turnos disponibles no tienen paciente asignado
 
     servicioId: idMongoSchema.optional(), //servicios se intentan autocompletar en la busqueda

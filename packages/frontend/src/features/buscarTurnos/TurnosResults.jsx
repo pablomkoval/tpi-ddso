@@ -4,17 +4,22 @@ import TurnoCard from './TurnoCard.jsx';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 import { buscarTurnos } from '../../services/busquedaTurnosService.js';
 
-const LIMITE = 10; //Revisar hardcodeo aca
+const LIMITE = 10;
+
+const PAGINATION_INICIAL = {
+  totalTurnos: 0,
+  page: 1,
+  limit: LIMITE,
+  totalPaginas: 0,
+};
 
 const TurnosResults = ({ filtros = {} }) => {
   const [turnos, setTurnos] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [pagination, setPagination] = useState(PAGINATION_INICIAL);
   const [pagina, setPagina] = useState(1);
   const [loading, setLoading] = useState(true);
   const [errorApi, setErrorApi] = useState(false);
 
-  // Cada vez que cambian los filtros, arrancamos de nuevo desde la página 1.
   useEffect(() => {
     setPagina(1);
   }, [filtros]);
@@ -25,15 +30,17 @@ const TurnosResults = ({ filtros = {} }) => {
       setErrorApi(false);
 
       try {
-        const { turnos: turnosObtenidos, pagination } = await buscarTurnos(filtros, pagina, LIMITE);
+        const resultado = await buscarTurnos({
+          ...filtros,
+          page: pagina,
+          limit: LIMITE,
+        });
 
-        setTurnos(turnosObtenidos);
-        setTotal(pagination.totalTurnos);
-        setTotalPaginas(pagination.totalPaginas);
+        setTurnos(resultado.turnos || []);
+        setPagination(resultado.pagination || PAGINATION_INICIAL);
       } catch (e) {
         setTurnos([]);
-        setTotal(0);
-        setTotalPaginas(0);
+        setPagination(PAGINATION_INICIAL);
         setErrorApi(true);
       } finally {
         setLoading(false);
@@ -49,8 +56,11 @@ const TurnosResults = ({ filtros = {} }) => {
         <Box>
           <Typography variant="h4" fontWeight={700}>Turnos Disponibles</Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
-            {/* Si esta cargando se muestra un skeleton para conteo*/}
-            {loading ? <Skeleton width={250} /> : `Se encontraron ${total} turnos que coinciden con su búsqueda.`}
+            {loading ? (
+              <Skeleton width={250} />
+            ) : (
+              `Se encontraron ${pagination.totalTurnos} turnos que coinciden con su busqueda.`
+            )}
           </Typography>
         </Box>
       </Box>
@@ -58,6 +68,12 @@ const TurnosResults = ({ filtros = {} }) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {loading ? (
           <CustomSkeleton type="list" count={3} />
+        ) : errorApi ? (
+          <Typography color="error">No se pudieron cargar los turnos.</Typography>
+        ) : turnos.length === 0 ? (
+          <Typography color="text.secondary">
+            No hay turnos disponibles para los filtros seleccionados.
+          </Typography>
         ) : (
           turnos.map((turno) => (
             <TurnoCard key={turno.id} turno={turno} />
@@ -67,11 +83,11 @@ const TurnosResults = ({ filtros = {} }) => {
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Pagination
-          count={totalPaginas}
+          count={pagination.totalPaginas}
           page={pagina}
           onChange={(_, p) => setPagina(p)}
           color="primary"
-          disabled={loading}
+          disabled={loading || pagination.totalPaginas <= 1}
         />
       </Box>
     </Box>

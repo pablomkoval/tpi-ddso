@@ -9,7 +9,6 @@ export class Turno {
   historialEstados = [];
 
   constructor(medico, fechaHora, servicio, sede, disponibilidadOrigen) {
-    this.id = "placeholder";
     this.medico = medico;
     //paciente no se define al crear un turno, solo esta disponible
     this.fechaHora = fechaHora;
@@ -28,7 +27,7 @@ export class Turno {
     // Le pasamos this.id en vez de this — evita la referencia circular
     const cambio = new CambioEstadoTurno(
       nuevoEstado,
-      this.id ?? this._id,
+      this._id,
       quien,
       motivoCambio,
     );

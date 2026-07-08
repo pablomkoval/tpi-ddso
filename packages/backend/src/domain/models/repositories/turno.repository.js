@@ -106,6 +106,12 @@ export class TurnoRepository {
 
     return { turnos, total };
   } */
+  normalizarFechaHasta(fechaHasta) {
+    const fecha = new Date(fechaHasta);
+    fecha.setHours(23, 59, 59, 999);
+    return fecha;
+  }
+
   async buscarDisponibles(filtros) {
     const query = { estado: "DISPONIBLE" };
 
@@ -163,7 +169,7 @@ export class TurnoRepository {
         this.model.countDocuments(query)
     ]);
 
-    return { turnos, total };
+    return { turnos, totalTurnos: total };
   }
 
 
