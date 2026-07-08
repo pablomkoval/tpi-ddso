@@ -32,6 +32,21 @@ export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
 
 };
 
+export const obtenerTurnoPorId = async (id) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`http://localhost:4000/turnos/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error al obtener el turno por ID:", error);
+        throw error;
+    }
+}
+
 /*
 queryparams aceptados:
 medicoId

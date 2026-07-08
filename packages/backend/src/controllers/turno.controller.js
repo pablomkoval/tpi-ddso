@@ -60,7 +60,7 @@ export class TurnoController {
 
       res.status(200).json({
         status: "success",
-        data: turno,
+        data: this.turnoDetalleToDTO(turno),
       });
     } catch (error) {
       next(error);
@@ -139,6 +139,34 @@ export class TurnoController {
         costoPaciente: turno.costoPaciente,
     };
 
+  }
+
+  turnoDetalleToDTO(turno) {
+    return {
+      id: turno._id,
+
+      fechaHora: turno.fechaHora,
+      estado: turno.estado,
+      costo: turno.costo,
+
+      medico: {
+        id: turno.medico._id,
+        nombre: turno.medico.nombre,
+      },
+
+      sede: {
+        id: turno.sede._id,
+        nombre: turno.sede.nombre,
+        direccion: turno.sede.direccion,
+      },
+
+      servicio: {
+        id: turno.servicio.servicioUnico._id,
+        nombre: turno.servicio.servicioUnico.nombre,
+        tipo: turno.servicio.servicioUnico.tipoServicio,
+        duracionMinutos: turno.servicio.duracionTurnoEnMins,
+      },
+    };
   }
 
 

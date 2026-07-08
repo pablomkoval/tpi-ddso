@@ -24,7 +24,14 @@ export class TurnoRepository {
   }
 
   async findById(id) {
-    return await this.model.findById(id);
+    return await this.model
+      .findById(id)
+      .populate("medico")
+      .populate({
+        path: "servicio",
+        populate: { path: "servicioUnico" },
+      })
+      .populate("sede");
   }
 
   async findByIdConServicio(id) {
