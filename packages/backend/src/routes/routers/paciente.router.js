@@ -1,4 +1,5 @@
 import express from "express";
+import { verifyToken } from "../../middlewares/auth.middleware.js";
 
 export class PacienteRouter {
     constructor(controller) {
@@ -50,6 +51,7 @@ export class PacienteRouter {
          */
         this.pacienteRouter.post("/", (req, res, next) => { this.controller.create(req, res, next); });
         this.pacienteRouter.get("/", (req, res, next) => { this.controller.findAll(req, res, next); });
+        this.pacienteRouter.get("/me", verifyToken, (req, res, next) => { this.controller.findMe(req, res, next); });
         
         /**
          * @swagger
@@ -174,7 +176,7 @@ export class PacienteRouter {
          *          204:
          *              description: Turno cancelado correctamente
          */
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cancelaciones", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
+        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cancelaciones", verifyToken, (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
 
         /**
          * @swagger
@@ -208,7 +210,7 @@ export class PacienteRouter {
          *          201:
          *              description: Solicitud de cambio registrada con éxito
          */
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cambios", (req, res, next) => { this.controller.solicitarCambioFecha(req, res, next); });
+        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cambios", verifyToken, (req, res, next) => { this.controller.solicitarCambioFecha(req, res, next); });
     }
 
     getRouter() {

@@ -45,6 +45,15 @@ export class PacienteController {
         }
     }
 
+    async findMe(req, res, next) {
+        try {
+            const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
+            res.status(200).json(paciente);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
     async consultarHistorial(req, res, next) {
         try {
             const idPaciente = parsearId(req.params.idPaciente);

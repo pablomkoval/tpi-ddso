@@ -63,6 +63,20 @@ export class SolicitudCambioTurnoService {
       );
     }
 
+    // Validar que ambos turnos correspondan al mismo servicio/especialidad
+    const idServicioOriginal = String(
+      turnoOriginal.servicio?._id || turnoOriginal.servicio
+    );
+    const idServicioNuevo = String(
+      turnoNuevo.servicio?._id || turnoNuevo.servicio
+    );
+    if (idServicioOriginal !== idServicioNuevo) {
+      throw new UnprocessableEntityError(
+        "El nuevo turno debe ser de la misma especialidad o práctica que el turno original",
+        "SERVICIO_NO_COINCIDE",
+      );
+    }
+
     if (turnoNuevo.estado !== EstadoTurno.DISPONIBLE || turnoNuevo.paciente) {
       throw new ConflictError(
         "El nuevo turno no está disponible",

@@ -56,7 +56,12 @@ export class TurnoRepository {
   async findByPaciente(pacienteId) {
     return await this.model
       .find({ paciente: String(pacienteId) })
-      .populate("servicio")
+      .populate({
+        path: 'servicio',
+        populate: { path: 'servicioUnico' }
+      })
+      .populate('medico', 'nombre')
+      .populate('sede', 'nombre direccion')
       .sort({ fechaHora: -1 });
   }
 
