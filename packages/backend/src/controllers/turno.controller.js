@@ -57,10 +57,24 @@ export class TurnoController {
   async getById(req, res, next) {
     try {
       const turno = await this.turnoService.obtenerPorId(req.params.id);
+      
+      let turnoConCosto = turno;
+      if (req.user) {
+        try {
+          const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
+          if (paciente) {
+            const turnoObj = turno.toObject ? turno.toObject() : turno;
+            const populados = this.turnoService.popularCostosTurnos([turnoObj], paciente);
+            turnoConCosto = populados[0];
+          }
+        } catch (e) {
+          return next(e);
+        }
+      }
 
       res.status(200).json({
         status: "success",
-        data: this.turnoDetalleToDTO(turno),
+        data: this.turnoDetalleToDTO(turnoConCosto),
       });
     } catch (error) {
       next(error);
@@ -73,11 +87,17 @@ export class TurnoController {
       const { estado, ...datos } = req.body
 
       if (!estado) {
-        //error de que falta poner estado del turno en el body
+        return res.status(400).json({ status: "error", message: "Debe indicar el estado destino" });
       }
 
       if (estado === "RESERVADO") {
-        const turnoReservado = await this.turnoService.reservarTurno(id, datos);
+        const { pacienteId } = datos;
+        if (!pacienteId) {
+          return res.status(400).json({ status: "error", message: "Debe indicar el pacienteId para reservar" });
+        }
+        // Usamos pacienteService para mantener todas las validaciones de negocio
+        // (estado disponible, notificación al médico, etc.)
+        const turnoReservado = await this.pacienteService.reservarTurno(pacienteId, id);
         return res.status(200).json({
           status: "success",
           data: turnoReservado,
@@ -92,6 +112,7 @@ export class TurnoController {
         });
       }
 
+      return res.status(400).json({ status: "error", message: `Estado '${estado}' no válido` });
 
     } catch (error) {
       next(error);
@@ -142,29 +163,31 @@ export class TurnoController {
   }
 
   turnoDetalleToDTO(turno) {
+    const servicio = turno.servicio || {};
+    const servicioUnico = servicio.servicioUnico || {};
+
     return {
       id: turno._id,
 
       fechaHora: turno.fechaHora,
       estado: turno.estado,
-      costo: turno.costo,
+      costo: turno.costo ?? 0,
+      cobertura: turno.cobertura,
+      costoPaciente: turno.costoPaciente,
 
-      medico: {
-        id: turno.medico._id,
-        nombre: turno.medico.nombre,
-      },
+      medico: turno.medico
+        ? { id: turno.medico._id, nombre: turno.medico.nombre }
+        : null,
 
-      sede: {
-        id: turno.sede._id,
-        nombre: turno.sede.nombre,
-        direccion: turno.sede.direccion,
-      },
+      sede: turno.sede
+        ? { id: turno.sede._id, nombre: turno.sede.nombre, direccion: turno.sede.direccion }
+        : null,
 
       servicio: {
-        id: turno.servicio.servicioUnico._id,
-        nombre: turno.servicio.servicioUnico.nombre,
-        tipo: turno.servicio.servicioUnico.tipoServicio,
-        duracionMinutos: turno.servicio.duracionTurnoEnMins,
+        id: servicioUnico._id ?? servicio._id ?? null,
+        nombre: servicioUnico.nombre ?? servicio.nombre ?? '—',
+        tipo: servicioUnico.tipoServicio ?? null,
+        duracionMinutos: servicio.duracionTurnoEnMins ?? null,
       },
     };
   }

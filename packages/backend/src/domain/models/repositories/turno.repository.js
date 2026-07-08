@@ -34,6 +34,11 @@ export class TurnoRepository {
       .populate("sede");
   }
 
+  async update(id, data) {
+    return await this.model.findByIdAndUpdate(id, data, { new: true });
+  }
+
+
   async findByIdConServicio(id) {
     return await this.model.findById(id).populate("servicio");
   }
@@ -105,17 +110,23 @@ export class TurnoRepository {
     const query = { estado: "DISPONIBLE" };
 
 
-    if (filtros.servicios?.length > 0) {//deberia ser ya mayor a cero pero no vaya a ser
+    if (filtros.servicios?.length > 0) {
         query.servicio = {
             $in: filtros.servicios
         };
+    } else if (filtros.prestacion) {
+        query.servicio = filtros.prestacion;
     }
 
     if (filtros.medico) {
         query.medico = filtros.medico;
+    } else if (filtros.medicoId) {
+        query.medico = filtros.medicoId;
     }
 
-    if (filtros.sedeId) {
+    if (filtros.sede) {
+        query.sede = filtros.sede;
+    } else if (filtros.sedeId) {
         query.sede = filtros.sedeId;
     }
 
@@ -127,7 +138,11 @@ export class TurnoRepository {
         }
 
         if (filtros.fechaHasta) {
-            query.fechaHora.$lte = new Date(filtros.fechaHasta);
+            const fechaFin = new Date(filtros.fechaHasta);
+            if (typeof filtros.fechaHasta === 'string' && !filtros.fechaHasta.includes('T')) {
+                fechaFin.setUTCHours(23, 59, 59, 999);
+            }
+            query.fechaHora.$lte = fechaFin;
         }
     }
 

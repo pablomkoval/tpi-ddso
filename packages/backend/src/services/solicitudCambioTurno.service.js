@@ -202,11 +202,25 @@ export class SolicitudCambioTurnoService {
 
     this.validarConfirmador(turnoOriginal, solicitud, confirmadorId);
 
+    const turnoNuevo = await this.turnoRepository.findById(
+      solicitud.turnoNuevo,
+    );
+    if (turnoNuevo) {
+      turnoNuevo.paciente = null;
+      turnoNuevo.actualizarEstado(
+        EstadoTurno.DISPONIBLE,
+        confirmadorId,
+        "Solicitud de cambio rechazada",
+      );
+      await this.turnoRepository.update(turnoNuevo.id || turnoNuevo._id, turnoNuevo);
+    }
+
     solicitud.rechazar(confirmadorId, motivoRechazo);
 
     return await this.solicitudCambioTurnoRepository.update(
       solicitud.id || solicitud._id,
       {
+        status: "success",
         estado: solicitud.estado,
         confirmadorId: solicitud.confirmadorId,
         fechaResolucion: solicitud.fechaResolucion,

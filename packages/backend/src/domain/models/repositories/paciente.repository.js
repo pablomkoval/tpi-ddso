@@ -16,15 +16,33 @@ export class PacienteRepository {
     }
 
     async findById(id) {
-        return await this.model.findById(id).populate('plan');
+        return await this.model.findById(id).populate({
+            path: 'plan',
+            populate: [
+                { path: 'coberturasEspecialidad.prestacion' },
+                { path: 'coberturasPractica.practica' }
+            ]
+        });
     }
 
     async findByIdUsuario(idUsuario){
-        return await this.model.findOne({usuario: idUsuario}).populate('plan')
+        return await this.model.findOne({usuario: idUsuario}).populate({
+            path: 'plan',
+            populate: [
+                { path: 'coberturasEspecialidad.prestacion' },
+                { path: 'coberturasPractica.practica' }
+            ]
+        });
     }
 
     async findByIdConPlan(id) {
-        return await this.model.findById(id).populate('plan');
+        return await this.model.findById(id).populate({
+            path: 'plan',
+            populate: [
+                { path: 'coberturasEspecialidad.prestacion' },
+                { path: 'coberturasPractica.practica' }
+            ]
+        });
     }
 
     async update(id, data) {

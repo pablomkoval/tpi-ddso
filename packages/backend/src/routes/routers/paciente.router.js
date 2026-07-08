@@ -120,7 +120,7 @@ export class PacienteRouter {
          *          200:
          *              description: Historial de turnos obtenido correctamente
          */
-        this.pacienteRouter.get("/:idPaciente/turnos", (req, res, next) => { this.controller.consultarHistorial(req, res, next); });
+        this.pacienteRouter.get("/:idPaciente/turnos", verifyToken, (req, res, next) => { this.controller.consultarHistorial(req, res, next); });
 
         /**
          * @swagger
@@ -143,7 +143,7 @@ export class PacienteRouter {
          *          200:
          *              description: Turno reservado con éxito
          */
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/reservaciones", (req, res, next) => { this.controller.reservarTurno(req, res, next); });
+        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/reservaciones", verifyToken, (req, res, next) => { this.controller.reservarTurno(req, res, next); });
 
         /**
          * @swagger

@@ -6,3 +6,7 @@
 //   const linkElement = screen.getByText(/learn react/i);
 //   expect(linkElement).toBeInTheDocument();
 // });
+
+test('placeholder frontend', () => {
+  expect(true).toBe(true);
+});

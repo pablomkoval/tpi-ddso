@@ -36,25 +36,42 @@ const obtenerNivelCobertura = (turno, plan) => {
   }
 
   const idServicio = obtenerId(servicio);
+  const idServicioUnicoTurno = obtenerId(servicio.servicioUnico);
 
   if (servicio.tipoServicio === "practica") {
     const coberturas = Array.isArray(plan.coberturasPractica)
       ? plan.coberturasPractica
       : [];
-    const cobertura = coberturas.find(
-      (item) => String(obtenerId(item.practica)) === String(idServicio),
-    );
+    const cobertura = coberturas.find((item) => {
+      const practicaCobertura = item.practica;
+      if (!practicaCobertura) return false;
+
+      const idPracticaCobertura = obtenerId(practicaCobertura);
+      if (String(idPracticaCobertura) === String(idServicio)) return true;
+
+      const idServicioUnicoCobertura = obtenerId(practicaCobertura.servicioUnico);
+      return idServicioUnicoCobertura && idServicioUnicoTurno && 
+             String(idServicioUnicoCobertura) === String(idServicioUnicoTurno);
+    });
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
 
-  const idEspecialidad = obtenerId(turno?.prestacion);
+  const idEspecialidad = idServicio;
   if (idEspecialidad) {
     const coberturasEspecialidad = Array.isArray(plan.coberturasEspecialidad)
       ? plan.coberturasEspecialidad
       : [];
-    const cobertura = coberturasEspecialidad.find(
-      (item) => String(obtenerId(item.prestacion)) === String(idEspecialidad),
-    );
+    const cobertura = coberturasEspecialidad.find((item) => {
+      const prestacionCobertura = item.prestacion;
+      if (!prestacionCobertura) return false;
+
+      const idPrestacionCobertura = obtenerId(prestacionCobertura);
+      if (String(idPrestacionCobertura) === String(idEspecialidad)) return true;
+
+      const idServicioUnicoCobertura = obtenerId(prestacionCobertura.servicioUnico);
+      return idServicioUnicoCobertura && idServicioUnicoTurno && 
+             String(idServicioUnicoCobertura) === String(idServicioUnicoTurno);
+    });
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
   }
 
@@ -334,8 +351,8 @@ export class TurnoService {
       switch (sortBy) {
 
         case "costo":
-          valueA = a.costo;
-          valueB = b.costo;
+          valueA = a.costoPaciente ?? a.costo ?? 0;
+          valueB = b.costoPaciente ?? b.costo ?? 0;
           break;
 
         case "fechaHora":

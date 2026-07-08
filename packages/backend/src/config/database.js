@@ -2,6 +2,18 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config({ path: new URL('../.env', import.meta.url) });
 
+// Registrar todos los schemas explícitamente para evitar problemas de populación asíncrona / orden de imports
+import "../schemas/sede.schema.js";
+import "../schemas/servicio.schema.js";
+import "../schemas/prestacion.schema.js";
+import "../schemas/plan.schema.js";
+import "../schemas/medico.schema.js";
+import "../schemas/paciente.schema.js";
+import "../schemas/turno.schema.js";
+import "../schemas/usuario.schema.js";
+import "../schemas/notificacion.schema.js";
+import "../schemas/solicitudCambioTurno.schema.js";
+
 //CONEXION A LA BASE DE DATOS
 export class MongoDBClient {
     static async connect() {

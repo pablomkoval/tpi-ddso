@@ -60,7 +60,27 @@ export class PacienteService {
 
   async consultarHistorial(pacienteId) {
     await this.findById(pacienteId);
-    return await this.turnoRepository.findByPaciente(pacienteId);
+    const turnos = await this.turnoRepository.findByPaciente(pacienteId);
+
+    const solicitudesPendientes = await this.solicitudCambioTurnoRepository.model.find({
+      pacienteId: String(pacienteId),
+      estado: "PENDIENTE",
+    });
+
+    const originalIds = new Set(solicitudesPendientes.map((s) => String(s.turnoOriginal)));
+    const nuevoIds = new Set(solicitudesPendientes.map((s) => String(s.turnoNuevo)));
+
+    return turnos.map((turno) => {
+      const turnoObj = turno.toObject ? turno.toObject() : turno;
+      const idStr = String(turnoObj._id || turnoObj.id);
+      if (originalIds.has(idStr) || nuevoIds.has(idStr)) {
+        return {
+          ...turnoObj,
+          estado: "PENDIENTE",
+        };
+      }
+      return turnoObj;
+    });
   }
 
   async reservarTurno(pacienteId, turnoId) {
@@ -187,6 +207,32 @@ export class PacienteService {
       throw new BadRequestError(
         `El turno propuesto no está disponible. Estado actual: ${nuevoTurno.estado}`,
         "TURNO_NUEVO_NO_DISPONIBLE",
+      );
+    }
+
+    const solicitudExistenteOriginal = await this.solicitudCambioTurnoRepository.model.findOne({
+      $or: [
+        { turnoOriginal: turnoActualId, estado: "PENDIENTE" },
+        { turnoNuevo: turnoActualId, estado: "PENDIENTE" }
+      ]
+    });
+    if (solicitudExistenteOriginal) {
+      throw new BadRequestError(
+        "Ya existe una solicitud de cambio pendiente que involucra a este turno",
+        "SOLICITUD_PENDIENTE"
+      );
+    }
+
+    const solicitudExistenteNuevo = await this.solicitudCambioTurnoRepository.model.findOne({
+      $or: [
+        { turnoOriginal: nuevoTurnoId, estado: "PENDIENTE" },
+        { turnoNuevo: nuevoTurnoId, estado: "PENDIENTE" }
+      ]
+    });
+    if (solicitudExistenteNuevo) {
+      throw new BadRequestError(
+        "El turno propuesto ya está involucrado en otra solicitud de cambio pendiente",
+        "SOLICITUD_PENDIENTE"
       );
     }
 

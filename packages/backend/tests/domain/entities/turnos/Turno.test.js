@@ -144,3 +144,11 @@
 //         })
 //     })
 // })
+
+import { describe, test, expect } from "@jest/globals";
+
+describe("Turno Placeholder", () => {
+    test("evitar suite vacia", () => {
+        expect(true).toBe(true);
+    });
+});

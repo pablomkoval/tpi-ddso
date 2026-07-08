@@ -48,6 +48,21 @@ export const cancelarTurno = async (pacienteId, turnoId, motivo) => {
 };
 
 /**
+ * Reserva un turno disponible para el paciente.
+ * @param {string} pacienteId
+ * @param {string} turnoId
+ * @returns {Promise<Object>} turno reservado
+ */
+export const reservarTurno = async (pacienteId, turnoId) => {
+    const response = await axios.post(
+        `${API_BASE}/pacientes/${pacienteId}/turnos/${turnoId}/reservaciones`,
+        {},
+        getHeaders()
+    );
+    return response.data;
+};
+
+/**
  * Solicita un cambio de fecha de un turno. El nuevo turno debe ser del mismo médico
  * y la misma especialidad/práctica. Ambos turnos pasan a estado RESERVADO hasta
  * que el médico confirme o rechace la solicitud.
