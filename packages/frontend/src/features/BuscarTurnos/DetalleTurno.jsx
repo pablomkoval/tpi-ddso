@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { obtenerTurnoPorId } from '../../services/busquedaTurnosService.js';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
+import { formatearFecha, formatearHora } from '../../utils/dateUtils.js';
 import {
   Box,
   Typography,
@@ -18,6 +19,7 @@ import {
   LocationOn as LocationIcon,
   CreditCard as CreditCardIcon,
   PersonSearch as PersonSearchIcon,
+  EventAvailable as EventAvailableIcon,
 } from '@mui/icons-material';
 
 
@@ -69,8 +71,6 @@ export default function DetalleTurno() {
     );
   }
 
-  const fecha = new Date(turno.fechaHora);
-
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
       <Button
@@ -81,9 +81,9 @@ export default function DetalleTurno() {
         Volver a resultados
       </Button>
 
-      <Card variant="outlined">
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      <Card variant="outlined" sx={{ borderRadius: 3 }}>
+        <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5, gap: 2 }}>
             <Box>
               <Typography variant="h5" fontWeight={700}>
                 {turno.servicio?.nombre}
@@ -92,45 +92,93 @@ export default function DetalleTurno() {
                 {turno.servicio?.tipo} · {turno.servicio?.duracionMinutos} min
               </Typography>
             </Box>
-            <Chip label={turno.estado} color="primary" variant="outlined" />
+            <Chip label={turno.estado} color="primary" variant="outlined" sx={{ fontWeight: 600 }} />
           </Box>
 
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2.5 }} />
 
-          <SeccionHeader icon={<CalendarIcon fontSize="small" />} label="Fecha y hora" color="primary.main" />
-          <Typography sx={{ mb: 2 }}>
-            {fecha.toLocaleDateString('es-AR')} - {fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
-          </Typography>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              gap: 2,
+            }}
+          >
+            <InfoCard icon={<CalendarIcon />} label="Fecha y hora">
+              {formatearFecha(turno.fechaHora)} - {formatearHora(turno.fechaHora)}
+            </InfoCard>
 
-          <SeccionHeader icon={<PersonSearchIcon fontSize="small" />} label="Médico" color="primary.main" />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <Avatar>{turno.medico?.nombre?.charAt(0)}</Avatar>
-            <Typography>{turno.medico?.nombre}</Typography>
+            <InfoCard icon={<PersonSearchIcon />} label="Médico">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Avatar sx={{ width: 28, height: 28, fontSize: 14 }}>
+                  {turno.medico?.nombre?.charAt(0)}
+                </Avatar>
+                {turno.medico?.nombre}
+              </Box>
+            </InfoCard>
+
+            <InfoCard icon={<LocationIcon />} label="Sede">
+              {turno.sede?.nombre} - {turno.sede?.direccion}
+            </InfoCard>
+
+            <InfoCard icon={<CreditCardIcon />} label="Costo">
+              ${turno.costo}
+            </InfoCard>
           </Box>
 
-          <SeccionHeader icon={<LocationIcon fontSize="small" />} label="Sede" color="primary.main" />
-          <Typography sx={{ mb: 2 }}>
-            {turno.sede?.nombre} - {turno.sede?.direccion}
-          </Typography>
+          <Divider sx={{ my: 2.5 }} />
 
-          <SeccionHeader icon={<CreditCardIcon fontSize="small" />} label="Costo" color="primary.main" />
-          <Typography sx={{ mb: 2 }}>${turno.costo}</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<EventAvailableIcon />}
+            >
+              Reservar turno
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     </Box>
   );
 }
 
-function SeccionHeader({ icon, label, color }) {
+function InfoCard({ icon, label, children }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 2 }}>
-      <Box sx={{ color, display: 'flex' }}>{icon}</Box>
-      <Typography
-        variant="caption"
-        sx={{ color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8 }}
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 1.5,
+        p: 2,
+        borderRadius: 2,
+        bgcolor: 'action.hover',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 36,
+          height: 36,
+          borderRadius: '50%',
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          flexShrink: 0,
+        }}
       >
-        {label}
-      </Typography>
+        {icon}
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography
+          variant="caption"
+          sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8 }}
+        >
+          {label}
+        </Typography>
+        <Typography sx={{ fontWeight: 500 }}>{children}</Typography>
+      </Box>
     </Box>
   );
 }

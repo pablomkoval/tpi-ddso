@@ -4,6 +4,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { formatearFechaHora } from '../../utils/dateUtils';
 
 const coberturaStyles = {
   NO_CUBIERTA: { bgcolor: '#ffebee', color: '#c62828', label: 'Sin Cobertura' },
@@ -15,17 +16,16 @@ const TurnoCard = ({ turno }) => {
   const { id, fechaHora, medico, sede, servicio, cobertura, costoPaciente } = turno;
   const navigate = useNavigate();
 
-  const obtenerFechaFormateada = (isoString) => {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }) + ' hs';
-  };
+  const obtenerFechaFormateada = (isoString) =>
+    isoString
+      ? formatearFechaHora(isoString, {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }) + ' hs'
+      : '';
 
   const estiloActual = coberturaStyles[cobertura] || { bgcolor: 'grey.100', color: 'text.secondary', label: cobertura };
 

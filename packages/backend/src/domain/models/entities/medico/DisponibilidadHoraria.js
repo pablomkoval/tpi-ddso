@@ -1,7 +1,9 @@
+import { DateTime } from "luxon";
 import { DiaSemana } from "../../../enum/DiaSemana.js";
 import { HorarioInvalidoError } from "../../../errors/HorarioInvalidoError.js";
 import { RangoHorarioInvalidoError } from "../../../errors/RangoHorarioInvalidoError.js";
 import { DiaSemanaInvalidoError } from "../../../errors/DiaSemanaInvalidoError.js";
+import { ZONA_HORARIA_ARGENTINA } from "../../../../shared/timezone.js";
 import { uuidv4 } from "zod";
 
 export class DisponibilidadHoraria {
@@ -70,8 +72,21 @@ export class DisponibilidadHoraria {
             const inicioTurno = this.obtenerHoraDesde() + (i * duracionServicioMins);
             const horas = Math.floor(inicioTurno / 60);
             const minutos = inicioTurno % 60;
-            const fechaHora = new Date(fecha);
-            fechaHora.setUTCHours(horas, minutos, 0, 0);
+
+            // horaDesde/horaHasta representan hora local de Argentina, no UTC.
+            // Se arma el instante en esa zona para que Luxon calcule el offset correcto
+            // (y quede como UTC real al pasarlo a Date, que es como Mongo lo persiste).
+            const fechaHora = DateTime.fromObject(
+                {
+                    year: fecha.getUTCFullYear(),
+                    month: fecha.getUTCMonth() + 1,
+                    day: fecha.getUTCDate(),
+                    hour: horas,
+                    minute: minutos,
+                },
+                { zone: ZONA_HORARIA_ARGENTINA },
+            ).toJSDate();
+
             instantes.push(fechaHora);
         }
 

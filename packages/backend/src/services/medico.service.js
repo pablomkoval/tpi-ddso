@@ -135,7 +135,6 @@ export class MedicoService {
             if (!medico) {
                 throw new NotFoundError("Médico con Id " + idMedico + " no encontrado", "MEDICO_NO_ENCONTRADO");
             }
-            console.log("DataDisponibilidades: ", nuevasDisponibilidades)
             const nuevasDisponibilidadesInstanciadas = nuevasDisponibilidades.map(d =>
                 new DisponibilidadHoraria({
                     diaSemana: d.diaSemana,  // ← Llega como string, el constructor lo convierte
@@ -145,7 +144,6 @@ export class MedicoService {
                     prestacion: toObjectId(d.prestacion)
                 })
             );
-            console.log("Disponibilidades Instanciadas: ", nuevasDisponibilidadesInstanciadas)
             medico.agregarDisponibilidades(nuevasDisponibilidadesInstanciadas);
             const medicoActualizado = await medico.save();
             return medicoActualizado;

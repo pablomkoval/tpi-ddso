@@ -16,6 +16,7 @@ import {
   InfoOutlined as InfoIcon,
   WarningAmber as WarningIcon,
 } from '@mui/icons-material';
+import { ZONA_HORARIA_ARGENTINA } from '../../utils/dateUtils';
 
 const ESTADO_CONFIG = {
   RESERVADO: { label: 'RESERVADO', color: 'success' },
@@ -27,6 +28,7 @@ const ESTADO_CONFIG = {
 function formatFecha(fechaHora) {
   const date = new Date(fechaHora);
   return new Intl.DateTimeFormat('es-AR', {
+    timeZone: ZONA_HORARIA_ARGENTINA,
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -36,6 +38,7 @@ function formatFecha(fechaHora) {
 function formatHora(fechaHora) {
   const date = new Date(fechaHora);
   return new Intl.DateTimeFormat('es-AR', {
+    timeZone: ZONA_HORARIA_ARGENTINA,
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
