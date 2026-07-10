@@ -55,10 +55,10 @@ const obraSocialRepository = new ObraSocialRepository();
 const notiService = new NotificacionesService(notiRepository);
 const servicioService = new ServicioService(servicioRepository, prestacionRepository);
 const pacienteService = new PacienteService(pacienteRepository, turnoRepository, notiService, solicitudCambioTurnoRepository);
-const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository, turnoRepository);
+const medicoService = new MedicoService(medicoRepository, servicioService, usuarioRepository, turnoRepository, notiService);
 export const turnoService = new TurnoService(turnoRepository, medicoService, pacienteService, servicioService);
 medicoService.turnoService = turnoService
-const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository /* se debe comunicar con turnoService en todo caso */);
+const solicitudCambioTurnoService = new SolicitudCambioTurnoService(solicitudCambioTurnoRepository, turnoRepository, notiService);
 const sedeService = new SedeService(sedeRepository);
 const keycloakService = new KeycloakService();
 const usuarioService = new UsuarioService(usuarioRepository);
@@ -92,8 +92,8 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
     routerGeneral.use("/pacientes", pacienteRouter.getRouter())
     routerGeneral.use("/turnos", verifyToken,turnoRouter.getRouter())
-    routerGeneral.use("/solicitudes-cambio", solicitudCambioTurnoRouter.getRouter())
-    routerGeneral.use("/notificaciones", notiRouter.getRouter())
+    routerGeneral.use("/solicitudes-cambio", verifyToken, solicitudCambioTurnoRouter.getRouter())
+    routerGeneral.use("/notificaciones", verifyToken, notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())
     routerGeneral.use("/sedes", sedeRouter.getRouter())
     routerGeneral.use("/auth", authRouter.getRouter())

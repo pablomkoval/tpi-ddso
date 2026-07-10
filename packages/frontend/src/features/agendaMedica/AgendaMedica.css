@@ -1,0 +1,153 @@
+.agenda-container {
+    display: flex;
+    gap: 32px;
+    padding: 24px;
+    min-height: 85vh;
+    background-color: #f9f9ff;
+}
+
+.agenda-main-content {
+    flex-grow: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ─── Calendario ─── */
+.calendar-wrapper {
+    background-color: #ffffff;
+    border: 1px solid #dfe1ea;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 71, 141, 0.04);
+}
+
+.calendar-grid-structure {
+    display: grid;
+    grid-template-columns: 80px repeat(5, 1fr);
+    position: relative;
+}
+
+.calendar-header {
+    background: linear-gradient(180deg, #f6f7fc 0%, #f0f1f8 100%);
+    border-bottom: 2px solid #e2e4ef;
+}
+
+.calendar-header-day {
+    padding: 12px 8px 10px;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.time-col-header {
+    border-right: 1px solid #e8e9f2;
+}
+
+.calendar-header-day.today-header {
+    background-color: rgba(0, 94, 184, 0.06);
+}
+
+.calendar-body-wrapper {
+    overflow-y: auto;
+    max-height: 520px;
+}
+
+.time-row-cell {
+    height: 60px;
+    border-bottom: 1px solid #f2f3fb;
+    border-right: 1px solid #f2f3fb;
+    transition: background-color 0.2s;
+}
+
+.time-row-cell.today-column {
+    background-color: rgba(0, 94, 184, 0.018);
+}
+
+.time-label {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-top: 4px;
+    padding-right: 12px;
+    color: #8b8fa3;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-right: 1px solid #e8e9f2;
+}
+
+/* ─── Indicador de hora actual ─── */
+.time-now-indicator {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+.time-now-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    flex-shrink: 0;
+    margin-left: -5px;
+}
+
+.time-now-line {
+    height: 2px;
+    width: 100%;
+    background-color: #ef4444;
+    opacity: 0.7;
+}
+
+/* ─── Tarjeta de turno en calendario ─── */
+.turno-card {
+    animation: turnoFadeIn 0.3s ease-out;
+}
+
+@keyframes turnoFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ─── Stats ─── */
+.stats-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+    .agenda-container {
+        padding: 16px;
+    }
+
+    .calendar-wrapper {
+        overflow-x: auto;
+    }
+    .calendar-grid-structure {
+        min-width: 700px;
+    }
+    .stats-dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .calendar-body-wrapper {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 600px) {
+    .agenda-main-content {
+        max-width: 100%;
+    }
+}

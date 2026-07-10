@@ -1,20 +1,55 @@
-import { useState } from 'react';
-import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Menu, MenuItem } from '@mui/material';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import HeaderMenuMedico from './HeaderMenuMedico.jsx';
+import { obtenerCantidadNoLeidas } from '../../services/notificacionesService.js';
 
 const navItems = [
   { text: 'Agenda Médica', to: '/agenda-medica' },
   { text: 'Disponibilidad', to: '/definir-disponibilidad' },
   { text: 'Prestaciones', to: '/gestionar-prestaciones' },
-  { text: 'Notificaciones', to: '/notificaciones' },
 ];
 
 const HeaderMedico = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
+
+  useEffect(() => {
+    cargarCantidadNotificaciones();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const actualizarContador = () => {
+      cargarCantidadNotificaciones();
+    };
+
+    window.addEventListener(
+      "actualizar-notificaciones",
+      actualizarContador
+    );
+
+    return () => {
+      window.removeEventListener(
+        "actualizar-notificaciones",
+        actualizarContador
+      );
+    };
+  }, []);
+
+  const cargarCantidadNotificaciones = async () => {
+    try {
+      const data = await obtenerCantidadNoLeidas();
+      setCantidadNotificaciones(data.cantidad);
+    } catch (error) {
+      console.error("Error cargando cantidad de notificaciones", error);
+      setCantidadNotificaciones(0);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -41,6 +76,21 @@ const HeaderMedico = () => {
         <HeaderMenuMedico />
 
         <Box sx={{ flex: 1 }} />
+
+        <IconButton
+          component={Link}
+          to="/notificaciones"
+          color="inherit"
+          sx={{ color: 'text.primary' }}
+        >
+          <Badge
+            badgeContent={cantidadNotificaciones}
+            color="error"
+            max={9}
+          >
+            <NotificationsOutlinedIcon />
+          </Badge>
+        </IconButton>
 
         <IconButton color="error" size="small" onClick={handleLogout}>
           <LogoutIcon />

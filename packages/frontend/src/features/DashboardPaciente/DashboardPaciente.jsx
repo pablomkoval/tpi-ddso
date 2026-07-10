@@ -21,7 +21,8 @@ import {
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
-import { proximoTurnoData, turnosPendientesData, notificacionesPacienteData } from '../../mockdata/dashboardPacienteMock';
+import { proximoTurnoData, turnosPendientesData } from '../../mockdata/dashboardPacienteMock';
+import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
 
 
 
@@ -34,7 +35,22 @@ export default function DashboardPaciente() {
   useEffect(() => {
     setProximoTurno(proximoTurnoData);
     setTurnosPendientes(turnosPendientesData);
-    setNotificaciones(notificacionesPacienteData);
+
+    const cargarResumenNotificaciones = async () => {
+      try {
+        const data = await obtenerResumenNotificaciones();
+        setNotificaciones(data);
+      } catch (error) {
+        console.error("Error cargando resumen de notificaciones", error);
+        setNotificaciones({
+          total: 0,
+          leidas: 0,
+          noLeidas: 0,
+        });
+      }
+    };
+
+    cargarResumenNotificaciones();
   }, []);
 
   const username = getUsernameFromToken();
@@ -196,14 +212,16 @@ export default function DashboardPaciente() {
               </Box>
 
               <Typography variant="h6" fontWeight={700} sx={{ color: 'white', mb: 1 }}>
-                {datosNotificaciones.count} Nuevos mensajes
+                {datosNotificaciones.noLeidas} Notificaciones no leídas
               </Typography>
 
               <Typography
                 variant="body2"
                 sx={{ color: 'rgba(255,255,255,0.8)', mb: 2.5, lineHeight: 1.5 }}
               >
-                {datosNotificaciones.mensaje}
+                {datosNotificaciones.noLeidas > 0
+                  ? "Tenés notificaciones pendientes para revisar."
+                  : "No tenés notificaciones pendientes."}
               </Typography>
 
               <Button

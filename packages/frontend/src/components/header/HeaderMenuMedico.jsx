@@ -7,7 +7,6 @@ const HeaderMenuMedico = () => {
       <HeaderMenuElement text="Agenda Médica" to="/agenda-medica" />
       <HeaderMenuElement text="Disponibilidad" to="/definir-disponibilidad" />
       <HeaderMenuElement text="Prestaciones" to="/gestionar-prestaciones" />
-      <HeaderMenuElement text="Notificaciones" to="/notificaciones" />
     </Box>
   );
 };

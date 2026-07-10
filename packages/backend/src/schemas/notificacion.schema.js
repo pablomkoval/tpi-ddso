@@ -28,6 +28,14 @@ const notificacionSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    tipo: {
+        type: String,
+        default: "INFO"
+    },
+    referenciaId: {
+        type: String,
+        default: null
+    },
     eliminado: {
         type: Boolean,
         default: false

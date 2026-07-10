@@ -54,6 +54,22 @@ export class MedicoRepository {
             .populate('sedes');
     }
 
+    async findByUsername(username) {
+        // Busca un médico cuyo campo 'usuario' coincida con el username de Keycloak
+        // (útil para médicos creados manualmente vía Keycloak sin usar el endpoint de registro)
+        return await this.model
+            .findOne({ usuario: { $regex: username, $options: 'i' } })
+            .populate({
+                path: 'especialidades',
+                populate: { path: 'servicioUnico' }
+            })
+            .populate({
+                path: 'practicas',
+                populate: { path: 'servicioUnico' }
+            })
+            .populate('sedes');
+    }
+
     async guardar(medico) {
         return await medico.save(/* { session } */)
     }

@@ -48,14 +48,19 @@ export const verifyToken = (req, res, next) => {
         }
 
         try {
-            const usuarioMongo = await UsuarioModel.findOne({ keycloakId: decoded.sub });
+            // Buscar o crear el usuario en MongoDB automáticamente
+            let usuarioMongo = await UsuarioModel.findOne({ keycloakId: decoded.sub });
             
             if (!usuarioMongo) {
-                return res.status(403).json({
-                    status: 403,
-                    message: 'Usuario autenticado pero sin perfil en el sistema',
-                    codigo: 'PERFIL_NO_ENCONTRADO'
-                });
+                // Auto-registrar el usuario en MongoDB en su primer login
+                usuarioMongo = await UsuarioModel.findOneAndUpdate(
+                    { keycloakId: decoded.sub },
+                    {
+                        keycloakId: decoded.sub,
+                        username: decoded.preferred_username || decoded.sub
+                    },
+                    { upsert: true, new: true }
+                );
             }
 
             const rolesDelCliente = decoded.resource_access?.[CLIENT_ID]?.roles || [];
