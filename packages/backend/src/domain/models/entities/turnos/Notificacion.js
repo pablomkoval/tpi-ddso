@@ -1,10 +1,15 @@
-export class Notificacion{
+export const TipoNotificacion = {
+    INFO: "INFO",
+    SOLICITUD_CAMBIO: "SOLICITUD_CAMBIO",
+};
+
+export class Notificacion {
     fechaHoraLeida = null;
     leida = false;
-    tipo = "INFO";
+    tipo = TipoNotificacion.INFO;
     referenciaId = null;
-    
-    constructor(destinatario, remitente, mensaje, tipo = "INFO", referenciaId = null){
+
+    constructor(destinatario, remitente, mensaje, tipo = TipoNotificacion.INFO, referenciaId = null) {
         this.destinatario = destinatario;
         this.remitente = remitente;
         this.mensaje = mensaje;
@@ -13,26 +18,37 @@ export class Notificacion{
         this.fechaHoraCreacion = new Date();
     }
 
-    marcarComoLeida(){
+    marcarComoLeida() {
         this.leida = true;
         this.fechaHoraLeida = new Date();
     }
 
-    static crearSegunEstadoTurno(turno){
+    static datosSegunEstadoTurno(turno) {
 
         const ultimoCambioEstado = turno.historialEstados[turno.historialEstados.length - 1];
         const motivo = ultimoCambioEstado.motivoCambio ?? ultimoCambioEstado.motivo;
 
-        const destinatario = ultimoCambioEstado.usuario.toString() === turno.paciente.toString() ? turno.medico : turno.paciente; 
+        const destinatario = String(ultimoCambioEstado.usuario) === String(turno.paciente) ? turno.medico : turno.paciente;
         //Si el usuario es el paciente, destinatario=medico, de lo contrario destinatario=paciente
 
-        const mensaje = "El turno esta en estado: " + ultimoCambioEstado.estado + " por el motivo: "+ motivo;
+        const mensaje = "El turno está en estado: " + ultimoCambioEstado.estado + " Motivo: " + motivo;
 
-        
-        return new Notificacion(
-            destinatario, //destinatario
-            ultimoCambioEstado.usuario, //remitente
-            mensaje
+        console.log({
+            paciente: turno.paciente,
+            medico: turno.medico,
+            medicoUsuario: turno.medico.usuario,
+            ultimoUsuario: ultimoCambioEstado.usuario
+        });
+        console.log(
+            "¿Es cambio solicitado?",
+            motivo
         );
+        return {
+            destinatario,
+            remitente: ultimoCambioEstado.usuario,
+            mensaje,
+            tipo: TipoNotificacion.INFO,
+            referenciaId: null
+        }
     }
 }

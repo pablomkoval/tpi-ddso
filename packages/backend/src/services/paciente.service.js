@@ -1,6 +1,7 @@
 import { BadRequestError, NotFoundError } from "../shared/errors/AppError.js";
 import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
 import { SolicitudCambioTurno } from "../domain/models/entities/turnos/SolicitudCambioTurno.js";
+import { TipoNotificacion } from "../domain/models/entities/turnos/Notificacion.js";
 
 //cancelación permitida hasta 1 hora antes, mandar a env
 const MINUTOS_MINIMOS_CANCELACION = 60;
@@ -167,7 +168,7 @@ export class PacienteService {
     if (minutosRestantes < MINUTOS_MINIMOS_CANCELACION) {
       throw new BadRequestError(
         `Solo se puede cancelar con al menos ${MINUTOS_MINIMOS_CANCELACION} minutos de anticipación. ` +
-          `Faltan ${Math.floor(minutosRestantes)} minutos para el turno.`,
+        `Faltan ${Math.floor(minutosRestantes)} minutos para el turno.`,
         "CANCELACION_FUERA_DE_PLAZO",
       );
     }
@@ -286,7 +287,13 @@ export class PacienteService {
         this.solicitudCambioTurnoRepository.save(nuevaSolicitud),
       ]);
 
-    await this.notificacionesService.crearSegunEstadoTurno(turnoActualGuardado);
+    await this.notificacionesService.create({
+      destinatario: turnoActual.medico,
+      remitente: pacienteId,
+      mensaje: "El paciente solicitó un cambio de turno. Revisá la solicitud para aceptarla o rechazarla.",
+      tipo: TipoNotificacion.SOLICITUD_CAMBIO,
+      referenciaId: solicitudGuardada.id || solicitudGuardada._id,
+    });
 
     return {
       turnoActual: turnoActualGuardado,

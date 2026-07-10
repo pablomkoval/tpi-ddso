@@ -119,8 +119,8 @@ export class NotificacionesService {
     }
 
     async crearSegunEstadoTurno(turno) {
-        const notificacion = Notificacion.crearSegunEstadoTurno(turno);
-        return await this.notificacionesRepository.save(notificacion);
+        const data = Notificacion.datosSegunEstadoTurno(turno);
+        return await this.create(data);
     }
 
     async marcarComoLeida(notificacionId) {

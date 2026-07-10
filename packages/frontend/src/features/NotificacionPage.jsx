@@ -21,7 +21,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import NotificacionFilter from "../components/NotificacionFilter.jsx";
 import NotificacionCard from "../components/NotificacionCard.jsx";
 
-// Importamos tus servicios y agregamos los de tu compañero para los cambios de turno
 import {
   obtenerNotificaciones,
   marcarNotificacionComoLeida,
@@ -32,7 +31,6 @@ import {
 } from "../services/notificacionesService.js";
 
 const NotificacionPage = () => {
-  // ─── TUS ESTADOS (BASE SÓLIDA) ───
   const [filter, setFilter] = useState("all");
   const [notificaciones, setNotificaciones] = useState([]);
   const [error, setError] = useState(null);
@@ -45,7 +43,6 @@ const NotificacionPage = () => {
     noLeidas: 0
   });
 
-  // ─── ESTADOS DE TU COMPAÑERO (MODAL DE RECHAZO) ───
   const [openRechazo, setOpenRechazo] = useState(false);
   const [motivoRechazo, setMotivoRechazo] = useState("");
   const [notificacionSeleccionadaParaRechazo, setNotificacionSeleccionadaParaRechazo] = useState(null);
@@ -55,10 +52,8 @@ const NotificacionPage = () => {
   const puedeIrAtras = page > 1 && !loading;
   const puedeIrAdelante = page < paginaFinal && !loading;
 
-  // ─── EFECTOS ───
   useEffect(() => {
     cargarNotificaciones();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filter]);
 
   useEffect(() => {
@@ -69,7 +64,6 @@ const NotificacionPage = () => {
     setPage(1);
   }, [filter]);
 
-  // ─── FUNCIONES DE CARGA ───
   const cargarNotificaciones = async () => {
     try {
       setLoading(true);
@@ -113,7 +107,6 @@ const NotificacionPage = () => {
     window.dispatchEvent(new Event("actualizar-notificaciones"));
   };
 
-  // ─── ACCIONES DE NOTIFICACIONES (TUS FUNCIONES) ───
   const handleLeer = async (id) => {
     try {
       await marcarNotificacionComoLeida(id);
@@ -140,10 +133,13 @@ const NotificacionPage = () => {
     }
   };
 
-  // ─── ACCIONES DE CAMBIO DE TURNO (DE TU COMPAÑERO) ───
   const handleAceptarCambio = async (idNotificacion, idTurno) => {
     try {
-      await confirmarSolicitudCambio(idTurno);
+      const userStr = localStorage.getItem("usuario") || localStorage.getItem("user");
+      const usuarioLogueado = userStr ? JSON.parse(userStr) : {};
+      const confirmadorId = usuarioLogueado.id || usuarioLogueado._id;
+
+      await confirmarSolicitudCambio(idTurno, confirmadorId); 
       await handleLeer(idNotificacion);
       cargarNotificaciones();
     } catch (err) {
@@ -152,19 +148,18 @@ const NotificacionPage = () => {
     }
   };
 
-  const abrirModalRechazo = (idNotificacion, idTurno) => {
-    setNotificacionSeleccionadaParaRechazo({ idNotificacion, idTurno });
-    setMotivoRechazo("");
-    setOpenRechazo(true);
-  };
-
   const handleConfirmarRechazo = async () => {
     if (!notificacionSeleccionadaParaRechazo) return;
 
     try {
+      const userStr = localStorage.getItem("usuario") || localStorage.getItem("user");
+      const usuarioLogueado = userStr ? JSON.parse(userStr) : {};
+      const confirmadorId = usuarioLogueado.id || usuarioLogueado._id;
+
       await rechazarSolicitudCambio(
-        notificacionSeleccionadaParaRechazo.idTurno,
-        motivoRechazo
+        notificacionSeleccionadaParaRechazo.idTurno, 
+        confirmadorId, 
+        motivoRechazo 
       );
       await handleLeer(notificacionSeleccionadaParaRechazo.idNotificacion);
       setOpenRechazo(false);
@@ -176,8 +171,13 @@ const NotificacionPage = () => {
     }
   };
 
+  const abrirModalRechazo = (idNotificacion, idTurno) => {
+    setNotificacionSeleccionadaParaRechazo({ idNotificacion, idTurno });
+    setMotivoRechazo("");
+    setOpenRechazo(true);
+  };
+
   return (
-    // Contenedor principal corregido para que se estire al 100% simétricamente
     <Box
       sx={{
         width: "100%",
@@ -188,7 +188,6 @@ const NotificacionPage = () => {
       }}
     >
 
-      {/* Cabecera perfectamente alineada */}
       <Box
         sx={{
           display: "flex",
@@ -220,7 +219,6 @@ const NotificacionPage = () => {
 
       {error && <Alert severity="error" sx={{ mb: 3, width: "100%" }}>{error}</Alert>}
 
-      {/* Caja de contenido unificada para evitar desalineación */}
       <Box sx={{ width: "100%" }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 200, width: "100%" }}>
@@ -231,7 +229,6 @@ const NotificacionPage = () => {
             No hay notificaciones para mostrar.
           </Paper>
         ) : (
-          // El Paper ahora ocupa el 100% de manera consistente
           <Paper
             elevation={1}
             sx={{
@@ -244,14 +241,23 @@ const NotificacionPage = () => {
                 key={notificacion.id || notificacion._id}
                 notificacion={notificacion}
                 onMarcarLeida={() => handleLeer(notificacion.id || notificacion._id)}
-                onAceptarCambio={() => handleAceptarCambio(notificacion.id, notificacion.referenciaTurnoId)}
-                onRechazarCambio={() => abrirModalRechazo(notificacion.id, notificacion.referenciaTurnoId)}
+                onAceptarCambio={() =>
+                  handleAceptarCambio(
+                    notificacion.id,
+                    notificacion.referenciaId
+                  )
+                }
+                onRechazarCambio={() =>
+                  abrirModalRechazo(
+                    notificacion.id,
+                    notificacion.referenciaId
+                  )
+                }
               />
             ))}
           </Paper>
         )}
 
-        {/* Footer de Paginación alineado con los bordes del bloque de tarjetas */}
         <Box
           component="footer"
           sx={{
@@ -293,7 +299,7 @@ const NotificacionPage = () => {
         <DialogTitle sx={{ fontWeight: 700 }}>Rechazar Solicitud de Cambio</DialogTitle>
         <DialogContent sx={{ minWidth: 320 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Por favor, especificá el motivo por el cual rechazás el cambio de turno solicitado por el paciente.
+            Indicá el motivo por el cual rechazás esta solicitud de cambio de turno.
           </Typography>
           <TextField
             autoFocus

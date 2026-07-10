@@ -5,14 +5,12 @@ import { EstadoSolicitudCambioTurno } from "./domain/enum/EstadoSolicitudCambioT
 import { EstadoTurno } from "./domain/enum/EstadoTurno.js";
 import { NivelCobertura } from "./domain/enum/NivelCobertura.js";
 import { TipoServicio } from "./domain/enum/TipoServicio.js";
-import { NivelCobertura } from "./domain/enum/NivelCobertura.js";
 import { ServicioModel } from "./schemas/servicio.schema.js";
 import { ObraSocialModel } from "./schemas/obraSocial.schema.js";
 import { PacienteModel } from "./schemas/paciente.schema.js";
 import { PlanModel } from "./schemas/plan.schema.js";
 import { SedeModel } from "./schemas/sede.schema.js";
 import { MedicoModel } from "./schemas/medico.schema.js";
-import { PacienteModel } from "./schemas/paciente.schema.js";
 import { TurnoModel } from "./schemas/turno.schema.js";
 import { PrestacionModel } from "./schemas/prestacion.schema.js";
 import { EspecialidadModel } from "./schemas/especialidad.schema.js";

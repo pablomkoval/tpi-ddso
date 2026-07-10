@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:4000/notificaciones';
+const API_CAMBIO = 'http://localhost:4000'
 
 
 export const obtenerNotificaciones = async (
@@ -128,7 +129,7 @@ export const confirmarSolicitudCambio = async (solicitudId, confirmadorId) => {
         const token = localStorage.getItem("token");
 
         const response = await axios.patch(
-            `${API_URL}/solicitudes-cambio/${solicitudId}/confirmar`,
+            `${API_CAMBIO}/solicitudes-cambio/${solicitudId}/confirmar`,
             { confirmadorId }, // Si el backend saca el ID del token, capaz no haga falta mandarlo
             {
                 headers: {
@@ -150,7 +151,7 @@ export const rechazarSolicitudCambio = async (solicitudId, confirmadorId, motivo
         const token = localStorage.getItem("token");
 
         const response = await axios.patch(
-            `${API_URL}/solicitudes-cambio/${solicitudId}/rechazar`,
+            `${API_CAMBIO}/solicitudes-cambio/${solicitudId}/rechazar`,
             { confirmadorId, motivoRechazo },
             {
                 headers: {
@@ -172,7 +173,7 @@ export const getSolicitudesCambio = async (params) => {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-            `${API_URL}/solicitudes-cambio`, 
+            `${API_CAMBIO}/solicitudes-cambio`, 
             {
                 params,
                 headers: {
