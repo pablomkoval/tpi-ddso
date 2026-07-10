@@ -1,11 +1,15 @@
 export class Notificacion{
     fechaHoraLeida = null;
     leida = false;
+    tipo = "INFO";
+    referenciaId = null;
     
-    constructor(destinatario, remitente, mensaje){
+    constructor(destinatario, remitente, mensaje, tipo = "INFO", referenciaId = null){
         this.destinatario = destinatario;
         this.remitente = remitente;
         this.mensaje = mensaje;
+        this.tipo = tipo;
+        this.referenciaId = referenciaId;
         this.fechaHoraCreacion = new Date();
     }
 

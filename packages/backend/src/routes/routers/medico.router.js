@@ -300,6 +300,7 @@ export class MedicoRouter {
          *          200:
          *              description: Historial de consultas del paciente retornado con éxito
          */
+        this.medicoRouter.get("/:idMedico/turnos/historial", verifyToken, (req, res, next) => { this.controller.obtenerHistorialTurnos(req, res, next); });
         this.medicoRouter.get("/:idPaciente/turnos", (req, res, next) => { this.controller.consultarHistorialPaciente(req, res, next); });
 
         /**
@@ -357,6 +358,8 @@ export class MedicoRouter {
          *              description: Turno cancelado por el profesional de forma exitosa
          */
         this.medicoRouter.post("/:idMedico/turnos/:turnoId/cancelaciones", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
+        this.medicoRouter.get("/:idMedico/agenda", verifyToken, (req, res, next) => { this.controller.obtenerAgenda(req, res, next); });
+        this.medicoRouter.post("/:idMedico/turnos/:turnoId/confirmaciones", verifyToken, (req, res, next) => { this.controller.confirmarTurno(req, res, next); });
     }
 
     getRouter() {

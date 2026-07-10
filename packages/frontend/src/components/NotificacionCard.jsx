@@ -1,7 +1,10 @@
-import { Box, Checkbox, Avatar, Typography } from "@mui/material";
+import React from "react";
+import { Box, Checkbox, Avatar, Typography, Button, Stack, Chip } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 
-function NotificacionCard({ notificacion, onMarcarLeida }) {
+function NotificationCard({ notificacion }) {
   const isUnread = !notificacion.leida;
 
   const fecha = new Date(notificacion.fechaHoraCreacion);
@@ -38,9 +41,6 @@ function NotificacionCard({ notificacion, onMarcarLeida }) {
     if (isUnread) {
       onMarcarLeida(notificacion.id);
     }
-
-    // En el futuro:
-    // navigate(...)
   };
 
   return (
@@ -65,6 +65,8 @@ function NotificacionCard({ notificacion, onMarcarLeida }) {
         "&:last-child": {
           borderBottom: "none",
         },
+        gap: 2,
+        width: "100%"
       }}
     >
       <Box

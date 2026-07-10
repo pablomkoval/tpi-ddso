@@ -65,7 +65,7 @@ export class MedicoController {
 
     async findMe(req, res, next) {
         try {
-            const medico = await this.medicoService.findByIdUsuario(req.user.id);
+            const medico = await this.medicoService.findByIdUsuario(req.user.id, req.user.username);
             res.status(200).json(this.medicoToDTO(medico));
         } catch (error) {
             return next(error);
@@ -270,6 +270,40 @@ export class MedicoController {
             const { motivo } = req.body;
             const turnoCancelado = await this.medicoService.cancelarTurno(idMedico, turnoId, motivo);
             res.status(200).json(turnoCancelado);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async obtenerAgenda(req, res, next) {
+        try {
+            const idMedico = parsearId(req.params.idMedico);
+            const { fechaDesde, fechaHasta } = req.query;
+            const agenda = await this.medicoService.obtenerAgenda(idMedico, fechaDesde, fechaHasta);
+            res.status(200).json(agenda);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async obtenerHistorialTurnos(req, res, next) {
+        try {
+            const idMedico = parsearId(req.params.idMedico);
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const resultado = await this.medicoService.obtenerHistorialTurnos(idMedico, page, limit);
+            res.status(200).json(resultado);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async confirmarTurno(req, res, next) {
+        try {
+            const idMedico = parsearId(req.params.idMedico);
+            const turnoId = parsearId(req.params.turnoId);
+            const turnoConfirmado = await this.medicoService.confirmarTurno(idMedico, turnoId);
+            res.status(200).json(turnoConfirmado);
         } catch (error) {
             return next(error);
         }

@@ -35,6 +35,25 @@ export class PacienteRepository {
         });
     }
 
+    async findByUsername(username) {
+        // Busca por campo usuario que contenga el username (útil para pacientes creados manualmente)
+        return await this.model.findOne({ usuario: { $regex: username, $options: 'i' } }).populate({
+            path: 'plan',
+            populate: [
+                { path: 'coberturasEspecialidad.prestacion' },
+                { path: 'coberturasPractica.practica' }
+            ]
+        });
+    }
+
+    async updateUsuarioId(pacienteId, nuevoUsuarioId) {
+        return await this.model.findByIdAndUpdate(
+            pacienteId,
+            { $set: { usuario: nuevoUsuarioId } },
+            { new: true }
+        );
+    }
+
     async findByIdConPlan(id) {
         return await this.model.findById(id).populate({
             path: 'plan',

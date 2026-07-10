@@ -32,6 +32,10 @@ export class SolicitudCambioTurnoRouter {
      *      201:
      *        description: Solicitud de cambio creada correctamente
      */
+    this.solicitudCambioTurnoRouter.get("/", (req, res, next) =>
+      this.controller.listar(req, res, next),
+    );
+
     this.solicitudCambioTurnoRouter.post("/", (req, res, next) =>
       this.controller.crearSolicitud(req, res, next),
     );

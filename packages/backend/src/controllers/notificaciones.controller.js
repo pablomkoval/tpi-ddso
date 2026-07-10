@@ -12,7 +12,9 @@ export class NotificacionesController {
             remitente: notificacion.remitente,
             mensaje: notificacion.mensaje,
             leida: notificacion.leida,
-            fechaHoraCreacion: notificacion.fechaHoraCreacion
+            fechaHoraCreacion: notificacion.fechaHoraCreacion,
+            tipo: notificacion.tipo || "INFO",
+            referenciaId: notificacion.referenciaId || null
         };
     }
 

@@ -47,7 +47,7 @@ export class PacienteController {
 
     async findMe(req, res, next) {
         try {
-            const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
+            const paciente = await this.pacienteService.findByIdUsuario(req.user.id, req.user.username);
             res.status(200).json(paciente);
         } catch (error) {
             return next(error);

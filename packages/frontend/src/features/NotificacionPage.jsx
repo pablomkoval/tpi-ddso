@@ -3,6 +3,9 @@ import { Box, Typography, Button, IconButton, Paper } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import PendingIcon from "@mui/icons-material/PendingActions";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 
 import NotificacionFilter from "../components/NotificacionFilter.jsx";
 import NotificacionCard from "../components/NotificacionCard.jsx";
@@ -115,7 +118,6 @@ const NotificacionPage = () => {
         component="main"
         sx={{
           flex: 1,
-          // Padding responsive: 24px 16px en móvil/tablet, 32px 48px en Desktop
           p: { xs: "24px 16px", md: "32px 48px" },
           display: "flex",
           flexDirection: "column",
@@ -126,7 +128,6 @@ const NotificacionPage = () => {
           component="header"
           sx={{
             display: "flex",
-            // Header colapsa a columna en móviles (<600px)
             flexDirection: { xs: "column", sm: "row" },
             justifyContent: "space-between",
             alignItems: { xs: "flex-start", sm: "center" },
@@ -143,7 +144,6 @@ const NotificacionPage = () => {
               display: "flex",
               gap: 1.5,
               alignItems: "center",
-              // Los botones ocupan todo el ancho en móviles
               width: { xs: "100%", sm: "auto" },
               justifyContent: { xs: "space-between", sm: "flex-start" }
             }}
@@ -156,6 +156,8 @@ const NotificacionPage = () => {
                 cargarResumen();
               }}
               startIcon={<DoneAllIcon />}
+              onClick={handleMarcarTodasComoLeidas}
+              disabled={unreadCount === 0 || loading}
               sx={{
                 color: "text.primary",
                 borderColor: "divider",
@@ -178,7 +180,11 @@ const NotificacionPage = () => {
           sx={{
             backgroundColor: "background.paper",
             borderRadius: "12px",
-            overflow: "hidden"
+            overflow: "hidden",
+            position: "relative",
+            minHeight: "150px",
+            display: "flex",
+            flexDirection: "column"
           }}
         >
           {notificaciones.map((notificacion) => (
@@ -194,7 +200,6 @@ const NotificacionPage = () => {
           component="footer"
           sx={{
             display: "flex",
-            // Footer colapsa a columna y se centra en móviles
             flexDirection: { xs: "column", sm: "row" },
             justifyContent: { xs: "center", sm: "space-between" },
             alignItems: "center",
@@ -227,6 +232,34 @@ const NotificacionPage = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Diálogo Global de Motivo de Rechazo */}
+      <Dialog open={openRechazo} onClose={() => setOpenRechazo(false)}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Rechazar Solicitud de Cambio</DialogTitle>
+        <DialogContent sx={{ minWidth: 320 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Por favor, especificá el motivo por el cual rechazás el cambio de turno solicitado por el paciente.
+          </Typography>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Motivo de rechazo"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={motivoRechazo}
+            onChange={(e) => setMotivoRechazo(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenRechazo(false)} variant="text" color="inherit">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmarRechazo} variant="contained" color="error" disabled={!motivoRechazo.trim()}>
+            Confirmar Rechazo
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
