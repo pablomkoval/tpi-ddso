@@ -13,6 +13,7 @@ import DetalleTurno from './features/buscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
 import HomePage from './features/HomePage.jsx';
 import RoleLayout from './features/RoleLayout.jsx';
+import HistorialPaciente from './features/historialPaciente/HistorialPaciente.jsx';
 
 const RootRedirect = () => {
   const token = localStorage.getItem("token");
@@ -91,6 +92,15 @@ function App() {
           }
         />
 
+        <Route 
+          path="historial/:idPaciente" 
+          element={
+            <PrivateRoute requiredRole="medico">
+              <HistorialPaciente />
+            </PrivateRoute>
+          } 
+        />
+        
         <Route
           path="gestionar-prestaciones"
           element={
