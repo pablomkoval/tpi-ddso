@@ -45,7 +45,8 @@ export class MedicoController {
 
     async findAll(req, res, next) {
         try {
-            const medicos = await this.medicoService.findAll();
+            const servicioId = req.query?.servicioId ? parsearId(req.query.servicioId) : undefined;
+            const medicos = await this.medicoService.findAll({ servicioId });
             const medicosDTO = medicos.map(medico => this.medicoToDTO(medico));
             res.status(200).json(medicosDTO);
         } catch (error) {
