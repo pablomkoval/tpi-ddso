@@ -14,10 +14,13 @@ import { MedicoModel } from "./schemas/medico.schema.js";
 import { TurnoModel } from "./schemas/turno.schema.js";
 import { PrestacionModel } from "./schemas/prestacion.schema.js";
 import { EspecialidadModel } from "./schemas/especialidad.schema.js";
-import { PracticaModel } from "./schemas/practica.schema.js";
 import { UsuarioModel } from "./schemas/usuario.schema.js";
 import { SolicitudCambioTurnoModel } from "./schemas/solicitudCambioTurno.schema.js";
 import { NotificacionModel } from "./schemas/notificacion.schema.js";
+import { KeycloakService } from "./services/keycloak.service.js";
+
+const SEED_PASSWORD = "1234";
+const keycloakService = new KeycloakService();
 
 const coleccionesAReiniciar = [
   TurnoModel,
@@ -48,6 +51,12 @@ const historial = (estado, usuario, motivoCambio, fechaHoraCambio = new Date()) 
     fechaHoraCambio,
   },
 ];
+
+const crearUsuarioParaSeed = async ({ username, nombre, role }) => {
+  const kcUser = await keycloakService.createUser({ username, password: SEED_PASSWORD, nombre });
+  await keycloakService.assignRole(kcUser.id, role);
+  return UsuarioModel.create({ username, keycloakId: kcUser.id });
+};
 
 const obtenerDisponibilidad = (medico, indice) =>
   medico.disponibilidades[indice].toObject();
@@ -131,19 +140,13 @@ try {
   await Promise.all(coleccionesAReiniciar.map((modelo) => modelo.deleteMany({})));
   console.log("Base de datos limpia.");
 
+  console.log("Limpiando usuarios de Keycloak...");
+  await keycloakService.deleteAllUsers();
+  console.log("Usuarios de Keycloak eliminados.");
+
   // 1. Crear Servicios (catalogo)
   const servicios = await ServicioModel.insertMany([
     { nombre: "Clinica Medica", tipoServicio: TipoServicio.ESPECIALIDAD },
-    { nombre: "Pediatria", tipoServicio: TipoServicio.ESPECIALIDAD },
-    { nombre: "Cardiologia", tipoServicio: TipoServicio.ESPECIALIDAD },
-    { nombre: "Dermatologia", tipoServicio: TipoServicio.ESPECIALIDAD },
-    { nombre: "Traumatologia", tipoServicio: TipoServicio.ESPECIALIDAD },
-    { nombre: "Ginecologia", tipoServicio: TipoServicio.ESPECIALIDAD },
-    { nombre: "Laboratorio", tipoServicio: TipoServicio.PRACTICA },
-    { nombre: "Radiografia", tipoServicio: TipoServicio.PRACTICA },
-    { nombre: "Ecografia", tipoServicio: TipoServicio.PRACTICA },
-    { nombre: "Resonancia Magnetica", tipoServicio: TipoServicio.PRACTICA },
-    { nombre: "Vacunacion", tipoServicio: TipoServicio.PRACTICA },
   ]);
   console.log(`${servicios.length} servicios creados.`);
 
@@ -154,22 +157,9 @@ try {
   // 2. Crear Prestaciones (Especialidades y Practicas) ligadas a cada servicio
   const especialidades = await EspecialidadModel.insertMany([
     { servicioUnico: servicioPorNombre["Clinica Medica"]._id, duracionTurnoEnMins: 20, costo: 3000 },
-    { servicioUnico: servicioPorNombre["Pediatria"]._id, duracionTurnoEnMins: 20, costo: 3000 },
-    { servicioUnico: servicioPorNombre["Cardiologia"]._id, duracionTurnoEnMins: 30, costo: 4500 },
-    { servicioUnico: servicioPorNombre["Dermatologia"]._id, duracionTurnoEnMins: 20, costo: 4000 },
-    { servicioUnico: servicioPorNombre["Traumatologia"]._id, duracionTurnoEnMins: 30, costo: 4200 },
-    { servicioUnico: servicioPorNombre["Ginecologia"]._id, duracionTurnoEnMins: 30, costo: 5000 },
   ]);
 
-  const practicas = await PracticaModel.insertMany([
-    { servicioUnico: servicioPorNombre["Laboratorio"]._id, duracionTurnoEnMins: 15, costo: 1500, codigo: "PRACT-LAB-01" },
-    { servicioUnico: servicioPorNombre["Radiografia"]._id, duracionTurnoEnMins: 20, costo: 3500, codigo: "PRACT-RAD-02" },
-    { servicioUnico: servicioPorNombre["Ecografia"]._id, duracionTurnoEnMins: 30, costo: 3500, codigo: "PRACT-ECO-03" },
-    { servicioUnico: servicioPorNombre["Resonancia Magnetica"]._id, duracionTurnoEnMins: 60, costo: 12000, codigo: "PRACT-RES-04" },
-    { servicioUnico: servicioPorNombre["Vacunacion"]._id, duracionTurnoEnMins: 15, costo: 1500, codigo: "PRACT-VAC-05" },
-  ]);
-
-  const prestaciones = [...especialidades, ...practicas];
+  const prestaciones = [...especialidades];
   console.log(`${prestaciones.length} prestaciones creadas.`);
 
   const prestacionPorNombre = (nombreServicio) => {
@@ -182,9 +172,6 @@ try {
   // 3. Crear Sedes
   const sedes = await SedeModel.insertMany([
     { nombre: "Sede Centro", direccion: "Av. Corrientes 1234, CABA" },
-    { nombre: "Sede Palermo", direccion: "Av. Santa Fe 4000, CABA" },
-    { nombre: "Sede Belgrano", direccion: "Av. Cabildo 2500, CABA" },
-    { nombre: "Sede Avellaneda", direccion: "Av. Mitre 800, Avellaneda" },
   ]);
   console.log(`${sedes.length} sedes creadas.`);
 
@@ -198,77 +185,7 @@ try {
       nombre: "OSDE 210",
       coberturasEspecialidad: [
         { prestacion: prestacionPorNombre("Clinica Medica")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Cardiologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Dermatologia")._id, nivel: NivelCobertura.NO_CUBIERTA },
-        { prestacion: prestacionPorNombre("Pediatria")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Traumatologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Ginecologia")._id, nivel: NivelCobertura.TOTAL },
       ],
-      coberturasPractica: [
-        { practica: prestacionPorNombre("Laboratorio")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Radiografia")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Ecografia")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Resonancia Magnetica")._id, nivel: NivelCobertura.NO_CUBIERTA },
-        { practica: prestacionPorNombre("Vacunacion")._id, nivel: NivelCobertura.TOTAL },
-      ],
-    },
-    {
-      nombre: "OSDE 310",
-      coberturasEspecialidad: [
-        { prestacion: prestacionPorNombre("Clinica Medica")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Cardiologia")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Dermatologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Pediatria")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Traumatologia")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Ginecologia")._id, nivel: NivelCobertura.TOTAL },
-      ],
-      coberturasPractica: [
-        { practica: prestacionPorNombre("Laboratorio")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Radiografia")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Ecografia")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Resonancia Magnetica")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Vacunacion")._id, nivel: NivelCobertura.TOTAL },
-      ],
-    },
-    {
-      nombre: "Swiss Medical SMG20",
-      coberturasEspecialidad: [
-        { prestacion: prestacionPorNombre("Clinica Medica")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Cardiologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Dermatologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Pediatria")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Traumatologia")._id, nivel: NivelCobertura.NO_CUBIERTA },
-        { prestacion: prestacionPorNombre("Ginecologia")._id, nivel: NivelCobertura.TOTAL },
-      ],
-      coberturasPractica: [
-        { practica: prestacionPorNombre("Laboratorio")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Radiografia")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Ecografia")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Resonancia Magnetica")._id, nivel: NivelCobertura.NO_CUBIERTA },
-        { practica: prestacionPorNombre("Vacunacion")._id, nivel: NivelCobertura.TOTAL },
-      ],
-    },
-    {
-      nombre: "Galeno Oro",
-      coberturasEspecialidad: [
-        { prestacion: prestacionPorNombre("Clinica Medica")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Pediatria")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Ginecologia")._id, nivel: NivelCobertura.TOTAL },
-        { prestacion: prestacionPorNombre("Cardiologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Traumatologia")._id, nivel: NivelCobertura.PARCIAL },
-        { prestacion: prestacionPorNombre("Dermatologia")._id, nivel: NivelCobertura.NO_CUBIERTA },
-      ],
-      coberturasPractica: [
-        { practica: prestacionPorNombre("Laboratorio")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Vacunacion")._id, nivel: NivelCobertura.TOTAL },
-        { practica: prestacionPorNombre("Ecografia")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Radiografia")._id, nivel: NivelCobertura.PARCIAL },
-        { practica: prestacionPorNombre("Resonancia Magnetica")._id, nivel: NivelCobertura.NO_CUBIERTA },
-      ],
-    },
-    {
-      nombre: "Particular",
-      coberturasEspecialidad: [],
       coberturasPractica: [],
     },
   ]);
@@ -281,19 +198,7 @@ try {
   const obrasSociales = await ObraSocialModel.insertMany([
     {
       nombre: "OSDE",
-      planes: [planPorNombre["OSDE 210"]._id, planPorNombre["OSDE 310"]._id],
-    },
-    {
-      nombre: "Swiss Medical",
-      planes: [planPorNombre["Swiss Medical SMG20"]._id],
-    },
-    {
-      nombre: "Galeno",
-      planes: [planPorNombre["Galeno Oro"]._id],
-    },
-    {
-      nombre: "Particular",
-      planes: [planPorNombre.Particular._id],
+      planes: [planPorNombre["OSDE 210"]._id],
     },
   ]);
 
@@ -301,169 +206,78 @@ try {
     obrasSociales.map((obraSocial) => [obraSocial.nombre, obraSocial]),
   );
 
-  const medicos = await MedicoModel.insertMany([
+  const medicosData = [
     {
-      usuario: "usuario-medico-ana-rivas",
-      matricula: "MN-102030",
-      nombre: "Dra. Ana Rivas",
-      especialidades: [
-        prestacionPorNombre("Clinica Medica")._id,
-        prestacionPorNombre("Cardiologia")._id,
-      ],
-      practicas: [prestacionPorNombre("Laboratorio")._id],
-      sedes: [sedePorNombre["Sede Centro"]._id, sedePorNombre["Sede Palermo"]._id],
+      username: "medico@mail.com",
+      matricula: "MN-100000",
+      nombre: "Dr. Juan Medico",
+      especialidades: [prestacionPorNombre("Clinica Medica")._id],
+      practicas: [],
+      sedes: [sedePorNombre["Sede Centro"]._id],
       disponibilidades: [
-        {
-          diaSemana: DiaSemana.LUNES,
-          horaDesde: "09:00",
-          horaHasta: "12:00",
-          sede: sedePorNombre["Sede Centro"]._id,
-          prestacion: prestacionPorNombre("Clinica Medica")._id,
-        },
-        {
-          diaSemana: DiaSemana.MIERCOLES,
-          horaDesde: "14:00",
-          horaHasta: "18:00",
-          sede: sedePorNombre["Sede Palermo"]._id,
-          prestacion: prestacionPorNombre("Cardiologia")._id,
-        },
-        {
-          diaSemana: DiaSemana.VIERNES,
-          horaDesde: "08:00",
-          horaHasta: "10:00",
-          sede: sedePorNombre["Sede Centro"]._id,
-          prestacion: prestacionPorNombre("Laboratorio")._id,
-        },
-      ],
+        DiaSemana.LUNES,
+        DiaSemana.MARTES,
+        DiaSemana.MIERCOLES,
+        DiaSemana.JUEVES,
+        DiaSemana.VIERNES,
+      ].map((diaSemana) => ({
+        diaSemana,
+        horaDesde: "09:00",
+        horaHasta: "11:00",
+        sede: sedePorNombre["Sede Centro"]._id,
+        prestacion: prestacionPorNombre("Clinica Medica")._id,
+      })),
     },
-    {
-      usuario: "usuario-medico-martin-sosa",
-      matricula: "MN-203040",
-      nombre: "Dr. Martin Sosa",
-      especialidades: [
-        prestacionPorNombre("Pediatria")._id,
-        prestacionPorNombre("Dermatologia")._id,
-      ],
-      practicas: [prestacionPorNombre("Vacunacion")._id],
-      sedes: [sedePorNombre["Sede Belgrano"]._id, sedePorNombre["Sede Centro"]._id],
-      disponibilidades: [
-        {
-          diaSemana: DiaSemana.MARTES,
-          horaDesde: "10:00",
-          horaHasta: "13:00",
-          sede: sedePorNombre["Sede Belgrano"]._id,
-          prestacion: prestacionPorNombre("Pediatria")._id,
-        },
-        {
-          diaSemana: DiaSemana.JUEVES,
-          horaDesde: "16:00",
-          horaHasta: "19:00",
-          sede: sedePorNombre["Sede Centro"]._id,
-          prestacion: prestacionPorNombre("Dermatologia")._id,
-        },
-        {
-          diaSemana: DiaSemana.SABADO,
-          horaDesde: "09:00",
-          horaHasta: "11:00",
-          sede: sedePorNombre["Sede Belgrano"]._id,
-          prestacion: prestacionPorNombre("Vacunacion")._id,
-        },
-      ],
-    },
-    {
-      usuario: "usuario-medico-laura-paz",
-      matricula: "MN-304050",
-      nombre: "Dra. Laura Paz",
-      especialidades: [
-        prestacionPorNombre("Traumatologia")._id,
-        prestacionPorNombre("Ginecologia")._id,
-      ],
-      practicas: [
-        prestacionPorNombre("Radiografia")._id,
-        prestacionPorNombre("Ecografia")._id,
-        prestacionPorNombre("Resonancia Magnetica")._id,
-      ],
-      sedes: [sedePorNombre["Sede Avellaneda"]._id, sedePorNombre["Sede Palermo"]._id],
-      disponibilidades: [
-        {
-          diaSemana: DiaSemana.LUNES,
-          horaDesde: "15:00",
-          horaHasta: "19:00",
-          sede: sedePorNombre["Sede Avellaneda"]._id,
-          prestacion: prestacionPorNombre("Traumatologia")._id,
-        },
-        {
-          diaSemana: DiaSemana.MIERCOLES,
-          horaDesde: "09:00",
-          horaHasta: "12:00",
-          sede: sedePorNombre["Sede Palermo"]._id,
-          prestacion: prestacionPorNombre("Ecografia")._id,
-        },
-        {
-          diaSemana: DiaSemana.VIERNES,
-          horaDesde: "13:00",
-          horaHasta: "17:00",
-          sede: sedePorNombre["Sede Avellaneda"]._id,
-          prestacion: prestacionPorNombre("Resonancia Magnetica")._id,
-        },
-      ],
-    },
-  ]);
+  ];
 
-  const medicoPorNombre = Object.fromEntries(
-    medicos.map((medico) => [medico.nombre, medico]),
-  );
+  console.log("Creando usuario de medico en Keycloak...");
+  const medicos = [];
+  for (const { username, ...datosMedico } of medicosData) {
+    const usuario = await crearUsuarioParaSeed({
+      username,
+      nombre: datosMedico.nombre,
+      role: "medico",
+    });
+    const medico = await MedicoModel.create({ ...datosMedico, usuario: String(usuario._id) });
+    medicos.push(medico);
+  }
+  console.log(`${medicos.length} medico creado (Keycloak + Mongo).`);
 
-  const pacientes = await PacienteModel.insertMany([
+  const medico = medicos[0];
+
+  const pacientesData = [
     {
-      usuario: "usuario-paciente-juan-perez",
+      username: "paciente@mail.com",
       dni: "30111222",
-      nombre: "Juan Perez",
+      nombre: "Juan Paciente",
       obraSocial: obraSocialPorNombre.OSDE._id,
       plan: planPorNombre["OSDE 210"]._id,
     },
-    {
-      usuario: "usuario-paciente-sofia-gomez",
-      dni: "33222333",
-      nombre: "Sofia Gomez",
-      obraSocial: obraSocialPorNombre.OSDE._id,
-      plan: planPorNombre["OSDE 310"]._id,
-    },
-    {
-      usuario: "usuario-paciente-camila-nunez",
-      dni: "35444555",
-      nombre: "Camila Nunez",
-      obraSocial: obraSocialPorNombre["Swiss Medical"]._id,
-      plan: planPorNombre["Swiss Medical SMG20"]._id,
-    },
-    {
-      usuario: "usuario-paciente-diego-rojas",
-      dni: "28666777",
-      nombre: "Diego Rojas",
-      obraSocial: obraSocialPorNombre.Galeno._id,
-      plan: planPorNombre["Galeno Oro"]._id,
-    },
-    {
-      usuario: "usuario-paciente-maria-lopez",
-      dni: "37888999",
-      nombre: "Maria Lopez",
-      obraSocial: obraSocialPorNombre.Particular._id,
-      plan: planPorNombre.Particular._id,
-    },
-  ]);
+  ];
 
-  const pacientePorNombre = Object.fromEntries(
-    pacientes.map((paciente) => [paciente.nombre, paciente]),
-  );
+  console.log("Creando usuario de paciente en Keycloak...");
+  const pacientes = [];
+  for (const { username, ...datosPaciente } of pacientesData) {
+    const usuario = await crearUsuarioParaSeed({
+      username,
+      nombre: datosPaciente.nombre,
+      role: "paciente",
+    });
+    const paciente = await PacienteModel.create({ ...datosPaciente, usuario: String(usuario._id) });
+    pacientes.push(paciente);
+  }
+  console.log(`${pacientes.length} paciente creado (Keycloak + Mongo).`);
 
-  const turnoDisponibleAna = {
-    medico: medicoPorNombre["Dra. Ana Rivas"]._id,
+  const paciente = pacientes[0];
+
+  const turnoDisponible = {
+    medico: medico._id,
     fechaHora: diasDesdeHoy(2, 9, 0),
     sede: sedePorNombre["Sede Centro"]._id,
     servicio: prestacionPorNombre("Clinica Medica")._id,
     costo: prestacionPorNombre("Clinica Medica").costo,
     estado: EstadoTurno.DISPONIBLE,
-    disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dra. Ana Rivas"], 0),
+    disponibilidadOrigen: obtenerDisponibilidad(medico, 0),
     historialEstados: historial(
       EstadoTurno.DISPONIBLE,
       "SYSTEM",
@@ -471,15 +285,15 @@ try {
     ),
   };
 
-  const turnoReservadoAna = {
-    medico: medicoPorNombre["Dra. Ana Rivas"]._id,
-    paciente: String(pacientePorNombre["Juan Perez"]._id),
-    fechaHora: diasDesdeHoy(3, 14, 0),
-    sede: sedePorNombre["Sede Palermo"]._id,
-    servicio: prestacionPorNombre("Cardiologia")._id,
-    costo: prestacionPorNombre("Cardiologia").costo,
+  const turnoReservado = {
+    medico: medico._id,
+    paciente: String(paciente._id),
+    fechaHora: diasDesdeHoy(3, 9, 0),
+    sede: sedePorNombre["Sede Centro"]._id,
+    servicio: prestacionPorNombre("Clinica Medica")._id,
+    costo: prestacionPorNombre("Clinica Medica").costo,
     estado: EstadoTurno.RESERVADO,
-    disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dra. Ana Rivas"], 1),
+    disponibilidadOrigen: obtenerDisponibilidad(medico, 1),
     historialEstados: [
       ...historial(
         EstadoTurno.DISPONIBLE,
@@ -489,22 +303,22 @@ try {
       ),
       {
         estado: EstadoTurno.RESERVADO,
-        usuario: String(pacientePorNombre["Juan Perez"]._id),
+        usuario: String(paciente._id),
         motivoCambio: "Reserva inicial para probar flujo paciente",
         fechaHoraCambio: diasDesdeHoy(-1, 11, 30),
       },
     ],
   };
 
-  const turnoConfirmadoSosa = {
-    medico: medicoPorNombre["Dr. Martin Sosa"]._id,
-    paciente: String(pacientePorNombre["Sofia Gomez"]._id),
-    fechaHora: diasDesdeHoy(4, 10, 0),
-    sede: sedePorNombre["Sede Belgrano"]._id,
-    servicio: prestacionPorNombre("Pediatria")._id,
-    costo: prestacionPorNombre("Pediatria").costo,
+  const turnoConfirmado = {
+    medico: medico._id,
+    paciente: String(paciente._id),
+    fechaHora: diasDesdeHoy(4, 9, 0),
+    sede: sedePorNombre["Sede Centro"]._id,
+    servicio: prestacionPorNombre("Clinica Medica")._id,
+    costo: prestacionPorNombre("Clinica Medica").costo,
     estado: EstadoTurno.CONFIRMADO,
-    disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dr. Martin Sosa"], 0),
+    disponibilidadOrigen: obtenerDisponibilidad(medico, 2),
     historialEstados: [
       ...historial(
         EstadoTurno.DISPONIBLE,
@@ -514,28 +328,28 @@ try {
       ),
       {
         estado: EstadoTurno.RESERVADO,
-        usuario: String(pacientePorNombre["Sofia Gomez"]._id),
+        usuario: String(paciente._id),
         motivoCambio: "Reserva del paciente",
         fechaHoraCambio: diasDesdeHoy(-3, 15, 0),
       },
       {
         estado: EstadoTurno.CONFIRMADO,
-        usuario: String(medicoPorNombre["Dr. Martin Sosa"]._id),
+        usuario: String(medico._id),
         motivoCambio: "Confirmacion del profesional",
         fechaHoraCambio: diasDesdeHoy(-2, 18, 0),
       },
     ],
   };
 
-  const turnoCanceladoPaz = {
-    medico: medicoPorNombre["Dra. Laura Paz"]._id,
-    paciente: String(pacientePorNombre["Camila Nunez"]._id),
-    fechaHora: diasDesdeHoy(5, 15, 0),
-    sede: sedePorNombre["Sede Avellaneda"]._id,
-    servicio: prestacionPorNombre("Traumatologia")._id,
-    costo: prestacionPorNombre("Traumatologia").costo,
+  const turnoCancelado = {
+    medico: medico._id,
+    paciente: String(paciente._id),
+    fechaHora: diasDesdeHoy(5, 9, 0),
+    sede: sedePorNombre["Sede Centro"]._id,
+    servicio: prestacionPorNombre("Clinica Medica")._id,
+    costo: prestacionPorNombre("Clinica Medica").costo,
     estado: EstadoTurno.CANCELADO,
-    disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dra. Laura Paz"], 0),
+    disponibilidadOrigen: obtenerDisponibilidad(medico, 3),
     historialEstados: [
       ...historial(
         EstadoTurno.DISPONIBLE,
@@ -545,28 +359,28 @@ try {
       ),
       {
         estado: EstadoTurno.RESERVADO,
-        usuario: String(pacientePorNombre["Camila Nunez"]._id),
+        usuario: String(paciente._id),
         motivoCambio: "Reserva del paciente",
         fechaHoraCambio: diasDesdeHoy(-4, 12, 0),
       },
       {
         estado: EstadoTurno.CANCELADO,
-        usuario: String(pacientePorNombre["Camila Nunez"]._id),
+        usuario: String(paciente._id),
         motivoCambio: "Cancelacion por viaje",
         fechaHoraCambio: diasDesdeHoy(-3, 9, 0),
       },
     ],
   };
 
-  const turnoRealizadoAna = {
-    medico: medicoPorNombre["Dra. Ana Rivas"]._id,
-    paciente: String(pacientePorNombre["Diego Rojas"]._id),
-    fechaHora: diasDesdeHoy(-7, 8, 30),
+  const turnoRealizado = {
+    medico: medico._id,
+    paciente: String(paciente._id),
+    fechaHora: diasDesdeHoy(-7, 9, 0),
     sede: sedePorNombre["Sede Centro"]._id,
-    servicio: prestacionPorNombre("Laboratorio")._id,
-    costo: prestacionPorNombre("Laboratorio").costo,
+    servicio: prestacionPorNombre("Clinica Medica")._id,
+    costo: prestacionPorNombre("Clinica Medica").costo,
     estado: EstadoTurno.REALIZADO,
-    disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dra. Ana Rivas"], 2),
+    disponibilidadOrigen: obtenerDisponibilidad(medico, 4),
     historialEstados: [
       ...historial(
         EstadoTurno.DISPONIBLE,
@@ -576,19 +390,19 @@ try {
       ),
       {
         estado: EstadoTurno.RESERVADO,
-        usuario: String(pacientePorNombre["Diego Rojas"]._id),
+        usuario: String(paciente._id),
         motivoCambio: "Reserva del paciente",
         fechaHoraCambio: diasDesdeHoy(-9, 13, 0),
       },
       {
         estado: EstadoTurno.CONFIRMADO,
-        usuario: String(medicoPorNombre["Dra. Ana Rivas"]._id),
+        usuario: String(medico._id),
         motivoCambio: "Confirmacion del profesional",
         fechaHoraCambio: diasDesdeHoy(-8, 16, 0),
       },
       {
         estado: EstadoTurno.REALIZADO,
-        usuario: String(medicoPorNombre["Dra. Ana Rivas"]._id),
+        usuario: String(medico._id),
         motivoCambio: "Atencion realizada",
         fechaHoraCambio: diasDesdeHoy(-7, 9, 0),
       },
@@ -596,13 +410,13 @@ try {
   };
 
   const turnoDisponibleCambio = {
-    medico: medicoPorNombre["Dr. Martin Sosa"]._id,
-    fechaHora: diasDesdeHoy(6, 10, 30),
-    sede: sedePorNombre["Sede Belgrano"]._id,
-    servicio: prestacionPorNombre("Pediatria")._id,
-    costo: prestacionPorNombre("Pediatria").costo,
+    medico: medico._id,
+    fechaHora: diasDesdeHoy(6, 9, 0),
+    sede: sedePorNombre["Sede Centro"]._id,
+    servicio: prestacionPorNombre("Clinica Medica")._id,
+    costo: prestacionPorNombre("Clinica Medica").costo,
     estado: EstadoTurno.DISPONIBLE,
-    disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dr. Martin Sosa"], 0),
+    disponibilidadOrigen: obtenerDisponibilidad(medico, 0),
     historialEstados: historial(
       EstadoTurno.DISPONIBLE,
       "SYSTEM",
@@ -611,20 +425,20 @@ try {
   };
 
   const turnosBase = [
-    turnoDisponibleAna,
-    turnoReservadoAna,
-    turnoConfirmadoSosa,
-    turnoCanceladoPaz,
-    turnoRealizadoAna,
+    turnoDisponible,
+    turnoReservado,
+    turnoConfirmado,
+    turnoCancelado,
+    turnoRealizado,
     turnoDisponibleCambio,
     {
-      medico: medicoPorNombre["Dra. Laura Paz"]._id,
+      medico: medico._id,
       fechaHora: diasDesdeHoy(7, 9, 0),
-      sede: sedePorNombre["Sede Palermo"]._id,
-      servicio: prestacionPorNombre("Ecografia")._id,
-      costo: prestacionPorNombre("Ecografia").costo,
+      sede: sedePorNombre["Sede Centro"]._id,
+      servicio: prestacionPorNombre("Clinica Medica")._id,
+      costo: prestacionPorNombre("Clinica Medica").costo,
       estado: EstadoTurno.DISPONIBLE,
-      disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dra. Laura Paz"], 1),
+      disponibilidadOrigen: obtenerDisponibilidad(medico, 1),
       historialEstados: historial(
         EstadoTurno.DISPONIBLE,
         "SYSTEM",
@@ -632,27 +446,13 @@ try {
       ),
     },
     {
-      medico: medicoPorNombre["Dra. Laura Paz"]._id,
-      fechaHora: diasDesdeHoy(8, 13, 0),
-      sede: sedePorNombre["Sede Avellaneda"]._id,
-      servicio: prestacionPorNombre("Resonancia Magnetica")._id,
-      costo: prestacionPorNombre("Resonancia Magnetica").costo,
+      medico: medico._id,
+      fechaHora: diasDesdeHoy(8, 9, 0),
+      sede: sedePorNombre["Sede Centro"]._id,
+      servicio: prestacionPorNombre("Clinica Medica")._id,
+      costo: prestacionPorNombre("Clinica Medica").costo,
       estado: EstadoTurno.DISPONIBLE,
-      disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dra. Laura Paz"], 2),
-      historialEstados: historial(
-        EstadoTurno.DISPONIBLE,
-        "SYSTEM",
-        "Turno disponible generado por seed",
-      ),
-    },
-    {
-      medico: medicoPorNombre["Dr. Martin Sosa"]._id,
-      fechaHora: diasDesdeHoy(9, 9, 0),
-      sede: sedePorNombre["Sede Belgrano"]._id,
-      servicio: prestacionPorNombre("Vacunacion")._id,
-      costo: prestacionPorNombre("Vacunacion").costo,
-      estado: EstadoTurno.DISPONIBLE,
-      disponibilidadOrigen: obtenerDisponibilidad(medicoPorNombre["Dr. Martin Sosa"], 2),
+      disponibilidadOrigen: obtenerDisponibilidad(medico, 2),
       historialEstados: historial(
         EstadoTurno.DISPONIBLE,
         "SYSTEM",
@@ -689,9 +489,9 @@ try {
     {
       turnoOriginal: turnos[2]._id,
       turnoNuevo: turnos[5]._id,
-      solicitanteId: String(pacientePorNombre["Sofia Gomez"]._id),
-      pacienteId: String(pacientePorNombre["Sofia Gomez"]._id),
-      medicoId: String(medicoPorNombre["Dr. Martin Sosa"]._id),
+      solicitanteId: String(paciente._id),
+      pacienteId: String(paciente._id),
+      medicoId: String(medico._id),
       motivo: "Necesita reprogramar por superposicion laboral",
       estado: EstadoSolicitudCambioTurno.PENDIENTE,
       fechaSolicitud: diasDesdeHoy(-1, 10, 0),
@@ -699,10 +499,10 @@ try {
     {
       turnoOriginal: turnos[1]._id,
       turnoNuevo: turnos[0]._id,
-      solicitanteId: String(pacientePorNombre["Juan Perez"]._id),
-      pacienteId: String(pacientePorNombre["Juan Perez"]._id),
-      medicoId: String(medicoPorNombre["Dra. Ana Rivas"]._id),
-      confirmadorId: String(medicoPorNombre["Dra. Ana Rivas"]._id),
+      solicitanteId: String(paciente._id),
+      pacienteId: String(paciente._id),
+      medicoId: String(medico._id),
+      confirmadorId: String(medico._id),
       motivo: "El paciente solicito adelantar el turno",
       motivoRechazo: "El turno propuesto queda reservado para urgencias",
       estado: EstadoSolicitudCambioTurno.RECHAZADA,
@@ -713,31 +513,31 @@ try {
 
   await NotificacionModel.insertMany([
     {
-      destinatario: medicoPorNombre["Dra. Ana Rivas"]._id,
-      remitente: pacientePorNombre["Juan Perez"]._id,
-      mensaje: "Juan Perez reservo un turno de Cardiologia.",
+      destinatario: medico._id,
+      remitente: paciente._id,
+      mensaje: "Juan Paciente reservo un turno de Clinica Medica.",
       leida: false,
       fechaHoraCreacion: diasDesdeHoy(-1, 11, 30),
     },
     {
-      destinatario: pacientePorNombre["Sofia Gomez"]._id,
-      remitente: medicoPorNombre["Dr. Martin Sosa"]._id,
-      mensaje: "Tu turno de Pediatria fue confirmado.",
+      destinatario: paciente._id,
+      remitente: medico._id,
+      mensaje: "Tu turno de Clinica Medica fue confirmado.",
       leida: true,
       fechaHoraCreacion: diasDesdeHoy(-2, 18, 0),
       fechaHoraLeida: diasDesdeHoy(-2, 18, 15),
     },
     {
-      destinatario: medicoPorNombre["Dr. Martin Sosa"]._id,
-      remitente: pacientePorNombre["Sofia Gomez"]._id,
-      mensaje: "Sofia Gomez solicito cambiar su turno de Pediatria.",
+      destinatario: medico._id,
+      remitente: paciente._id,
+      mensaje: "Juan Paciente solicito cambiar su turno de Clinica Medica.",
       leida: false,
       fechaHoraCreacion: diasDesdeHoy(-1, 10, 0),
     },
     {
-      destinatario: pacientePorNombre["Camila Nunez"]._id,
-      remitente: medicoPorNombre["Dra. Laura Paz"]._id,
-      mensaje: "Se registro la cancelacion de tu turno de Traumatologia.",
+      destinatario: paciente._id,
+      remitente: medico._id,
+      mensaje: "Se registro la cancelacion de tu turno de Clinica Medica.",
       leida: true,
       fechaHoraCreacion: diasDesdeHoy(-3, 9, 0),
       fechaHoraLeida: diasDesdeHoy(-3, 9, 10),
@@ -753,6 +553,9 @@ try {
   console.log(`Medicos: ${medicos.length}`);
   console.log(`Pacientes: ${pacientes.length}`);
   console.log(`Turnos: ${turnos.length}`);
+  console.log(`Usuarios creados en Keycloak + Mongo: ${medicos.length + pacientes.length} (password: "${SEED_PASSWORD}")`);
+  process.exit(0);
 } catch (error) {
     console.error("Error al ejecutar el seeder:", error);
+    process.exit(1);
 }
