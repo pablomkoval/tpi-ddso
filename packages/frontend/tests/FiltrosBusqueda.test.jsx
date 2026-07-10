@@ -1,13 +1,13 @@
 import { render, waitFor } from '@testing-library/react';
-import FiltrosBusqueda from './FiltrosBusqueda';
+import FiltrosBusqueda from '../src/features/BuscarTurnos/FiltrosBusqueda';
 import {
-  buscarEspecialidades,
+  buscarServicios,
   buscarMedicos,
   buscarSedes,
-} from '../../services/filtrosBusquedaService';
+} from '../src/services/filtrosBusquedaService';
 
-jest.mock('../../services/filtrosBusquedaService', () => ({
-  buscarEspecialidades: jest.fn(),
+jest.mock('../src/services/filtrosBusquedaService', () => ({
+  buscarServicios: jest.fn(),
   buscarMedicos: jest.fn(),
   buscarSedes: jest.fn(),
 }));
@@ -17,15 +17,15 @@ describe('FiltrosBusqueda', () => {
     jest.clearAllMocks();
   });
 
-  it('no consulta médicos hasta que haya una especialidad seleccionada', async () => {
-    buscarEspecialidades.mockResolvedValue([{ id: 'esp-1', nombre: 'Cardiología' }]);
+  it('no consulta médicos hasta que haya un servicio seleccionado', async () => {
+    buscarServicios.mockResolvedValue([{ id: 'esp-1', nombre: 'Cardiología' }]);
     buscarSedes.mockResolvedValue([{ id: 'sede-1', nombre: 'Sede Norte' }]);
     buscarMedicos.mockResolvedValue([{ id: 'med-1', nombre: 'Dr. López' }]);
 
     const { rerender } = render(
       <FiltrosBusqueda
         filtros={{
-          especialidad: '',
+          servicio: '',
           profesional: '',
           sede: '',
           fechaDesde: '',
@@ -38,13 +38,13 @@ describe('FiltrosBusqueda', () => {
       />
     );
 
-    await waitFor(() => expect(buscarEspecialidades).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(buscarServicios).toHaveBeenCalledTimes(1));
     expect(buscarMedicos).not.toHaveBeenCalled();
 
     rerender(
       <FiltrosBusqueda
         filtros={{
-          especialidad: 'esp-1',
+          servicio: 'esp-1',
           profesional: '',
           sede: '',
           fechaDesde: '',

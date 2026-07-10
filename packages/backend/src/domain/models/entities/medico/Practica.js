@@ -5,7 +5,6 @@ export class Practica {
     _id;
 
     constructor(codigo, nombre, duracionTurnoEnMins, costo) {
-        this.id = "placeholder";
         this.codigo = codigo; //diferencia código, id y nombre?
         this.nombre = nombre;
         this.duracionTurnoEnMins = duracionTurnoEnMins;
@@ -21,9 +20,12 @@ export class Practica {
         if (this === otroServicio) {
             return true;
         }
-        if (this.id && this.id !== "placeholder" && otroServicio.id && otroServicio.id !== "placeholder") {
+        if (this.id && otroServicio.id) {
             return this.id === otroServicio.id;
         }
-        return this.codigo === otroServicio.codigo;
+        if (this.codigo && otroServicio.codigo) {
+            return this.codigo === otroServicio.codigo;
+        }
+        return this.nombre === otroServicio.nombre;
     }
 }

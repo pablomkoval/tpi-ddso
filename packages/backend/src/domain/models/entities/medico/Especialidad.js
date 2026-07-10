@@ -18,7 +18,7 @@ export class Especialidad {
         if (this === otroServicio) {
             return true;
         }
-        if (this.id && this.id !== "placeholder" && otroServicio.id && otroServicio.id !== "placeholder") {
+        if (this.id && otroServicio.id) {
             return this.id === otroServicio.id;
         }
         return this.nombre === otroServicio.nombre;

@@ -6,21 +6,23 @@ const API_URL_SEDE = 'http://localhost:4000/sedes';
 
 const API_URL_MED = 'http://localhost:4000/medicos'; 
 
-export const buscarEspecialidades = async () => {
+export const buscarServicios = async () => {
     try{
         const response = await axios.get(API_URL_ESP);
 
-        const especialidades = response.data.data.map(especialidad => ({
-            nombre: especialidad.nombre,
-            id: especialidad.id,
+        const servicios = response.data.data.map(servicio => ({
+            nombre: servicio.nombre,
+            id: servicio.id,
         }));
 
-        return especialidades;
+        return servicios;
     } catch (error) {
         console.error("Error al conectar con la API de servicios:", error);
         throw error;
     }
 };
+
+export const buscarEspecialidades = buscarServicios;
 
 export const buscarSedes = async () => {
     try{
