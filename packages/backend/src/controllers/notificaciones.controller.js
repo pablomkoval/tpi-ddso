@@ -20,8 +20,8 @@ export class NotificacionesController {
 
     async findAllPaginated(req, res, next) {
         try {
-            console.log("Usuario logueado:", req.user);
-            console.log("Buscando destinatario:", req.user.id);
+            // console.log("Usuario logueado:", req.user);
+            // console.log("Buscando destinatario:", req.user.id);
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
             const criterios = {

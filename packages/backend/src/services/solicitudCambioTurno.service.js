@@ -310,8 +310,15 @@ export class SolicitudCambioTurnoService {
     const docPaciente = await PacienteModel.findById(idPaciente);
     const docMedico = await MedicoModel.findById(idMedico);
 
-    const userPacienteId = docPaciente ? String(docPaciente.usuario) : null;
-    const userMedicoId = docMedico ? String(docMedico.usuario) : null;
+    const userPacienteId = docPaciente ? String(docPaciente.usuario?._id || docPaciente.usuario) : null;
+    const userMedicoId = docMedico ? String(docMedico.usuario?._id || docMedico.usuario) : null;
+
+    console.log("=== DATOS DE VALIDACIÓN DE CONFIRMADOR ===");
+    console.log("Tipo quien lo pidió:", solicitanteTipo);
+    console.log("ID de quien aprieta Aceptar:", idConfirmador);
+    console.log("ID de Usuario Médico Autorizado:", userMedicoId);
+    console.log("ID de Usuario Paciente Autorizado:", userPacienteId);
+    console.log("==========================================");
 
     if (solicitanteTipo === "PACIENTE") {
       const esMedicoDirecto = idConfirmador === idMedico;
@@ -349,10 +356,13 @@ export class SolicitudCambioTurnoService {
     const docPaciente = await PacienteModel.findById(idPaciente);
     const docMedico = await MedicoModel.findById(idMedico);
 
-    if (docPaciente && idSolicitante === String(docPaciente.usuario)) {
+    const userPacienteId = docPaciente ? String(docPaciente.usuario?._id || docPaciente.usuario) : null;
+    const userMedicoId = docMedico ? String(docMedico.usuario?._id || docMedico.usuario) : null;
+
+    if (userPacienteId && idSolicitante === userPacienteId) {
       return "PACIENTE";
     }
-    if (docMedico && idSolicitante === String(docMedico.usuario)) {
+    if (userMedicoId && idSolicitante === userMedicoId) {
       return "MEDICO";
     }
 
