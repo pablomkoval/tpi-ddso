@@ -1,26 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Typography, 
-    TextField, 
-    Button, 
-    Card, 
-    Box,
-    MenuItem,
-    Stack,
-    Grid,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    IconButton,
-    Snackbar,
-    Alert,
-    CircularProgress,
-    Chip,
-    Divider
+import {
+    Typography, TextField, Button, Card, Box, MenuItem, Stack, Grid,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Paper, IconButton, Snackbar, Alert, CircularProgress, Chip, Divider
 } from '@mui/material';
 
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
@@ -30,29 +12,29 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import axios from 'axios';
+
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
 const API_BASE = 'http://localhost:4000';
-
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 const diasSemanaMap = {
     'Lunes': 1,
-    'Martes': 2,
-    'Miércoles': 3,
-    'Jueves': 4,
-    'Viernes': 5,
-    'Sábado': 6,
+    'Martes': 2, 
+    'Miércoles': 3, 
+    'Jueves': 4, 
+    'Viernes': 5, 
+    'Sábado': 6, 
     'Domingo': 0
 };
 
 const diasSemanaMapReverse = {
-    1: 'Lunes',
-    2: 'Martes',
-    3: 'Miércoles',
-    4: 'Jueves',
-    5: 'Viernes',
-    6: 'Sábado',
+    1: 'Lunes', 
+    2: 'Martes', 
+    3: 'Miércoles', 
+    4: 'Jueves', 
+    5: 'Viernes', 
+    6: 'Sábado', 
     0: 'Domingo'
 };
 
@@ -65,18 +47,12 @@ const DefinirDisponibilidad = () => {
     const [sede, setSede] = useState('');
     const [prestacion, setPrestacion] = useState('');
 
-    // UI States
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     const token = localStorage.getItem("token");
-
-    const getHeaders = () => ({
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+    const getHeaders = () => ({ headers: { Authorization: `Bearer ${token}` } });
 
     const showMsg = (message, severity = 'success') => {
         setSnackbar({ open: true, message, severity });
@@ -91,8 +67,7 @@ const DefinirDisponibilidad = () => {
             const sedesRes = await axios.get(`${API_BASE}/sedes`, getHeaders());
             const allSedes = sedesRes.data.data || [];
             setSedesCatalogo(allSedes);
-            
-            // Set defaults if data is available
+
             if (allSedes.length > 0) {
                 setSede(allSedes[0]._id || allSedes[0].id);
             }
@@ -126,17 +101,14 @@ const DefinirDisponibilidad = () => {
 
     const handleGuardar = async (e) => {
         e.preventDefault();
-
         if (diasSeleccionados.length === 0) {
             showMsg("Debe seleccionar al menos un día de la semana.", "warning");
             return;
         }
-
         if (!sede) {
             showMsg("Debe seleccionar una sede.", "warning");
             return;
         }
-
         if (!prestacion) {
             showMsg("Debe seleccionar una prestación.", "warning");
             return;
@@ -144,7 +116,6 @@ const DefinirDisponibilidad = () => {
 
         setActionLoading(true);
         try {
-            // Generar payload con múltiples disponibilidades, una por día seleccionado
             const payload = {
                 disponibilidades: diasSeleccionados.map(dia => ({
                     diaSemana: diasSemanaMap[dia],
@@ -155,10 +126,10 @@ const DefinirDisponibilidad = () => {
                 }))
             };
 
-            const response = await axios.post(`${API_BASE}/medicos/${medico.id}/disponibilidades`, payload, getHeaders());
+            const response = await axios.post(`${API_BASE}/medicos/${medico.id || medico._id}/disponibilidades`, payload, getHeaders());
             setMedico(response.data);
             showMsg("Disponibilidad guardada exitosamente.");
-            setDiasSeleccionados([]); // Resetear selección de días
+            setDiasSeleccionados([]);
         } catch (error) {
             const errorMsg = error.response?.data?.message || "No se pudo guardar la disponibilidad.";
             showMsg(errorMsg, "error");
@@ -171,11 +142,10 @@ const DefinirDisponibilidad = () => {
         if (!window.confirm("¿Está seguro de que desea eliminar esta disponibilidad? Se cancelarán los turnos disponibles asociados.")) {
             return;
         }
-
         setActionLoading(true);
         try {
             const response = await axios.delete(
-                `${API_BASE}/medicos/${medico.id}/disponibilidades/${disponibilidadId}`,
+                `${API_BASE}/medicos/${medico.id || medico._id}/disponibilidades/${disponibilidadId}`,
                 getHeaders()
             );
             setMedico(response.data);
@@ -188,7 +158,6 @@ const DefinirDisponibilidad = () => {
         }
     };
 
-    // Helper functions to map IDs to Names from the current doctor context
     const getSedeNombre = (sedeId) => {
         const idStr = String(sedeId?._id || sedeId);
         const found = sedesCatalogo.find(s => String(s._id || s.id) === idStr);
@@ -235,19 +204,20 @@ const DefinirDisponibilidad = () => {
         );
     }
 
-    // Combinar especialidades y prácticas del médico para listarlas
     const prestacionesMedico = [
         ...(medico?.especialidades || []).map(p => ({ ...p, tipoServicio: 'especialidad' })),
         ...(medico?.practicas || []).map(p => ({ ...p, tipoServicio: 'practica' }))
     ];
 
     return (
-        <div className="disponibilidad-container">
-            <main className="disponibilidad-main-content">
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: { xs: 2, md: 3 }, minHeight: '85vh', bgcolor: '#f9f9ff' }}>
+            <Box sx={{ flexGrow: 1, maxWidth: 1200, width: '100%' }}>
+
+                {/* Cabecera */}
                 <Box sx={{ mb: 4, textAlign: 'left' }}>
                     <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'primary.main', mb: 1 }}>
                         <EventAvailableIcon />
-                        <Typography variant="caption" sx={{ fontWeight: 'bold', textTransform: 'uppercase', tracking: 'wider' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Gestión Médica
                         </Typography>
                     </Stack>
@@ -260,7 +230,7 @@ const DefinirDisponibilidad = () => {
                 </Box>
 
                 <Grid container spacing={4}>
-                    {/* Panel Izquierdo: Formulario de Nueva Disponibilidad */}
+                    {/* Panel Izquierdo: Formulario */}
                     <Grid item xs={12} lg={4}>
                         <Card variant="outlined" sx={{ p: 3, bgcolor: 'background.paper', textAlign: 'left' }} component="form" onSubmit={handleGuardar}>
                             <Typography variant="h6" fontWeight={700} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -269,11 +239,11 @@ const DefinirDisponibilidad = () => {
                             <Divider sx={{ my: 1.5 }} />
 
                             <Stack spacing={2.5}>
-                                <div style={{ textAlign: 'left' }}>
+                                <Box sx={{ textAlign: 'left' }}>
                                     <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1.5 }}>
                                         Días de la Semana
                                     </Typography>
-                                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" gap={1}>
+                                    <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
                                         {diasSemana.map((dia) => {
                                             const activo = diasSeleccionados.includes(dia);
                                             return (
@@ -291,39 +261,12 @@ const DefinirDisponibilidad = () => {
                                             );
                                         })}
                                     </Stack>
-                                </div>
+                                </Box>
 
-                                <TextField
-                                    label="Hora de Inicio"
-                                    type="time"
-                                    value={horaInicio}
-                                    onChange={(e) => setHoraInicio(e.target.value)}
-                                    InputLabelProps={{ shrink: true }}
-                                    InputProps={{
-                                        startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} />
-                                    }}
-                                    required
-                                />
+                                <TextField label="Hora de Inicio" type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} InputLabelProps={{ shrink: true }} InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }} required />
+                                <TextField label="Hora de Fin" type="time" value={horaFin} onChange={(e) => setHoraFin(e.target.value)} InputLabelProps={{ shrink: true }} InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }} required />
 
-                                <TextField
-                                    label="Hora de Fin"
-                                    type="time"
-                                    value={horaFin}
-                                    onChange={(e) => setHoraFin(e.target.value)}
-                                    InputLabelProps={{ shrink: true }}
-                                    InputProps={{
-                                        startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} />
-                                    }}
-                                    required
-                                />
-
-                                <TextField
-                                    select
-                                    label="Prestación"
-                                    value={prestacion}
-                                    onChange={(e) => setPrestacion(e.target.value)}
-                                    required
-                                >
+                                <TextField select label="Prestación" value={prestacion} onChange={(e) => setPrestacion(e.target.value)} required>
                                     {prestacionesMedico.map((p) => (
                                         <MenuItem key={p._id || p.id} value={p._id || p.id}>
                                             {p.servicioUnico?.nombre || p.nombre} ({p.tipoServicio === 'practica' ? 'Práctica' : 'Especialidad'})
@@ -334,16 +277,7 @@ const DefinirDisponibilidad = () => {
                                     )}
                                 </TextField>
 
-                                <TextField
-                                    select
-                                    label="Sede de Atención"
-                                    value={sede}
-                                    onChange={(e) => setSede(e.target.value)}
-                                    InputProps={{
-                                        startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} />
-                                    }}
-                                    required
-                                >
+                                <TextField select label="Sede de Atención" value={sede} onChange={(e) => setSede(e.target.value)} InputProps={{ startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} /> }} required>
                                     {sedesCatalogo.map((s) => (
                                         <MenuItem key={s._id || s.id} value={s._id || s.id}>
                                             {s.nombre} - {s.direccion}
@@ -354,21 +288,14 @@ const DefinirDisponibilidad = () => {
                                     )}
                                 </TextField>
 
-                                <Button 
-                                    type="submit" 
-                                    variant="contained" 
-                                    color="primary"
-                                    disabled={actionLoading}
-                                    startIcon={actionLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
-                                    fullWidth
-                                >
+                                <Button type="submit" variant="contained" color="primary" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />} fullWidth>
                                     Guardar disponibilidad
                                 </Button>
                             </Stack>
                         </Card>
                     </Grid>
 
-                    {/* Panel Derecho: Tabla de Disponibilidades Activas */}
+                    {/* Panel Derecho: Tabla */}
                     <Grid item xs={12} lg={8}>
                         <Card variant="outlined" sx={{ p: 3, bgcolor: 'background.paper' }}>
                             <Typography variant="h6" fontWeight={700} gutterBottom sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -414,21 +341,17 @@ const DefinirDisponibilidad = () => {
                                                             <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                                                 {getPrestacionNombre(disp.prestacion)}
                                                             </Typography>
-                                                            <Chip 
+                                                            <Chip
                                                                 label={getTipoPrestacionLabel(disp.prestacion)}
                                                                 size="small"
                                                                 color={getTipoPrestacionLabel(disp.prestacion) === 'Práctica' ? 'secondary' : 'primary'}
                                                                 sx={{ fontSize: '0.7rem', height: 18 }}
+                                                                variant="contained"
                                                             />
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: 'center' }}>
-                                                        <IconButton
-                                                            color="error"
-                                                            size="small"
-                                                            onClick={() => handleEliminar(disp.id || disp._id)}
-                                                            disabled={actionLoading}
-                                                        >
+                                                        <IconButton color="error" size="small" onClick={() => handleEliminar(disp.id || disp._id)} disabled={actionLoading}>
                                                             <DeleteIcon fontSize="small" />
                                                         </IconButton>
                                                     </TableCell>
@@ -441,24 +364,15 @@ const DefinirDisponibilidad = () => {
                         </Card>
                     </Grid>
                 </Grid>
-            </main>
 
-            {/* Feedback Notifications */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={4000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert
-                    onClose={() => setSnackbar({ ...snackbar, open: false })}
-                    severity={snackbar.severity}
-                    sx={{ width: '100%' }}
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
-        </div>
+                {/* Feedback Notifications */}
+                <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                    <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', borderRadius: 2 }}>
+                        {snackbar.message}
+                    </Alert>
+                </Snackbar>
+            </Box>
+        </Box>
     );
 };
 
