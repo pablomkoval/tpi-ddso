@@ -11,8 +11,43 @@ export class MedicoRepository {
         return await nuevoMedico.save();
     }
 
-    async findAll() {
-        return await this.model.find().populate('especialidades practicas sedes');
+    async findAll({ servicioId } = {}) {
+        const medicos = await this.model.find()
+            .populate({
+                path: 'especialidades',
+                populate: {
+                    path: 'servicioUnico'
+                }
+            })
+            .populate({
+                path: 'practicas',
+                populate: {
+                    path: 'servicioUnico'
+                }
+            })
+            .populate('sedes');
+
+        if (!servicioId) {
+            return medicos;
+        }
+
+        const servicioIdString = servicioId.toString();
+
+        return medicos.filter((medico) => {
+            const prestaciones = [
+                ...(medico?.especialidades ?? []),
+                ...(medico?.practicas ?? [])
+            ];
+
+            return prestaciones.some((prestacion) => {
+                const servicioUnico = prestacion?.servicioUnico;
+                const servicioUnicoId = typeof servicioUnico === 'string'
+                    ? servicioUnico
+                    : servicioUnico?._id?.toString() ?? servicioUnico?.id?.toString();
+
+                return servicioUnicoId === servicioIdString;
+            });
+        });
     }
     async findAllConTurnos() {
         return await this.model.find().populate(['especialidades', 'practicas', 'sedes', 'turnos']);

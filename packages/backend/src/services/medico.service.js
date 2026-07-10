@@ -79,8 +79,8 @@ export class MedicoService {
         return actualizado;
     }
 
-    async findAll() {
-        const medicos = await this.medicoRepository.findAll();
+    async findAll({ servicioId } = {}) {
+        const medicos = await this.medicoRepository.findAll({ servicioId });
         return medicos;
     }
 

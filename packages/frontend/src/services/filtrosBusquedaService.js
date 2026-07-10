@@ -38,13 +38,15 @@ export const buscarSedes = async () => {
     }
 };
 
-export const buscarMedicos = async () => {
+export const buscarMedicos = async (servicioId = '') => {
     try{
-        const response = await axios.get(API_URL_MED);
-        
-        const medicos = response.data.map(medico => ({
+        const url = servicioId ? `${API_URL_MED}?servicioId=${servicioId}` : API_URL_MED;
+        const response = await axios.get(url);
+
+        const datosMedicos = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
+        const medicos = datosMedicos.map(medico => ({
             nombre: medico.nombre,
-            id: medico.id,
+            id: medico.id ?? medico._id,
         }));
         
         return medicos;
