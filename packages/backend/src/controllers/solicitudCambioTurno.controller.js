@@ -109,13 +109,15 @@ export class SolicitudCambioTurnoController {
   async confirmar(req, res, next) {
     try {
       const id = parsearId(req.params.id);
-      const data = confirmarSolicitudCambioTurnoSchema.parse(req.body);
+      const confirmadorId = req.user.id;
+
       const solicitud = await this.solicitudCambioTurnoService.confirmarSolicitud(
         id,
-        data.confirmadorId,
+        confirmadorId,
       );
       return res.status(200).json(this.solicitudToDTO(solicitud));
     } catch (error) {
+      console.error("ERROR EN CONFIRMAR SOLICITUD:", error);
       return next(error);
     }
   }
@@ -124,13 +126,17 @@ export class SolicitudCambioTurnoController {
     try {
       const id = parsearId(req.params.id);
       const data = rechazarSolicitudCambioTurnoSchema.parse(req.body);
+
+      const confirmadorId = req.user.id;
+
       const solicitud = await this.solicitudCambioTurnoService.rechazarSolicitud(
         id,
-        data.confirmadorId,
+        confirmadorId,
         data.motivoRechazo,
       );
       return res.status(200).json(this.solicitudToDTO(solicitud));
     } catch (error) {
+      console.error("ERROR EN RECHAZAR SOLICITUD:", error);
       return next(error);
     }
   }

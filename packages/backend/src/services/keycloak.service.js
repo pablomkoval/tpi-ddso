@@ -56,6 +56,22 @@ export class KeycloakService {
         }
     }
 
+    async deleteAllUsers() {
+        await this.#authenticateAdmin();
+
+        const users = await this.kcAdminClient.users.find({
+            realm: "tpi-realm",
+            max: 1000,
+        });
+
+        for (const user of users) {
+            await this.kcAdminClient.users.del({
+                realm: "tpi-realm",
+                id: user.id,
+            });
+        }
+    }
+
     async assignRole(userId, roleName) {
         await this.#authenticateAdmin();
 
