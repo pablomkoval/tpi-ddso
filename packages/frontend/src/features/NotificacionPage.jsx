@@ -132,14 +132,10 @@ const NotificacionPage = () => {
       console.error("Error al marcar todas como leídas:", err);
     }
   };
-
+  
   const handleAceptarCambio = async (idNotificacion, idTurno) => {
     try {
-      const userStr = localStorage.getItem("usuario") || localStorage.getItem("user");
-      const usuarioLogueado = userStr ? JSON.parse(userStr) : {};
-      const confirmadorId = usuarioLogueado.id || usuarioLogueado._id;
-
-      await confirmarSolicitudCambio(idTurno, confirmadorId); 
+      await confirmarSolicitudCambio(idTurno, null); 
       await handleLeer(idNotificacion);
       cargarNotificaciones();
     } catch (err) {
@@ -152,13 +148,10 @@ const NotificacionPage = () => {
     if (!notificacionSeleccionadaParaRechazo) return;
 
     try {
-      const userStr = localStorage.getItem("usuario") || localStorage.getItem("user");
-      const usuarioLogueado = userStr ? JSON.parse(userStr) : {};
-      const confirmadorId = usuarioLogueado.id || usuarioLogueado._id;
 
       await rechazarSolicitudCambio(
         notificacionSeleccionadaParaRechazo.idTurno, 
-        confirmadorId, 
+        null, 
         motivoRechazo 
       );
       await handleLeer(notificacionSeleccionadaParaRechazo.idNotificacion);
