@@ -49,12 +49,24 @@ export class PacienteService {
     return paciente;
   }
 
-  async findByIdUsuario(id){
-    const usuario = await this.usuarioService.findById(id);
-    if(!usuario){
-      throw BadRequestError("Id de usuario invalida");
+  async findByIdUsuario(id, username) {
+    // Buscar primero por el ID de usuario de MongoDB
+    let paciente = await this.pacienteRepository.findByIdUsuario(id);
+
+    // Fallback: buscar por nombre de usuario (para pacientes creados manualmente vía Keycloak)
+    if (!paciente && username) {
+      paciente = await this.pacienteRepository.findByUsername(username);
+      // Si se encuentra, actualizar el campo usuario para que el ID sea correcto en el futuro
+      if (paciente) {
+        await this.pacienteRepository.updateUsuarioId(paciente._id, id);
+      }
     }
-    return await this.pacienteRepository.findByIdUsuario(id);
+
+    if (!paciente) {
+      throw new NotFoundError("Paciente no encontrado para el usuario actual", "PACIENTE_NO_ENCONTRADO");
+    }
+
+    return paciente;
   }
 
 
@@ -110,12 +122,16 @@ export class PacienteService {
 
     const turnoGuardado = await this.turnoRepository.guardar(turno);
 
-    const nombreServicio = turno.servicio?.nombre ?? "servicio no especificado";
-    await this.notificacionesService.create({
-      destinatario: turno.medico,
-      remitente: pacienteId,
-      mensaje: `El paciente ${paciente.nombre} reservó un turno para ${nombreServicio}.`,
-    }); //!!utilizar metodo estático de clase notificacion 
+    const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
+    try {
+      await this.notificacionesService.create({
+        destinatario: turno.medico,
+        remitente: pacienteId,
+        mensaje: `El paciente ${paciente.nombre} reservó un turno para ${nombreServicio}.`,
+      });
+    } catch (notifErr) {
+      console.error('[PacienteService] Error al enviar notificación de reserva:', notifErr.message);
+    }
 
     return turnoGuardado;
   }
@@ -131,7 +147,7 @@ export class PacienteService {
       );
     }
 
-    if (!turno.paciente.equals(pacienteId)) {
+    if (String(turno.paciente._id || turno.paciente) !== String(pacienteId)) {
       throw new BadRequestError(
         "No podés cancelar un turno que no te pertenece",
         "TURNO_AJENO",
@@ -160,12 +176,16 @@ export class PacienteService {
 
     const turnoGuardado = await this.turnoRepository.guardar(turno);
 
-    const nombreServicio = turno.servicio?.nombre ?? "servicio no especificado";
-    await this.notificacionesService.create({
-      destinatario: turno.medico,
-      remitente: pacienteId,
-      mensaje: `El paciente ${paciente.nombre} canceló el turno de ${nombreServicio}. Motivo: ${motivo}`,
-    });
+    const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
+    try {
+      await this.notificacionesService.create({
+        destinatario: turno.medico,
+        remitente: pacienteId,
+        mensaje: `El paciente ${paciente.nombre} canceló el turno de ${nombreServicio}. Motivo: ${motivo}`,
+      });
+    } catch (notifErr) {
+      console.error('[PacienteService] Error al enviar notificación de cancelación:', notifErr.message);
+    }
 
     return turnoGuardado;
   }
@@ -255,7 +275,7 @@ export class PacienteService {
       turnoNuevoId: nuevoTurnoId,
       solicitanteId: pacienteId,
       pacienteId: pacienteId,
-      medicoId: String(turnoActual.medico),
+      medicoId: String(turnoActual.medico._id || turnoActual.medico),
       motivo: `Cambio de fecha solicitado por el paciente`,
     });
 
@@ -267,15 +287,21 @@ export class PacienteService {
       ]);
 
     const nombreServicio =
-      turnoActual.servicio?.nombre ?? "servicio no especificado";
+      turnoActual.servicio?.servicioUnico?.nombre ?? turnoActual.servicio?.nombre ?? "servicio no especificado";
     const fechaNueva = new Date(nuevoTurno.fechaHora).toLocaleString("es-AR");
-    await this.notificacionesService.create({
-      destinatario: turnoActual.medico,
-      remitente: pacienteId,
-      mensaje:
-        `El paciente ${paciente.nombre} solicitó cambiar el turno de ${nombreServicio} ` +
-        `para el ${fechaNueva}. Revisá la solicitud para aceptar o rechazar.`,
-    });
+    try {
+      await this.notificacionesService.create({
+        destinatario: turnoActual.medico,
+        remitente: pacienteId,
+        mensaje:
+          `El paciente ${paciente.nombre} solicitó cambiar el turno de ${nombreServicio} ` +
+          `para el ${fechaNueva}. Revisá la solicitud para aceptar o rechazar.`,
+        tipo: "CAMBIO_TURNO",
+        referenciaId: solicitudGuardada._id.toString(),
+      });
+    } catch (notifErr) {
+      console.error('[PacienteService] Error al enviar notificación de solicitud de cambio:', notifErr.message);
+    }
 
     return {
       turnoActual: turnoActualGuardado,

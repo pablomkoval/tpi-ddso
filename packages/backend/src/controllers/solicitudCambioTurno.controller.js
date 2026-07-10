@@ -12,10 +12,27 @@ export class SolicitudCambioTurnoController {
   }
 
   solicitudToDTO(solicitud) {
+    const formatTurno = (t) => {
+      if (!t || !t.fechaHora) return t;
+      const servicio = t.servicio || {};
+      const servicioUnico = servicio.servicioUnico || {};
+      return {
+        id: t.id || t._id,
+        fechaHora: t.fechaHora,
+        estado: t.estado,
+        costo: t.costo,
+        servicio: {
+          id: servicioUnico._id ?? servicio._id ?? null,
+          nombre: servicioUnico.nombre ?? servicio.nombre ?? '—',
+          tipo: servicioUnico.tipoServicio ?? null,
+        }
+      };
+    };
+
     return {
       id: solicitud.id || solicitud._id,
-      turnoOriginal: solicitud.turnoOriginal,
-      turnoNuevo: solicitud.turnoNuevo,
+      turnoOriginal: formatTurno(solicitud.turnoOriginal),
+      turnoNuevo: formatTurno(solicitud.turnoNuevo),
       solicitanteId: solicitud.solicitanteId,
       pacienteId: solicitud.pacienteId,
       medicoId: solicitud.medicoId,

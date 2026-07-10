@@ -21,6 +21,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
+import { getNoLeidas } from '../../services/notificacionesService';
 import { proximoTurnoData, turnosPendientesData, notificacionesPacienteData } from '../../mockdata/dashboardPacienteMock';
 
 
@@ -34,7 +35,27 @@ export default function DashboardPaciente() {
   useEffect(() => {
     setProximoTurno(proximoTurnoData);
     setTurnosPendientes(turnosPendientesData);
-    setNotificaciones(notificacionesPacienteData);
+
+    const fetchNotificaciones = async () => {
+      try {
+        const res = await getNoLeidas();
+        const count = res.pagination?.total || 0;
+        const recentMsg = res.notificaciones?.length > 0 
+          ? res.notificaciones[0].mensaje 
+          : "No tenés mensajes nuevos.";
+        setNotificaciones({
+          count,
+          mensaje: recentMsg
+        });
+      } catch (err) {
+        console.error("Error al obtener notificaciones en dashboard paciente:", err);
+        setNotificaciones({
+          count: 0,
+          mensaje: "No se pudieron cargar las notificaciones."
+        });
+      }
+    };
+    fetchNotificaciones();
   }, []);
 
   const username = getUsernameFromToken();

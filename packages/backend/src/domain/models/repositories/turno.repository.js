@@ -172,6 +172,78 @@ export class TurnoRepository {
     return { turnos, totalTurnos: total };
   }
 
+  async buscarTurnos(filtros) {
+    const query = {};
 
+    if (filtros.medico) {
+        query.medico = filtros.medico;
+    }
 
+    if (filtros.fechaDesde || filtros.fechaHasta) {
+        query.fechaHora = {};
+        if (filtros.fechaDesde) {
+            query.fechaHora.$gte = new Date(filtros.fechaDesde);
+        }
+        if (filtros.fechaHasta) {
+            query.fechaHora.$lte = new Date(filtros.fechaHasta);
+        }
+    }
+
+    if (filtros.estados && filtros.estados.length > 0) {
+        query.estado = { $in: filtros.estados };
+    }
+
+    return await this.model
+        .find(query)
+        .populate("medico")
+        .populate({
+            path: "servicio",
+            populate: { path: "servicioUnico" }
+        })
+        .populate("sede")
+        .sort({ fechaHora: 1 });
+  }
+
+  async buscarTurnosPaginados(filtros, page = 1, limit = 10) {
+    const query = {};
+
+    if (filtros.medico) {
+        query.medico = filtros.medico;
+    }
+
+    if (filtros.fechaDesde || filtros.fechaHasta) {
+        query.fechaHora = {};
+        if (filtros.fechaDesde) {
+            query.fechaHora.$gte = new Date(filtros.fechaDesde);
+        }
+        if (filtros.fechaHasta) {
+            query.fechaHora.$lte = new Date(filtros.fechaHasta);
+        }
+    }
+
+    if (filtros.estados && filtros.estados.length > 0) {
+        query.estado = { $in: filtros.estados };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [turnos, total] = await Promise.all([
+        this.model
+            .find(query)
+            .populate("medico")
+            .populate({
+                path: "servicio",
+                populate: { path: "servicioUnico" }
+            })
+            .populate("sede")
+            .sort({ fechaHora: -1 })
+            .skip(skip)
+            .limit(limit),
+        this.model.countDocuments(query)
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return { turnos, total, page, totalPages };
+  }
 }

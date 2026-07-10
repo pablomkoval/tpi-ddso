@@ -1,5 +1,10 @@
 import { SolicitudCambioTurnoModel } from "../../../schemas/solicitudCambioTurno.schema.js";
 import { EstadoSolicitudCambioTurno } from "../../enum/EstadoSolicitudCambioTurno.js";
+import '../../../schemas/turno.schema.js';
+import '../../../schemas/prestacion.schema.js';
+import '../../../schemas/especialidad.schema.js';
+import '../../../schemas/practica.schema.js';
+import '../../../schemas/servicio.schema.js';
 
 export class SolicitudCambioTurnoRepository {
   constructor() {
@@ -12,7 +17,21 @@ export class SolicitudCambioTurnoRepository {
   }
 
   async findById(id) {
-    return await this.model.findById(id);
+    return await this.model.findById(id)
+      .populate({
+        path: "turnoOriginal",
+        populate: {
+          path: "servicio",
+          populate: { path: "servicioUnico" }
+        }
+      })
+      .populate({
+        path: "turnoNuevo",
+        populate: {
+          path: "servicio",
+          populate: { path: "servicioUnico" }
+        }
+      });
   }
 
   async findPendienteByTurnoOriginal(turnoId) {
@@ -29,6 +48,20 @@ export class SolicitudCambioTurnoRepository {
 
     const solicitudes = await this.model
       .find(criterios)
+      .populate({
+        path: "turnoOriginal",
+        populate: {
+          path: "servicio",
+          populate: { path: "servicioUnico" }
+        }
+      })
+      .populate({
+        path: "turnoNuevo",
+        populate: {
+          path: "servicio",
+          populate: { path: "servicioUnico" }
+        }
+      })
       .sort({ fechaSolicitud: -1 })
       .skip(skip)
       .limit(limitNum);
@@ -49,6 +82,20 @@ export class SolicitudCambioTurnoRepository {
       id,
       { $set: data },
       { new: true },
-    );
+    )
+    .populate({
+      path: "turnoOriginal",
+      populate: {
+        path: "servicio",
+        populate: { path: "servicioUnico" }
+      }
+    })
+    .populate({
+      path: "turnoNuevo",
+      populate: {
+        path: "servicio",
+        populate: { path: "servicioUnico" }
+      }
+    });
   }
 }

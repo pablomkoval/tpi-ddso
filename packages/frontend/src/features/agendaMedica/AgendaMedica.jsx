@@ -1,203 +1,948 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Typography,
     Card,
     CardContent,
     Avatar,
     Box,
-    Stack
+    Stack,
+    Button,
+    Dialog,
+    DialogContent,
+    DialogActions,
+    Divider,
+    IconButton,
+    Snackbar,
+    Alert,
+    Grid,
+    Chip,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    CircularProgress,
+    TextField
 } from '@mui/material';
 
-// Íconos oficiales de Material-UI
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventIcon from '@mui/icons-material/Event';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import NotificationImportantIcon from '@mui/icons-material/NotificationImportant';
-import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CloseIcon from '@mui/icons-material/Close';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PlaceIcon from '@mui/icons-material/Place';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import CheckIcon from '@mui/icons-material/Check';
+import TodayIcon from '@mui/icons-material/Today';
+import HistoryIcon from '@mui/icons-material/History';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-import { horasAgenda, turnosMedicos, agendaStats, agendaSemana } from '../../mockdata/agendaMedicaData.js'
+import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
+import { getMiMedico, getAgenda, confirmarTurno, getHistorialTurnos, realizarTurno, cancelarTurno, proponerCambioTurno } from '../../services/medicoService.js';
+import './AgendaMedica.css';
+
+const horasAgenda = [
+  '08:00', '09:00', '10:00', '11:00', '12:00',
+  '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+];
+
+const HORA_INICIO = 8;
+
+const getMonday = (d) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(date.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+};
 
 const formatearSemana = (inicio) => {
     const fechaInicio = new Date(inicio);
     const fechaFin = new Date(inicio);
     fechaFin.setDate(fechaInicio.getDate() + 4);
-    const mes = fechaInicio.toLocaleDateString("es-AR", { month: "long" });
+    const mesInicio = fechaInicio.toLocaleDateString("es-AR", { month: "long" });
+    const mesFin = fechaFin.toLocaleDateString("es-AR", { month: "long" });
     const anio = fechaInicio.getFullYear();
-    return `Semana del ${fechaInicio.getDate()} al ${fechaFin.getDate()} de ${mes}, ${anio}`;
+    if (mesInicio === mesFin) {
+        return `Semana del ${fechaInicio.getDate()} al ${fechaFin.getDate()} de ${mesInicio}, ${anio}`;
+    }
+    return `${fechaInicio.getDate()} de ${mesInicio} – ${fechaFin.getDate()} de ${mesFin}, ${anio}`;
 };
 
 const AgendaMedica = () => {
     const [loading, setLoading] = useState(true);
+    const [medico, setMedico] = useState(null);
+    const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
+    const [turnos, setTurnos] = useState([]);
+    const [selectedTurno, setSelectedTurno] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
 
-    // para el skeleton
+    // Cancelación
+    const [showCancelForm, setShowCancelForm] = useState(false);
+    const [motivoCancelacion, setMotivoCancelacion] = useState('');
+
+    // Propuesta de cambio
+    const [showChangeForm, setShowChangeForm] = useState(false);
+    const [selectedNuevoTurnoId, setSelectedNuevoTurnoId] = useState('');
+    const [motivoCambio, setMotivoCambio] = useState('');
+
+    // Histórico
+    const [historial, setHistorial] = useState([]);
+    const [historialPage, setHistorialPage] = useState(0);
+    const [historialTotal, setHistorialTotal] = useState(0);
+    const [historialLoading, setHistorialLoading] = useState(false);
+    const HISTORIAL_ROWS = 5;
+
+    // Snackbar
+    const [snackbar, setSnackbar] = useState({ open: false, mensaje: '', tipo: 'success' });
+
+    // Cargar perfil del médico
     useEffect(() => {
-        setLoading(true);
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
+        const fetchMedico = async () => {
+            try {
+                const data = await getMiMedico();
+                setMedico(data);
+            } catch (err) {
+                console.error("Error al obtener perfil del médico:", err);
+                setSnackbar({ open: true, mensaje: "No se pudieron cargar tus datos de médico", tipo: "error" });
+            }
+        };
+        fetchMedico();
     }, []);
 
+    // Cargar turnos de la agenda
+    const loadAgendaData = useCallback(async () => {
+        if (!medico) return;
+        try {
+            setLoading(true);
+            const fechaHasta = new Date(currentMonday);
+            fechaHasta.setDate(currentMonday.getDate() + 6);
+            fechaHasta.setHours(23, 59, 59, 999);
+
+            const agendaData = await getAgenda(medico.id || medico._id, currentMonday.toISOString(), fechaHasta.toISOString());
+
+            // Filtrar cancelados — no se muestran en la agenda
+            const mappedTurnos = agendaData
+                .filter(turno => turno.estado.toLowerCase() !== 'cancelado')
+                .map(turno => {
+                    const fecha = new Date(turno.fechaHora);
+                    const diaSemana = fecha.getDay();
+                    const columna = diaSemana === 0 ? 7 : diaSemana;
+
+                    const horas = fecha.getHours();
+                    const minutos = fecha.getMinutes();
+                    const top = (horas - HORA_INICIO) * 60 + minutos;
+
+                    const duracion = turno.servicio?.duracionMinutos ?? turno.servicio?.duracionTurnoEnMins ?? 30;
+                    const height = Math.max(duracion, 40);
+
+                    const pacienteNombre = turno.pacienteDetalle?.nombre || (turno.paciente ? "Paciente Registrado" : "Disponible");
+
+                    return {
+                        id: turno.id || turno._id,
+                        paciente: pacienteNombre,
+                        pacienteDni: turno.pacienteDetalle?.dni,
+                        motivo: turno.servicio?.nombre || turno.servicio?.servicioUnico?.nombre || "Consulta General",
+                        estado: turno.estado.toLowerCase(),
+                        columna,
+                        top,
+                        height,
+                        fechaHora: fecha,
+                        sede: turno.sede?.nombre || "Sede Principal",
+                        cobertura: turno.cobertura,
+                        costoPaciente: turno.costoPaciente,
+                        original: turno
+                    };
+                });
+
+            setTurnos(mappedTurnos);
+        } catch (err) {
+            console.error("Error al cargar la agenda médica:", err);
+            setSnackbar({ open: true, mensaje: "No se pudo cargar la agenda médica", tipo: "error" });
+        } finally {
+            setLoading(false);
+        }
+    }, [medico, currentMonday]);
+
+    useEffect(() => {
+        loadAgendaData();
+    }, [loadAgendaData]);
+
+    // Cargar histórico de turnos realizados
+    const loadHistorial = useCallback(async () => {
+        if (!medico) return;
+        try {
+            setHistorialLoading(true);
+            const data = await getHistorialTurnos(medico.id || medico._id, historialPage + 1, HISTORIAL_ROWS);
+            setHistorial(data.turnos || []);
+            setHistorialTotal(data.pagination?.total || 0);
+        } catch (err) {
+            console.error("Error al cargar historial:", err);
+        } finally {
+            setHistorialLoading(false);
+        }
+    }, [medico, historialPage]);
+
+    useEffect(() => {
+        loadHistorial();
+    }, [loadHistorial]);
+
+    // Navegación
+    const handleSemanaAnterior = () => {
+        setCurrentMonday(prev => {
+            const d = new Date(prev);
+            d.setDate(prev.getDate() - 7);
+            return d;
+        });
+    };
+
+    const handleSemanaSiguiente = () => {
+        setCurrentMonday(prev => {
+            const d = new Date(prev);
+            d.setDate(prev.getDate() + 7);
+            return d;
+        });
+    };
+
+    const handleHoy = () => {
+        setCurrentMonday(getMonday(new Date()));
+    };
+
+    const esEstaSemana = () => {
+        return currentMonday.getTime() === getMonday(new Date()).getTime();
+    };
+
+    // Cerrar dialog y resetear estados
+    const cerrarDialog = () => {
+        setOpenDialog(false);
+        setSelectedTurno(null);
+        setShowCancelForm(false);
+        setMotivoCancelacion('');
+        setShowChangeForm(false);
+        setSelectedNuevoTurnoId('');
+        setMotivoCambio('');
+    };
+
+    // Estilos por estado
     const obtenerEstilosEstado = (estado) => {
         switch (estado) {
+            case 'realizado':
             case 'completado':
-                return { bg: '#e8f5e9', border: '#4caf50', texto: '#2e7d32', icono: <CheckCircleIcon sx={{ fontSize: 16 }} /> };
-            case 'pendiente':
-                return { bg: '#fff3e0', border: '#ff9800', texto: '#e65100', icono: <ErrorOutlineIcon sx={{ fontSize: 16 }} /> };
+                return { bg: '#e8f5e9', border: '#43a047', texto: '#2e7d32', label: 'Realizado' };
             case 'reservado':
+                return { bg: '#fff8e1', border: '#ffa726', texto: '#e65100', label: 'Pendiente' };
+            case 'confirmado':
+                return { bg: '#e3f2fd', border: '#1e88e5', texto: '#1565c0', label: 'Confirmado' };
+            case 'disponible':
+                return { bg: '#f3e5f5', border: '#ab47bc', texto: '#7b1fa2', label: 'Disponible' };
             default:
-                return { bg: '#e3f2fd', border: '#1976d2', texto: '#1565c0', icono: <EventIcon sx={{ fontSize: 16 }} /> };
+                return { bg: '#f5f5f5', border: '#9e9e9e', texto: '#616161', label: estado };
         }
     };
+
+    // ─── ACCIONES ───
+
+    const handleConfirmar = async () => {
+        if (!medico || !selectedTurno) return;
+        try {
+            setActionLoading(true);
+            await confirmarTurno(medico.id || medico._id, selectedTurno.id);
+            setSnackbar({ open: true, mensaje: "Turno confirmado con éxito", tipo: "success" });
+            cerrarDialog();
+            await loadAgendaData();
+        } catch (err) {
+            const errMsg = err.response?.data?.message || "No se pudo confirmar el turno";
+            setSnackbar({ open: true, mensaje: errMsg, tipo: "error" });
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleRealizar = async () => {
+        if (!medico || !selectedTurno) return;
+        try {
+            setActionLoading(true);
+            await realizarTurno(medico.id || medico._id, selectedTurno.id);
+            setSnackbar({ open: true, mensaje: "Turno marcado como realizado", tipo: "success" });
+            cerrarDialog();
+            await loadAgendaData();
+            await loadHistorial();
+        } catch (err) {
+            const errMsg = err.response?.data?.message || "No se pudo marcar el turno como realizado";
+            setSnackbar({ open: true, mensaje: errMsg, tipo: "error" });
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCancelar = async () => {
+        if (!medico || !selectedTurno || !motivoCancelacion.trim()) return;
+        try {
+            setActionLoading(true);
+            await cancelarTurno(medico.id || medico._id, selectedTurno.id, motivoCancelacion.trim());
+            setSnackbar({ open: true, mensaje: "Turno cancelado correctamente", tipo: "success" });
+            cerrarDialog();
+            await loadAgendaData();
+        } catch (err) {
+            const errMsg = err.response?.data?.message || "No se pudo cancelar el turno";
+            setSnackbar({ open: true, mensaje: errMsg, tipo: "error" });
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleProponerCambio = async () => {
+        if (!medico || !selectedTurno || !selectedNuevoTurnoId) return;
+        try {
+            setActionLoading(true);
+            await proponerCambioTurno(
+                selectedTurno.id,
+                selectedNuevoTurnoId,
+                medico.id || medico._id,
+                motivoCambio.trim()
+            );
+            setSnackbar({ open: true, mensaje: "Propuesta de cambio enviada al paciente", tipo: "success" });
+            cerrarDialog();
+            await loadAgendaData();
+        } catch (err) {
+            const errMsg = err.response?.data?.message || "No se pudo proponer el cambio";
+            setSnackbar({ open: true, mensaje: errMsg, tipo: "error" });
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Estadísticas
+    const turnosHoy = turnos.filter(t => {
+        const hoy = new Date();
+        return t.fechaHora.toDateString() === hoy.toDateString() &&
+            (t.estado === 'confirmado' || t.estado === 'reservado');
+    }).length;
+    const confirmados = turnos.filter(t => t.estado === 'confirmado').length;
+    const pendientesConfirmacion = turnos.filter(t => t.estado === 'reservado').length;
+
+    // Días de la semana
+    const diasCabecera = [];
+    const hoy = new Date();
+    for (let i = 0; i < 5; i++) {
+        const d = new Date(currentMonday);
+        d.setDate(currentMonday.getDate() + i);
+        diasCabecera.push({
+            label: ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE'][i],
+            numero: d.getDate(),
+            esHoy: d.toDateString() === hoy.toDateString(),
+            columna: i + 1
+        });
+    }
+
+    // Indicador de hora actual
+    const timeIndicatorTop = (hoy.getHours() - HORA_INICIO) * 60 + hoy.getMinutes();
+    const showTimeIndicator = esEstaSemana() && hoy.getDay() >= 1 && hoy.getDay() <= 5 &&
+        hoy.getHours() >= HORA_INICIO && hoy.getHours() <= 18;
+    const todayCol = hoy.getDay();
+
+    // ¿Se puede cancelar o reprogramar?
+    const puedesCancelar = selectedTurno && (selectedTurno.estado === 'reservado' || selectedTurno.estado === 'confirmado');
 
     return (
         <div className="agenda-container">
             <main className="agenda-main-content">
 
-                {/* 📊 Encabezado Simple */}
-                <Box sx={{ mb: 4, textAlign: 'left' }}>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-                        Agenda Médica
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                        {formatearSemana(agendaSemana.inicio)}
-                    </Typography>
+                {/* ─── ENCABEZADO ─── */}
+                <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+                    <Box sx={{ textAlign: 'left' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                            Agenda Médica
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            {formatearSemana(currentMonday)}
+                        </Typography>
+                    </Box>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                        <IconButton
+                            onClick={handleSemanaAnterior}
+                            size="small"
+                            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+                        >
+                            <ChevronLeftIcon />
+                        </IconButton>
+                        <Button
+                            variant={esEstaSemana() ? "contained" : "outlined"}
+                            size="small"
+                            onClick={handleHoy}
+                            startIcon={<TodayIcon />}
+                            sx={{ borderRadius: 2, px: 2 }}
+                        >
+                            Hoy
+                        </Button>
+                        <IconButton
+                            onClick={handleSemanaSiguiente}
+                            size="small"
+                            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+                        >
+                            <ChevronRightIcon />
+                        </IconButton>
+                    </Stack>
                 </Box>
 
-                {/* 📅 Estructura del Calendario Semanal */}
-                <div className="calendar-wrapper">
-
-                    {/* Encabezado de los días */}
-                    <div className="calendar-grid-structure" style={{ backgroundColor: '#f2f3fb' }}>
-                        <div className="calendar-header-day"></div>
-                        <div className="calendar-header-day">
-                            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>LUN</Typography>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>20</Typography>
-                        </div>
-                        <div className="calendar-header-day" style={{ backgroundColor: 'rgba(0, 94, 184, 0.04)' }}>
-                            <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>MAR</Typography>
-                            <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>21</Typography>
-                        </div>
-                        <div className="calendar-header-day">
-                            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>MIÉ</Typography>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>22</Typography>
-                        </div>
-                        <div className="calendar-header-day">
-                            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>JUE</Typography>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>23</Typography>
-                        </div>
-                        <div className="calendar-header-day">
-                            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>VIE</Typography>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>24</Typography>
-                        </div>
-                    </div>
-
-                    {loading ? (
-                        <Box sx={{ p: 3, bgcolor: 'background.paper', border: '1px solid #e0e0e0', borderTop: 0 }}>
-                            <CustomSkeleton type="table" count={5} />
-                        </Box>
-                    ) : (
-                        <div className="calendar-grid-structure" style={{ height: `${horasAgenda.length * 60}px` }}>
-                            {horasAgenda.map((hora, indice) => (
-                                <React.Fragment key={hora}>
-                                    <div className="time-row-cell time-label" style={{ gridRowStart: indice + 1 }}>
-                                        {hora}
-                                    </div>
-                                    <div className="time-row-cell" style={{ gridRowStart: indice + 1 }}></div>
-                                    <div className="time-row-cell" style={{ gridRowStart: indice + 1 }}></div>
-                                    <div className="time-row-cell" style={{ gridRowStart: indice + 1 }}></div>
-                                    <div className="time-row-cell" style={{ gridRowStart: indice + 1 }}></div>
-                                    <div className="time-row-cell" style={{ gridRowStart: indice + 1 }}></div>
-                                </React.Fragment>
-                            ))}
-
-                            {turnosMedicos.map((turno) => {
-                                const config = obtenerEstilosEstado(turno.estado);
-                                return (
-                                    <Box
-                                        key={turno.id}
-                                        sx={{
-                                            position: 'absolute',
-                                            left: `calc(80px + ((100% - 80px) / 5) * ${turno.columna - 1} + 4px)`,
-                                            width: `calc((100% - 80px) / 5 - 8px)`,
-                                            top: `${turno.top}px`,
-                                            height: `${turno.height}px`,
-                                            bgcolor: config.bg,
-                                            borderLeft: `4px solid ${config.border}`,
-                                            borderRadius: '0 8px 8px 0',
-                                            p: 1,
-                                            cursor: 'pointer',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                                            transition: 'transform 0.2s',
-                                            textAlign: 'left',
-                                            '&:hover': { transform: 'scale(0.98)', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }
-                                        }}
-                                    >
-                                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                                            <Typography sx={{ fontSize: '10px', fontWeight: 'bold', color: config.texto, textTransform: 'uppercase' }}>
-                                                {turno.estado === 'pendiente' ? 'Cambio' : turno.estado}
-                                            </Typography>
-                                            <span style={{ color: config.border, display: 'flex' }}>{config.icono}</span>
-                                        </Stack>
-                                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary', fontSize: '13px' }} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                            {turno.paciente}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '11px' }} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                            {turno.motivo}
-                                        </Typography>
-                                    </Box>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                {/* 📊 CONTENEDOR INFERIOR DE ESTADÍSTICAS */}
-                <section className="stats-dashboard-grid" style={{ textAlign: 'left' }}>
-                    <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
-                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: '#e8f5e9', color: '#2e7d32', width: 48, height: 48 }}>
-                                <TaskAltIcon />
+                {/* ─── TARJETAS DE ESTADÍSTICAS ─── */}
+                <section className="stats-dashboard-grid" style={{ marginBottom: 20 }}>
+                    <Card variant="outlined" sx={{ borderRadius: 3 }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, '&:last-child': { pb: 2 } }}>
+                            <Avatar sx={{ bgcolor: '#e3f2fd', color: '#1565c0', width: 44, height: 44 }}>
+                                <TodayIcon />
                             </Avatar>
-                            <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                                    {agendaStats.completados}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">Turnos Completados</Typography>
+                            <Box sx={{ textAlign: 'left' }}>
+                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{turnosHoy}</Typography>
+                                <Typography variant="body2" color="text.secondary">Turnos de Hoy</Typography>
                             </Box>
                         </CardContent>
                     </Card>
 
-                    <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
-                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: '#e3f2fd', color: '#1976d2', width: 48, height: 48 }}>
-                                <CalendarTodayIcon />
+                    <Card variant="outlined" sx={{ borderRadius: 3 }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, '&:last-child': { pb: 2 } }}>
+                            <Avatar sx={{ bgcolor: '#e8f5e9', color: '#2e7d32', width: 44, height: 44 }}>
+                                <EventAvailableIcon />
                             </Avatar>
-                            <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                                    {agendaStats.proximasCitas}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">Próximas Citas</Typography>
+                            <Box sx={{ textAlign: 'left' }}>
+                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{confirmados}</Typography>
+                                <Typography variant="body2" color="text.secondary">Confirmados</Typography>
                             </Box>
                         </CardContent>
                     </Card>
 
-                    <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
-                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: '#fff3e0', color: '#e65100', width: 48, height: 48 }}>
-                                <NotificationImportantIcon />
+                    <Card variant="outlined" sx={{ borderRadius: 3 }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, '&:last-child': { pb: 2 } }}>
+                            <Avatar sx={{ bgcolor: '#fff3e0', color: '#e65100', width: 44, height: 44 }}>
+                                <PendingActionsIcon />
                             </Avatar>
-                            <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                                    {agendaStats.cambiosSolicitados}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">Cambios Solicitados</Typography>
+                            <Box sx={{ textAlign: 'left' }}>
+                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{pendientesConfirmacion}</Typography>
+                                <Typography variant="body2" color="text.secondary">Por Confirmar</Typography>
                             </Box>
                         </CardContent>
                     </Card>
                 </section>
+
+                {/* ─── CALENDARIO SEMANAL ─── */}
+                <div className="calendar-wrapper">
+                    {/* Header de días */}
+                    <div className="calendar-grid-structure calendar-header">
+                        <div className="calendar-header-day time-col-header"></div>
+                        {diasCabecera.map((dia, idx) => (
+                            <div
+                                key={idx}
+                                className={`calendar-header-day ${dia.esHoy ? 'today-header' : ''}`}
+                            >
+                                <Typography variant="caption" sx={{
+                                    color: dia.esHoy ? 'primary.main' : 'text.secondary',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.7rem'
+                                }}>
+                                    {dia.label}
+                                </Typography>
+                                <Typography variant="h6" sx={{
+                                    fontWeight: 'bold',
+                                    color: dia.esHoy ? 'primary.main' : 'text.primary',
+                                    fontSize: '1.1rem'
+                                }}>
+                                    {dia.numero}
+                                </Typography>
+                                {dia.esHoy && (
+                                    <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: 'primary.main', mx: 'auto', mt: 0.3 }} />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {loading && turnos.length === 0 ? (
+                        <Box sx={{ p: 3, bgcolor: 'background.paper' }}>
+                            <CustomSkeleton type="table" count={5} />
+                        </Box>
+                    ) : (
+                        <div className="calendar-body-wrapper">
+                            <div className="calendar-grid-structure calendar-body" style={{ height: `${horasAgenda.length * 60}px` }}>
+                                {horasAgenda.map((hora, indice) => (
+                                    <React.Fragment key={hora}>
+                                        <div className="time-row-cell time-label" style={{ gridRowStart: indice + 1 }}>
+                                            {hora}
+                                        </div>
+                                        {[1, 2, 3, 4, 5].map(col => (
+                                            <div
+                                                key={col}
+                                                className={`time-row-cell ${diasCabecera[col - 1]?.esHoy ? 'today-column' : ''}`}
+                                                style={{ gridRowStart: indice + 1 }}
+                                            />
+                                        ))}
+                                    </React.Fragment>
+                                ))}
+
+                                {/* Indicador de hora actual */}
+                                {showTimeIndicator && (
+                                    <div
+                                        className="time-now-indicator"
+                                        style={{
+                                            top: `${timeIndicatorTop}px`,
+                                            left: `calc(80px + ((100% - 80px) / 5) * ${todayCol - 1})`,
+                                            width: `calc((100% - 80px) / 5)`
+                                        }}
+                                    >
+                                        <div className="time-now-dot" />
+                                        <div className="time-now-line" />
+                                    </div>
+                                )}
+
+                                {/* Turnos */}
+                                {turnos.filter(t => t.columna >= 1 && t.columna <= 5).map((turno) => {
+                                    const config = obtenerEstilosEstado(turno.estado);
+                                    return (
+                                        <Box
+                                            key={turno.id}
+                                            onClick={() => {
+                                                setSelectedTurno(turno);
+                                                setOpenDialog(true);
+                                            }}
+                                            sx={{
+                                                position: 'absolute',
+                                                left: `calc(80px + ((100% - 80px) / 5) * ${turno.columna - 1} + 3px)`,
+                                                width: `calc((100% - 80px) / 5 - 6px)`,
+                                                top: `${turno.top}px`,
+                                                height: `${turno.height}px`,
+                                                bgcolor: config.bg,
+                                                borderLeft: `4px solid ${config.border}`,
+                                                borderRadius: '0 8px 8px 0',
+                                                p: '6px 8px',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                                                transition: 'box-shadow 0.2s, transform 0.2s',
+                                                textAlign: 'left',
+                                                zIndex: 2,
+                                                overflow: 'hidden',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                    boxShadow: '0 3px 8px rgba(0,0,0,0.1)',
+                                                    zIndex: 3
+                                                }
+                                            }}
+                                        >
+                                            <Typography sx={{
+                                                fontSize: '9px',
+                                                fontWeight: 'bold',
+                                                color: config.texto,
+                                                textTransform: 'uppercase',
+                                                mb: 0.25
+                                            }}>
+                                                {config.label}
+                                            </Typography>
+                                            <Typography variant="body2" noWrap sx={{ fontWeight: 'bold', fontSize: '12px' }}>
+                                                {turno.paciente}
+                                            </Typography>
+                                            {turno.height >= 50 && (
+                                                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', fontSize: '10px' }}>
+                                                    {turno.motivo}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* ─── HISTÓRICO DE TURNOS REALIZADOS ─── */}
+                <Box sx={{ mt: 4 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                        <HistoryIcon sx={{ color: 'text.secondary' }} />
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                            Histórico de Turnos Realizados
+                        </Typography>
+                    </Stack>
+
+                    <Card variant="outlined" sx={{ borderRadius: 3 }}>
+                        <TableContainer>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow sx={{ bgcolor: '#f8f9fc' }}>
+                                        <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary', fontSize: '0.75rem' }}>Fecha</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary', fontSize: '0.75rem' }}>Paciente</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary', fontSize: '0.75rem' }}>DNI</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary', fontSize: '0.75rem' }}>Servicio</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary', fontSize: '0.75rem' }}>Sede</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {historialLoading ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                                                <CircularProgress size={24} />
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : historial.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                                                <Stack alignItems="center" spacing={1}>
+                                                    <AssignmentTurnedInIcon sx={{ fontSize: 36, color: 'text.disabled' }} />
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Aún no hay turnos realizados
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        historial.map((turno, idx) => {
+                                            const fecha = new Date(turno.fechaHora);
+                                            return (
+                                                <TableRow key={turno._id || turno.id || idx} hover>
+                                                    <TableCell>
+                                                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem' }}>
+                                                            {fecha.toLocaleDateString("es-AR", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                            {turno.pacienteDetalle?.nombre || 'Paciente'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {turno.pacienteDetalle?.dni || '—'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body2">
+                                                            {turno.servicio?.nombre || turno.servicio?.servicioUnico?.nombre || 'Consulta'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {turno.sede?.nombre || '—'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        {historialTotal > 0 && (
+                            <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                                <Button 
+                                    size="small"
+                                    disabled={historialPage === 0} 
+                                    onClick={() => setHistorialPage(p => p - 1)}
+                                >
+                                    Anterior
+                                </Button>
+                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    Página {historialPage + 1} de {Math.ceil(historialTotal / HISTORIAL_ROWS)}
+                                </Typography>
+                                <Button 
+                                    size="small"
+                                    disabled={(historialPage + 1) * HISTORIAL_ROWS >= historialTotal} 
+                                    onClick={() => setHistorialPage(p => p + 1)}
+                                >
+                                    Siguiente
+                                </Button>
+                            </Box>
+                        )}
+                    </Card>
+                </Box>
+
+                {/* ─── DIALOG DETALLE DEL TURNO ─── */}
+                <Dialog
+                    open={openDialog}
+                    onClose={cerrarDialog}
+                    PaperProps={{ sx: { borderRadius: 3, minWidth: 370, maxWidth: 430 } }}
+                >
+                    {selectedTurno && (
+                        <>
+                            {/* Header */}
+                            <Box sx={{ p: 2.5, pb: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                        Detalle del Turno
+                                    </Typography>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2, mt: 0.3 }}>
+                                        {selectedTurno.paciente}
+                                    </Typography>
+                                    {selectedTurno.pacienteDni && (
+                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
+                                            DNI: {selectedTurno.pacienteDni}
+                                        </Typography>
+                                    )}
+                                </Box>
+                                <IconButton onClick={cerrarDialog} size="small">
+                                    <CloseIcon fontSize="small" />
+                                </IconButton>
+                            </Box>
+
+                            <Divider />
+
+                            <DialogContent sx={{ p: 2.5 }}>
+                                {/* Estado */}
+                                <Box sx={{ mb: 2 }}>
+                                    <Chip
+                                        label={obtenerEstilosEstado(selectedTurno.estado).label}
+                                        size="small"
+                                        sx={{
+                                            bgcolor: obtenerEstilosEstado(selectedTurno.estado).bg,
+                                            color: obtenerEstilosEstado(selectedTurno.estado).texto,
+                                            fontWeight: 'bold',
+                                            border: `1px solid ${obtenerEstilosEstado(selectedTurno.estado).border}`
+                                        }}
+                                    />
+                                </Box>
+
+                                {/* Info del turno */}
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <AccessTimeIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Hora</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    {selectedTurno.fechaHora.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <CalendarTodayIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Fecha</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    {selectedTurno.fechaHora.toLocaleDateString("es-AR", { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <PlaceIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Sede</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedTurno.sede}</Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <LocalHospitalIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Servicio</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedTurno.motivo}</Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                </Grid>
+
+                                {selectedTurno.costoPaciente !== undefined && (
+                                    <>
+                                        <Divider sx={{ my: 2 }} />
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <Typography variant="body2" color="text.secondary">Costo Paciente</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>${selectedTurno.costoPaciente}</Typography>
+                                        </Box>
+                                    </>
+                                )}
+
+                                {/* Formulario de cancelación */}
+                                {showCancelForm && (
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: '#fff5f5', borderRadius: 2, border: '1px solid #ffcdd2' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#c62828' }}>
+                                            Motivo de cancelación *
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            size="small"
+                                            placeholder="Ej: Urgencia en quirófano, reprogramación..."
+                                            value={motivoCancelacion}
+                                            onChange={(e) => setMotivoCancelacion(e.target.value)}
+                                            sx={{ bgcolor: 'white' }}
+                                        />
+                                        <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => { setShowCancelForm(false); setMotivoCancelacion(''); }}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Volver
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                color="error"
+                                                disabled={actionLoading || !motivoCancelacion.trim()}
+                                                onClick={handleCancelar}
+                                                startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Confirmar Cancelación
+                                            </Button>
+                                        </Stack>
+                                    </Box>
+                                )}
+
+                                {/* Formulario de propuesta de cambio */}
+                                {showChangeForm && (
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: '#f0f4f8', borderRadius: 2, border: '1px solid #d0d7de' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'primary.main' }}>
+                                            Seleccionar nueva fecha y hora *
+                                        </Typography>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            size="small"
+                                            value={selectedNuevoTurnoId}
+                                            onChange={(e) => setSelectedNuevoTurnoId(e.target.value)}
+                                            SelectProps={{ native: true }}
+                                            sx={{ bgcolor: 'white', mb: 2 }}
+                                        >
+                                            <option value="">-- Seleccionar horario disponible --</option>
+                                            {turnos.filter(t => t.estado === 'disponible').map(t => {
+                                                const fecha = new Date(t.fechaHora);
+                                                const label = `${fecha.toLocaleDateString("es-AR")} a las ${fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs - Sede: ${t.sede}`;
+                                                return (
+                                                    <option key={t.id} value={t.id}>
+                                                        {label}
+                                                    </option>
+                                                );
+                                            })}
+                                        </TextField>
+
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                                            Motivo del cambio
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            size="small"
+                                            placeholder="Ej: Reprogramación por congreso..."
+                                            value={motivoCambio}
+                                            onChange={(e) => setMotivoCambio(e.target.value)}
+                                            sx={{ bgcolor: 'white' }}
+                                        />
+
+                                        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => { setShowChangeForm(false); setSelectedNuevoTurnoId(''); setMotivoCambio(''); }}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Volver
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                color="primary"
+                                                disabled={actionLoading || !selectedNuevoTurnoId}
+                                                onClick={handleProponerCambio}
+                                                startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Enviar Propuesta
+                                            </Button>
+                                        </Stack>
+                                    </Box>
+                                )}
+                            </DialogContent>
+
+                             {!showCancelForm && !showChangeForm && (
+                                <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                                    {/* Botón cancelar turno */}
+                                    {puedesCancelar && (
+                                        <Button
+                                            onClick={() => setShowCancelForm(true)}
+                                            color="error"
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Cancelar
+                                        </Button>
+                                    )}
+
+                                    {/* Botón proponer cambio */}
+                                    {puedesCancelar && (
+                                        <Button
+                                            onClick={() => setShowChangeForm(true)}
+                                            color="primary"
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Cambio
+                                        </Button>
+                                    )}
+
+                                    {/* Confirmar — solo si está reservado */}
+                                    {selectedTurno.estado === 'reservado' && (
+                                        <Button
+                                            onClick={handleConfirmar}
+                                            color="primary"
+                                            variant="contained"
+                                            disabled={actionLoading}
+                                            startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : null}
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Confirmar
+                                        </Button>
+                                    )}
+
+                                    {/* Marcar realizado — solo si está confirmado */}
+                                    {selectedTurno.estado === 'confirmado' && (
+                                        <Button
+                                            onClick={handleRealizar}
+                                            color="success"
+                                            variant="contained"
+                                            disabled={actionLoading}
+                                            startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : null}
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Realizado
+                                        </Button>
+                                    )}
+                                </DialogActions>
+                            )}
+                        </>
+                    )}
+                </Dialog>
+
+                {/* ─── SNACKBAR ─── */}
+                <Snackbar
+                    open={snackbar.open}
+                    autoHideDuration={4000}
+                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                >
+                    <Alert
+                        severity={snackbar.tipo}
+                        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+                        sx={{ width: '100%', borderRadius: 2 }}
+                    >
+                        {snackbar.mensaje}
+                    </Alert>
+                </Snackbar>
 
             </main>
         </div>

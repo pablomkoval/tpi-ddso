@@ -12,7 +12,9 @@ export class NotificacionesController {
             remitente: notificacion.remitente,
             mensaje: notificacion.mensaje,
             leida: notificacion.leida,
-            fechaHoraCreacion: notificacion.fechaHoraCreacion
+            fechaHoraCreacion: notificacion.fechaHoraCreacion,
+            tipo: notificacion.tipo || "INFO",
+            referenciaId: notificacion.referenciaId || null
         };
     }
 
@@ -20,7 +22,8 @@ export class NotificacionesController {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
-            const resultado = await this.notificacionesService.findAllPaginated(page, limit);
+            const userId = req.user?.id || req.query.userId;
+            const resultado = await this.notificacionesService.findAllPaginated(userId, page, limit);
 
             res.json({
                 ...resultado,
@@ -33,12 +36,12 @@ export class NotificacionesController {
 
     async obtenerLeidas(req, res, next) {
         try {
-            const userId = req.query.userId;
+            const userId = req.user?.id || req.query.userId;
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
 
             if (!userId) {
-                return res.status(400).json({ error: "Se requiere userId en los query params" });
+                return res.status(400).json({ error: "Se requiere userId en los query params o token" });
             }
 
             const resultado = await this.notificacionesService.obtenerLeidas(userId, page, limit);
@@ -54,12 +57,12 @@ export class NotificacionesController {
 
     async obtenerNoLeidas(req, res, next) {
         try {
-            const userId = req.query.userId;
+            const userId = req.user?.id || req.query.userId;
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
 
             if (!userId) {
-                return res.status(400).json({ error: "Se requiere userId en los query params" });
+                return res.status(400).json({ error: "Se requiere userId en los query params o token" });
             }
 
             const resultado = await this.notificacionesService.obtenerNoLeidas(userId, page, limit);

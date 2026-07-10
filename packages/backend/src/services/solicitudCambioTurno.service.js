@@ -6,11 +6,14 @@ import {
 import { EstadoSolicitudCambioTurno } from "../domain/enum/EstadoSolicitudCambioTurno.js";
 import { SolicitudCambioTurno } from "../domain/models/entities/turnos/SolicitudCambioTurno.js";
 import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
+import { PacienteModel } from "../schemas/paciente.schema.js";
+import { MedicoModel } from "../schemas/medico.schema.js";
 
 export class SolicitudCambioTurnoService {
-  constructor(solicitudCambioTurnoRepository, turnoRepository) {
+  constructor(solicitudCambioTurnoRepository, turnoRepository, notificacionesService) {
     this.solicitudCambioTurnoRepository = solicitudCambioTurnoRepository;
     this.turnoRepository = turnoRepository;
+    this.notificacionesService = notificacionesService;
   }
 
   async obtenerPorId(id) {
@@ -46,7 +49,7 @@ export class SolicitudCambioTurnoService {
       );
     }
 
-    this.obtenerTipoSolicitante(turnoOriginal, solicitanteId);
+    await this.obtenerTipoSolicitante(turnoOriginal, solicitanteId);
 
     const turnoNuevo = await this.turnoRepository.findById(nuevoTurnoId);
     if (!turnoNuevo) {
@@ -104,7 +107,43 @@ export class SolicitudCambioTurnoService {
       motivo,
     });
 
-    return await this.solicitudCambioTurnoRepository.save(solicitud);
+    const solicitudGuardada = await this.solicitudCambioTurnoRepository.save(solicitud);
+
+    // Actualizar estados de los turnos en la base de datos
+    turnoOriginal.actualizarEstado(
+      turnoOriginal.estado,
+      solicitanteId,
+      `Propuesta de cambio hacia el turno ${nuevoTurnoId}`,
+    );
+    turnoOriginal.turnoSugerido = nuevoTurnoId;
+    await this.turnoRepository.guardar(turnoOriginal);
+
+    turnoNuevo.paciente = turnoOriginal.paciente;
+    turnoNuevo.actualizarEstado(
+      EstadoTurno.RESERVADO,
+      solicitanteId,
+      `Propuesto como cambio del turno ${turnoId}`,
+    );
+    await this.turnoRepository.guardar(turnoNuevo);
+
+    // Enviar notificación al paciente
+    try {
+      const docMedico = await MedicoModel.findById(turnoOriginal.medico);
+      const nombreMedico = docMedico ? docMedico.nombre : "Médico";
+      const fechaNueva = new Date(turnoNuevo.fechaHora).toLocaleString("es-AR");
+
+      await this.notificacionesService.create({
+        destinatario: String(turnoOriginal.paciente),
+        remitente: String(turnoOriginal.medico),
+        mensaje: `El médico ${nombreMedico} propuso cambiar tu turno para el ${fechaNueva}. Revisá la solicitud para aceptar o rechazar.`,
+        tipo: "CAMBIO_TURNO",
+        referenciaId: String(solicitudGuardada.id || solicitudGuardada._id),
+      });
+    } catch (notifError) {
+      console.error("Error al enviar notificación tras crear propuesta de cambio:", notifError);
+    }
+
+    return solicitudGuardada;
   }
 
   async listarPorPaciente(pacienteId, page, limit) {
@@ -146,12 +185,17 @@ export class SolicitudCambioTurnoService {
       );
     }
 
-    this.validarConfirmador(turnoOriginal, solicitud, confirmadorId);
+    await this.validarConfirmador(turnoOriginal, solicitud, confirmadorId);
 
-    if (turnoNuevo.estado !== EstadoTurno.DISPONIBLE || turnoNuevo.paciente) {
+    const solicitanteTipo = await this.obtenerTipoSolicitante(turnoOriginal, solicitud.solicitanteId);
+
+    if (
+      turnoNuevo.estado !== EstadoTurno.RESERVADO ||
+      String(turnoNuevo.paciente._id || turnoNuevo.paciente) !== String(solicitud.pacienteId)
+    ) {
       throw new ConflictError(
-        "El nuevo turno ya no está disponible",
-        "TURNO_NO_DISPONIBLE",
+        "El nuevo turno ya no está reservado para esta solicitud",
+        "TURNO_NO_RESERVADO",
       );
     }
 
@@ -184,6 +228,33 @@ export class SolicitudCambioTurnoService {
       },
     );
 
+    // Enviar notificación al otro participante
+    try {
+      const docPaciente = await PacienteModel.findById(solicitud.pacienteId);
+      const nombrePaciente = docPaciente ? docPaciente.nombre : "Paciente";
+      const fechaNueva = new Date(turnoNuevo.fechaHora).toLocaleString("es-AR");
+
+      if (solicitanteTipo === "PACIENTE") {
+        await this.notificacionesService.create({
+          destinatario: solicitud.pacienteId,
+          remitente: solicitud.medicoId,
+          mensaje: `Tu solicitud de cambio de turno fue aceptada por el médico. Nuevo turno: ${fechaNueva}.`,
+          tipo: "INFO",
+          referenciaId: String(solicitud.id || solicitud._id)
+        });
+      } else {
+        await this.notificacionesService.create({
+          destinatario: solicitud.medicoId,
+          remitente: solicitud.pacienteId,
+          mensaje: `El paciente ${nombrePaciente} aceptó tu propuesta de cambio de turno para el ${fechaNueva}.`,
+          tipo: "INFO",
+          referenciaId: String(solicitud.id || solicitud._id)
+        });
+      }
+    } catch (notifError) {
+      console.error("Error al enviar notificación tras confirmar cambio de turno:", notifError);
+    }
+
     return actualizada;
   }
 
@@ -200,7 +271,7 @@ export class SolicitudCambioTurnoService {
       );
     }
 
-    this.validarConfirmador(turnoOriginal, solicitud, confirmadorId);
+    await this.validarConfirmador(turnoOriginal, solicitud, confirmadorId);
 
     const turnoNuevo = await this.turnoRepository.findById(
       solicitud.turnoNuevo,
@@ -217,7 +288,7 @@ export class SolicitudCambioTurnoService {
 
     solicitud.rechazar(confirmadorId, motivoRechazo);
 
-    return await this.solicitudCambioTurnoRepository.update(
+    const actualizada = await this.solicitudCambioTurnoRepository.update(
       solicitud.id || solicitud._id,
       {
         status: "success",
@@ -227,33 +298,100 @@ export class SolicitudCambioTurnoService {
         motivoRechazo: solicitud.motivoRechazo,
       },
     );
+
+    // Enviar notificación al otro participante
+    try {
+      const docPaciente = await PacienteModel.findById(solicitud.pacienteId);
+      const nombrePaciente = docPaciente ? docPaciente.nombre : "Paciente";
+      const solicitanteTipo = await this.obtenerTipoSolicitante(turnoOriginal, solicitud.solicitanteId);
+
+      if (solicitanteTipo === "PACIENTE") {
+        await this.notificacionesService.create({
+          destinatario: solicitud.pacienteId,
+          remitente: solicitud.medicoId,
+          mensaje: `Tu solicitud de cambio de turno fue rechazada por el médico. Motivo: ${motivoRechazo || "No especificado"}.`,
+          tipo: "INFO",
+          referenciaId: String(solicitud.id || solicitud._id)
+        });
+      } else {
+        await this.notificacionesService.create({
+          destinatario: solicitud.medicoId,
+          remitente: solicitud.pacienteId,
+          mensaje: `El paciente rechazó tu propuesta de cambio de turno. Motivo: ${motivoRechazo || "No especificado"}.`,
+          tipo: "INFO",
+          referenciaId: String(solicitud.id || solicitud._id)
+        });
+      }
+    } catch (notifError) {
+      console.error("Error al enviar notificación tras rechazar cambio de turno:", notifError);
+    }
+
+    return actualizada;
   }
 
-  validarConfirmador(turno, solicitud, confirmadorId) {
-    const solicitanteTipo = this.obtenerTipoSolicitante(
+  async validarConfirmador(turno, solicitud, confirmadorId) {
+    const solicitanteTipo = await this.obtenerTipoSolicitante(
       turno,
       solicitud.solicitanteId,
     );
 
-    if (String(turno.medico) !== String(confirmadorId)) {
-      throw new UnprocessableEntityError(
-        "El confirmador no coincide con el médico del turno",
-        "MEDICO_NO_AUTORIZADO",
-      );
+    const idPaciente = String(turno.paciente?._id || turno.paciente || '');
+    const idMedico = String(turno.medico?._id || turno.medico || '');
+    const idConfirmador = String(confirmadorId);
+
+    const docPaciente = await PacienteModel.findById(idPaciente);
+    const docMedico = await MedicoModel.findById(idMedico);
+
+    const userPacienteId = docPaciente ? String(docPaciente.usuario) : null;
+    const userMedicoId = docMedico ? String(docMedico.usuario) : null;
+
+    if (solicitanteTipo === "PACIENTE") {
+      const esMedicoDirecto = idConfirmador === idMedico;
+      const esMedicoUsuario = userMedicoId && idConfirmador === userMedicoId;
+      if (!esMedicoDirecto && !esMedicoUsuario) {
+        throw new UnprocessableEntityError(
+          "El confirmador no coincide con el médico del turno",
+          "MEDICO_NO_AUTORIZADO",
+        );
+      }
+    } else {
+      const esPacienteDirecto = idConfirmador === idPaciente;
+      const esPacienteUsuario = userPacienteId && idConfirmador === userPacienteId;
+      if (!esPacienteDirecto && !esPacienteUsuario) {
+        throw new UnprocessableEntityError(
+          "El confirmador no coincide con el paciente del turno",
+          "PACIENTE_NO_AUTORIZADO",
+        );
+      }
+    }
+  }
+
+  async obtenerTipoSolicitante(turno, solicitanteId) {
+    const idPaciente = String(turno.paciente?._id || turno.paciente || '');
+    const idMedico = String(turno.medico?._id || turno.medico || '');
+    const idSolicitante = String(solicitanteId);
+
+    if (idSolicitante === idPaciente) {
+      return "PACIENTE";
+    }
+    if (idSolicitante === idMedico) {
+      return "MEDICO";
     }
 
-    if (!turno.paciente) {
-      throw new UnprocessableEntityError(
-        "El turno no tiene paciente asociado",
-        "TURNO_SIN_PACIENTE",
-      );
+    const docPaciente = await PacienteModel.findById(idPaciente);
+    const docMedico = await MedicoModel.findById(idMedico);
+
+    if (docPaciente && idSolicitante === String(docPaciente.usuario)) {
+      return "PACIENTE";
     }
-    if (String(turno.paciente) !== String(confirmadorId)) {
-      throw new UnprocessableEntityError(
-        "El confirmador no coincide con el paciente del turno",
-        "PACIENTE_NO_AUTORIZADO",
-      );
+    if (docMedico && idSolicitante === String(docMedico.usuario)) {
+      return "MEDICO";
     }
+
+    throw new UnprocessableEntityError(
+      "El solicitante no pertenece al turno original o no está autorizado",
+      "SOLICITANTE_NO_AUTORIZADO",
+    );
   }
 
   async obtenerSolicitudPendiente(id) {

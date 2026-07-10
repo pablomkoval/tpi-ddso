@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
+import { getNoLeidas } from '../../services/notificacionesService';
 import { turnosHoyData, dashboardStats, proximoTurnoData, notificacionesData } from '../../mockdata/dashboardMedicoMock';
 
 const estadoConfig = {
@@ -32,6 +33,19 @@ const estadoConfig = {
 export default function DashboardMedico() {
   const username = getUsernameFromToken();
   const navigate = useNavigate();
+  const [cantidadNotificaciones, setCantidadNotificaciones] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchNotificaciones = async () => {
+      try {
+        const res = await getNoLeidas();
+        setCantidadNotificaciones(res.pagination?.total || 0);
+      } catch (err) {
+        console.error("Error al obtener notificaciones en dashboard:", err);
+      }
+    };
+    fetchNotificaciones();
+  }, []);
 
   const nombreCompleto = username ? username : 'Médico';
 
@@ -161,7 +175,7 @@ export default function DashboardMedico() {
                 </Typography>
               </Box>
               <Typography variant="h6" fontWeight={700} sx={{ color: 'white', mb: 1 }}>
-                {notificacionesData.cantidadPendientes} cambios pendientes
+                {cantidadNotificaciones} notificaciones pendientes
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mb: 2.5, lineHeight: 1.5 }}>
                 Pacientes que solicitaron modificar su turno esta semana.
