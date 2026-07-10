@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -21,7 +21,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
-import { turnosHoyData, dashboardStats, proximoTurnoData, notificacionesData } from '../../mockdata/dashboardMedicoMock';
+import { turnosHoyData, dashboardStats, proximoTurnoData } from '../../mockdata/dashboardMedicoMock';
+import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
 
 const estadoConfig = {
   completado: { label: 'Completado', color: 'success' },
@@ -32,6 +33,24 @@ const estadoConfig = {
 export default function DashboardMedico() {
   const username = getUsernameFromToken();
   const navigate = useNavigate();
+  const [resumenNotificaciones, setResumenNotificaciones] = useState({
+    total: 0,
+    leidas: 0,
+    noLeidas: 0,
+  });
+
+  useEffect(() => {
+    const cargarResumenNotificaciones = async () => {
+      try {
+        const data = await obtenerResumenNotificaciones();
+        setResumenNotificaciones(data);
+      } catch (error) {
+        console.error("Error cargando resumen de notificaciones", error);
+      }
+    };
+
+    cargarResumenNotificaciones();
+  }, []);
 
   const nombreCompleto = username ? username : 'Médico';
 
@@ -77,7 +96,7 @@ export default function DashboardMedico() {
       >
         <StatCard icon={<CheckCircleIcon />} iconColor="#2e7d32" bg="#e8f5e9" value={dashboardStats.atendidosMes} label="Atendidos este mes" />
         <StatCard icon={<CalendarIcon />}    iconColor="#1565c0" bg="#e3f2fd" value={dashboardStats.proximasCitas} label="Próximas citas"      />
-        <StatCard icon={<PendingIcon />}     iconColor="#e65100" bg="#fff3e0" value={dashboardStats.cambiosSolicitados}  label="Cambios solicitados" />
+        <StatCard icon={<PendingIcon />}     iconColor="#e65100" bg="#fff3e0" value={resumenNotificaciones.noLeidas}  label="Cambios solicitados" />
         <StatCard icon={<ClockIcon />}       iconColor="#6a1b9a" bg="#f3e5f5" value={dashboardStats.turnosHoy}  label="Turnos de hoy"       />
       </Box>
 
@@ -161,10 +180,12 @@ export default function DashboardMedico() {
                 </Typography>
               </Box>
               <Typography variant="h6" fontWeight={700} sx={{ color: 'white', mb: 1 }}>
-                {notificacionesData.cantidadPendientes} cambios pendientes
+                {resumenNotificaciones.noLeidas} Notificaciones no leídas
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mb: 2.5, lineHeight: 1.5 }}>
-                Pacientes que solicitaron modificar su turno esta semana.
+                {resumenNotificaciones.noLeidas > 0
+                  ? "Tenés solicitudes y avisos pendientes de revisión."
+                  : "No tenés notificaciones pendientes."}
               </Typography>
               <Button
                 variant="contained"

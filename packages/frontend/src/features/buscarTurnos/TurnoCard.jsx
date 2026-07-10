@@ -3,7 +3,6 @@ import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
 import { formatearFechaHora } from '../../utils/dateUtils';
 
 const coberturaStyles = {

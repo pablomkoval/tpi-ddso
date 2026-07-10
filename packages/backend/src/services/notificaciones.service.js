@@ -4,24 +4,36 @@ import { Notificacion } from '../domain/models/entities/turnos/Notificacion.js'
 
 export class NotificacionesService {
     constructor(notificacionesRepository) {
-    this.notificacionesRepository = notificacionesRepository;
+        this.notificacionesRepository = notificacionesRepository;
     }
 
 
-    async obtenerLeidas (userId, page, limit) {
-        const criterios = { destinatario: userId, leida: true };
-        return await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
+    async obtenerLeidas(userId, page, limit) {
+        return this.findAllPaginated(
+            page,
+            limit,
+            {
+                destinatario: userId,
+                leida: true
+            }
+        );
     }
 
-    async obtenerNoLeidas (userId, page, limit) {
-        const criterios = { destinatario: userId, leida: false };
-        return await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
+    async obtenerNoLeidas(userId, page, limit) {
+        return this.findAllPaginated(
+            page,
+            limit,
+            {
+                destinatario: userId,
+                leida: false
+            }
+        );
     }
 
     async create(data) {
-        const {destinatario, remitente, mensaje} = data;
+        const { destinatario, remitente, mensaje } = data;
 
-        if(!destinatario || !remitente || !mensaje) {
+        if (!destinatario || !remitente || !mensaje) {
             throw new ValidationError("Los datos para la notificacion no son validos");
         }
 
@@ -29,6 +41,11 @@ export class NotificacionesService {
         const notificacionGuardada = await this.notificacionesRepository.save(nueva);
 
         return notificacionGuardada;
+    }
+
+    async crearSegunEstadoTurno(turno) {
+        const notificacion = Notificacion.crearSegunEstadoTurno(turno);
+        return await this.notificacionesRepository.save(notificacion);
     }
 
     async marcarComoLeida(notificacionId) {
@@ -40,7 +57,7 @@ export class NotificacionesService {
 
         notificacion.marcarComoLeida();
 
-        const actualizada = await this.notificacionesRepository.update(notificacionId, { 
+        const actualizada = await this.notificacionesRepository.update(notificacionId, {
             leida: notificacion.leida,
             fechaHoraLeida: notificacion.fechaHoraLeida
         });
@@ -52,7 +69,39 @@ export class NotificacionesService {
         return await this.notificacionesRepository.softDelete(notificacionId);
     }
 
-    async findAllPaginated(page, limit) {
-        return await this.notificacionesRepository.findAllPaginated({}, page, limit);
+    async findAllPaginated(page, limit, criterios = {}) {
+        return await this.notificacionesRepository.findAllPaginated(criterios, page, limit);
+    }
+
+    async count(criterios = {}) {
+        return await this.notificacionesRepository.count(criterios);
+    }
+
+    async obtenerResumen(userId) {
+        const total = await this.notificacionesRepository.count({
+            destinatario: userId
+        });
+
+        const leidas = await this.notificacionesRepository.count({
+            destinatario: userId,
+            leida: true
+        });
+
+        const noLeidas = await this.notificacionesRepository.count({
+            destinatario: userId,
+            leida: false
+        });
+
+        return {
+            total,
+            leidas,
+            noLeidas
+        };
+    }
+
+    async marcarTodasComoLeidas(userId) {
+        return await this.notificacionesRepository.marcarTodasComoLeidas({
+            destinatario: userId
+        });
     }
 }

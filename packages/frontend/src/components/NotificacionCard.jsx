@@ -1,7 +1,7 @@
 import { Box, Checkbox, Avatar, Typography } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-function NotificationCard({ notificacion }) {
+function NotificacionCard({ notificacion, onMarcarLeida }) {
   const isUnread = !notificacion.leida;
 
   const fecha = new Date(notificacion.fechaHoraCreacion);
@@ -14,27 +14,54 @@ function NotificationCard({ notificacion }) {
   }) + " hs";
 
   const getAvatarStyles = (tipo) => {
-    if (tipo === "turno") {
-      return { backgroundColor: "#e0f2f1", color: "#00bfa5" };
+    switch (tipo) {
+      case "turno":
+        return {
+          backgroundColor: "#e0f2f1",
+          color: "#00bfa5",
+        };
+
+      case "recordatorio":
+        return {
+          backgroundColor: "#fff3e0",
+          color: "#ff9100",
+        };
+
+      default:
+        return {
+          backgroundColor: "#e3f2fd",
+          color: "#1976d2",
+        };
     }
-    if (tipo === "recordatorio") {
-      return { backgroundColor: "#fff3e0", color: "#ff9100" };
+  };
+  const handleClick = () => {
+    if (isUnread) {
+      onMarcarLeida(notificacion.id);
     }
-    return {};
+
+    // En el futuro:
+    // navigate(...)
   };
 
   return (
     <Box
+      onClick={handleClick}
       sx={{
         display: "flex",
-        alignItems: "flex-start",
-        padding: "16px 24px",
-        borderBottom: "1px solid #e0e0e0",
-        backgroundColor: "#ffffff",
-        transition: "background-color 0.2s ease",
+        alignItems: "center",
+        gap: 2,
+        px: 3,
+        py: 2,
+        cursor: "pointer",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        backgroundColor: isUnread ? "#f5f9ff" : "background.paper",
+        transition: "all .2s ease",
+
         "&:hover": {
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "#eef5ff",
         },
+
         "&:last-child": {
           borderBottom: "none",
         },
@@ -42,66 +69,56 @@ function NotificationCard({ notificacion }) {
     >
       <Box
         sx={{
+          width: 10,
           display: "flex",
-          alignItems: "center",
-          marginRight: "16px",
-          position: "relative",
+          justifyContent: "center",
         }}
       >
-        <Box
-          sx={{
-            width: "8px",
-            height: "8px",
-            backgroundColor: "#1976d2",
-            borderRadius: "50%",
-            position: "absolute",
-            left: "-12px",
-            visibility: isUnread ? "visible" : "hidden",
-          }}
-        />
-        <Checkbox
-          size="small"
-          color="primary"
-          sx={{ padding: 0 }}
-        />
+        {isUnread && (
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              bgcolor: "primary.main",
+            }}
+          />
+        )}
       </Box>
 
       <Avatar
         sx={{
-          marginRight: "16px",
-          width: "40px",
-          height: "40px",
+          width: 42,
+          height: 42,
           ...getAvatarStyles(notificacion.tipo),
         }}
       >
-        <NotificationsIcon fontSize="small" color="inherit" />
+        <NotificationsIcon fontSize="small" />
       </Avatar>
 
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
+      <Box sx={{ flex: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: isUnread ? 600 : 400,
+          }}
+        >
           {notificacion.mensaje}
         </Typography>
       </Box>
 
-      <Box
+      <Typography
+        variant="caption"
+        color="text.secondary"
         sx={{
-          marginLeft: "16px",
           whiteSpace: "nowrap",
+          ml: 2,
         }}
       >
-        <Typography variant="caption" color="text.secondary">
-          {fechaFormateada}
-        </Typography>
-      </Box>
+        {fechaFormateada}
+      </Typography>
     </Box>
   );
 }
 
-export default NotificationCard;
+export default NotificacionCard;

@@ -18,6 +18,7 @@ import NotificationImportantIcon from '@mui/icons-material/NotificationImportant
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
 import { horasAgenda, turnosMedicos, agendaStats, agendaSemana } from '../../mockdata/agendaMedicaData.js'
+import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
 
 const formatearSemana = (inicio) => {
     const fechaInicio = new Date(inicio);
@@ -30,6 +31,11 @@ const formatearSemana = (inicio) => {
 
 const AgendaMedica = () => {
     const [loading, setLoading] = useState(true);
+    const [resumenNotificaciones, setResumenNotificaciones] = useState({
+        total: 0,
+        leidas: 0,
+        noLeidas: 0,
+    });
 
     // para el skeleton
     useEffect(() => {
@@ -38,6 +44,19 @@ const AgendaMedica = () => {
             setLoading(false);
         }, 800);
         return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        const cargarResumenNotificaciones = async () => {
+            try {
+                const data = await obtenerResumenNotificaciones();
+                setResumenNotificaciones(data);
+            } catch (error) {
+                console.error("Error cargando resumen de notificaciones", error);
+            }
+        };
+
+        cargarResumenNotificaciones();
     }, []);
 
     const obtenerEstilosEstado = (estado) => {
@@ -191,7 +210,7 @@ const AgendaMedica = () => {
                             </Avatar>
                             <Box>
                                 <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                                    {agendaStats.cambiosSolicitados}
+                                    {resumenNotificaciones.noLeidas}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">Cambios Solicitados</Typography>
                             </Box>

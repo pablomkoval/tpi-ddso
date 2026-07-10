@@ -171,7 +171,7 @@ export class PacienteService {
   }
 
   async solicitarCambioFecha(pacienteId, turnoActualId, nuevoTurnoId) {
-    const paciente = await this.findById(pacienteId);
+    await this.findById(pacienteId);
 
     const turnoActual = await this.turnoRepository.findById(turnoActualId);
     if (!turnoActual) {
@@ -266,16 +266,7 @@ export class PacienteService {
         this.solicitudCambioTurnoRepository.save(nuevaSolicitud),
       ]);
 
-    const nombreServicio =
-      turnoActual.servicio?.nombre ?? "servicio no especificado";
-    const fechaNueva = new Date(nuevoTurno.fechaHora).toLocaleString("es-AR");
-    await this.notificacionesService.create({
-      destinatario: turnoActual.medico,
-      remitente: pacienteId,
-      mensaje:
-        `El paciente ${paciente.nombre} solicitó cambiar el turno de ${nombreServicio} ` +
-        `para el ${fechaNueva}. Revisá la solicitud para aceptar o rechazar.`,
-    });
+    await this.notificacionesService.crearSegunEstadoTurno(turnoActualGuardado);
 
     return {
       turnoActual: turnoActualGuardado,

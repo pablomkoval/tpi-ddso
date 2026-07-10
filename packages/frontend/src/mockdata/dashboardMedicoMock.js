@@ -32,7 +32,6 @@ export const turnosHoyData = [
 export const dashboardStats = {
   atendidosMes: 24,
   proximasCitas: 12,
-  cambiosSolicitados: 3,
   turnosHoy: 4
 };
 
@@ -43,7 +42,3 @@ export const proximoTurnoData = {
   tiempoRestante: 'En 1 hora 30 min'
 };
 
-export const notificacionesData = {
-  cantidadPendientes: 3,
-  mensaje: 'Pacientes que solicitaron modificar su turno esta semana.'
-};

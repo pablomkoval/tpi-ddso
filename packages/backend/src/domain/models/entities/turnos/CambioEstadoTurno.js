@@ -3,10 +3,10 @@
 export class CambioEstadoTurno{
 
     constructor (estado, turno, usuario, motivo){
-        this.fechaHoraIngreso = new Date();
+        this.fechaHoraCambio = new Date();
         this.estado = estado;
         this.turno = turno; //por que conoce el turno (?)
         this.usuario = usuario;
-        this.motivo = motivo;
+        this.motivoCambio = motivo;
     }
 }

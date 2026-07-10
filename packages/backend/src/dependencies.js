@@ -93,7 +93,7 @@ export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/pacientes", pacienteRouter.getRouter())
     routerGeneral.use("/turnos", verifyToken,turnoRouter.getRouter())
     routerGeneral.use("/solicitudes-cambio", solicitudCambioTurnoRouter.getRouter())
-    routerGeneral.use("/notificaciones", notiRouter.getRouter())
+    routerGeneral.use("/notificaciones", verifyToken, notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())
     routerGeneral.use("/sedes", sedeRouter.getRouter())
     routerGeneral.use("/auth", authRouter.getRouter())

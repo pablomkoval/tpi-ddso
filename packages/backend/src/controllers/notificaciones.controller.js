@@ -20,53 +20,23 @@ export class NotificacionesController {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 5;
-            const resultado = await this.notificacionesService.findAllPaginated(page, limit);
+            const criterios = {
+                destinatario: req.user.id
+            };
+
+            if (req.query.leida !== undefined) {
+                criterios.leida = req.query.leida ==="true";
+            }
+            const resultado = await this.notificacionesService.findAllPaginated(
+                page,
+                limit,
+                criterios
+            );
 
             res.json({
                 ...resultado,
                 notificaciones: resultado.notificaciones.map(n => this.notificacionToDTO(n))
             });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async obtenerLeidas(req, res, next) {
-        try {
-            const userId = req.query.userId;
-            const page = Number(req.query.page) || 1;
-            const limit = Number(req.query.limit) || 5;
-
-            if (!userId) {
-                return res.status(400).json({ error: "Se requiere userId en los query params" });
-            }
-
-            const resultado = await this.notificacionesService.obtenerLeidas(userId, page, limit);
-
-            res.json({
-                ...resultado,
-                notificaciones: resultado.notificaciones.map(n => this.notificacionToDTO(n))
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async obtenerNoLeidas(req, res, next) {
-        try {
-            const userId = req.query.userId;
-            const page = Number(req.query.page) || 1;
-            const limit = Number(req.query.limit) || 5;
-
-            if (!userId) {
-                return res.status(400).json({ error: "Se requiere userId en los query params" });
-            }
-
-            const resultado = await this.notificacionesService.obtenerNoLeidas(userId, page, limit);
-
-            res.json({
-                ...resultado,
-                notificaciones: resultado.notificaciones.map(n => this.notificacionToDTO(n))});
         } catch (error) {
             next(error);
         }
@@ -113,6 +83,54 @@ export class NotificacionesController {
             res.json(this.notificacionToDTO(notificacion))
         } catch (error) {
             next(error)
+        }
+    }
+
+    async count(req, res, next) {
+        try {
+            const criterios = {
+                destinatario: req.user.id
+            };
+
+            if (req.query.leida !== undefined) {
+                criterios.leida = req.query.leida === "true";
+            }
+
+            const cantidad = await this.notificacionesService.count(
+                criterios
+            );
+
+            res.json({
+                cantidad
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async resumen(req, res, next) {
+        try {
+            const resumen =
+                await this.notificacionesService.obtenerResumen(req.user.id);
+
+            res.json(resumen);
+
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async marcarTodasComoLeidas(req, res, next) {
+        try {
+            const resultado =
+                await this.notificacionesService
+                    .marcarTodasComoLeidas(req.user.id);
+
+            res.json(resultado);
+
+        } catch (error) {
+            next(error);
         }
     }
 }

@@ -1,23 +1,41 @@
-import { useState } from 'react';
-import { AppBar, Toolbar, Typography, Box, InputBase, IconButton, Badge, Menu, MenuItem } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import { useState, useEffect } from 'react';
+import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Menu, MenuItem } from '@mui/material';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate } from 'react-router-dom';
 import HeaderMenu from './HeaderMenu.jsx';
-import { useCart } from '../../context/CartContext.jsx';
+import { obtenerCantidadNoLeidas } from '../../services/notificacionesService.js';
 
 const navItems = [
   { text: 'Buscar Turnos', to: '/buscar-turnos' },
   { text: 'Mis Turnos', to: '/mis-turnos' },
-  { text: 'Notificaciones', to: '/notificaciones' },
 ];
 
 const Header = () => {
-  const { carrito } = useCart();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
+
+  useEffect(() => {
+    cargarCantidadNotificaciones();
+  }, []);
+
+  const cargarCantidadNotificaciones = async () => {
+    try {
+      const data = await obtenerCantidadNoLeidas();
+
+      setCantidadNotificaciones(data.cantidad);
+
+    } catch (error) {
+      console.error(
+        "Error cargando cantidad de notificaciones",
+        error
+      );
+
+      setCantidadNotificaciones(0);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -45,14 +63,20 @@ const Header = () => {
 
         <Box sx={{ flex: 1 }} />
 
-        <Box sx={{
-          display: { xs: 'none', sm: 'flex' }, alignItems: 'center',
-          bgcolor: 'grey.100', borderRadius: 50, px: 2, py: 0.5, gap: 1
-        }}>
-          <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-          <InputBase placeholder="Buscar..." sx={{ fontSize: '0.875rem' }} />
-        </Box>
-
+        <IconButton
+          component={Link}
+          to="/notificaciones"
+          color="inherit"
+          sx={{ color: 'text.primary' }}
+        >
+          <Badge
+            badgeContent={cantidadNotificaciones}
+            color="error"
+            max={9}
+          >
+            <NotificationsOutlinedIcon />
+          </Badge>
+        </IconButton>
 
         <IconButton color="error" size="small" onClick={handleLogout}>
           <LogoutIcon />
