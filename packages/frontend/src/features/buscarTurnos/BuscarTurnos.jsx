@@ -7,7 +7,7 @@ import FiltrosBusqueda from './FiltrosBusqueda.jsx';
 const FILTROS_INICIALES = {
   profesional: '',
   sede: '',
-  especialidad: '',
+  servicio: '',
   fechaDesde: '',
   fechaHasta: '',
   sortBy: '',
@@ -24,9 +24,8 @@ const BuscarTurnos = () => {
   };
 
   const handleAplicar = () => {
-    if (!filtrosPendientes.especialidad) {
-        //console.error("Cuidado aca en buscarTurnos.jsx");
-        alert("Por favor, selecciona una especialidad/servicio para buscar.");
+    if (!filtrosPendientes.servicio) {
+        alert("Por favor, selecciona un servicio para buscar.");
         return;
     }
     setFiltrosAplicados({ ...filtrosPendientes });
@@ -83,7 +82,7 @@ const BuscarTurnos = () => {
             }}
           >
             <Typography variant="body1" color="text.secondary" textAlign="center">
-              Por favor, seleccione una especialidad y aplique los filtros para iniciar la búsqueda de turnos.
+              Por favor, seleccione un servicio y aplique los filtros para iniciar la búsqueda de turnos.
             </Typography>
           </Box>
         )}

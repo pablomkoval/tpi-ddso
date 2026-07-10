@@ -152,7 +152,7 @@ export default function DetalleTurno() {
                 </Typography>
                 {turno.servicio?.tipo && (
                   <Typography variant="caption" color="text.secondary">
-                    {turno.servicio.tipo}
+                    {turno.servicio.tipo.toUpperCase()}
                     {turno.servicio.duracionMinutos ? ` · ${turno.servicio.duracionMinutos} min` : ''}
                   </Typography>
                 )}

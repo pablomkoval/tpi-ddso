@@ -7,7 +7,7 @@ export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
         const token = localStorage.getItem("token");
 
         const queryParams = {
-            servicioId: filtros.especialidad || undefined, // *Obligatorio
+            servicioId: filtros.servicio || undefined, // *Obligatorio
             sedeId: filtros.sede || undefined,
             medicoId: filtros.profesional || undefined,
             fechaDesde: filtros.fechaDesde || undefined,

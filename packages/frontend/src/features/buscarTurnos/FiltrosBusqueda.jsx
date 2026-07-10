@@ -14,14 +14,14 @@ import {
 
 import {
   PersonOutlined as PersonIcon,
-  MedicalServicesOutlined as EspecialidadIcon,
+  MedicalServicesOutlined as ServicioIcon,
   LocationOnOutlined as UbicacionIcon,
   CalendarMonthOutlined as CalendarIcon,
   SortOutlined as SortIcon,
 } from '@mui/icons-material';
 
 import {
-  buscarEspecialidades,
+  buscarServicios,
   buscarMedicos,
   buscarSedes
 } from '../../services/filtrosBusquedaService';
@@ -30,7 +30,7 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
   const [loading, setLoading] = useState(true);
   const [errorApi, setErrorApi] = useState(false);
   const [medicos, setMedicos] = useState([]);
-  const [especialidades, setEspecialidades] = useState([]);
+  const [servicios, setServicios] = useState([]);
   const [sedes, setSedes] = useState([]);
   const [cargandoMedicos, setCargandoMedicos] = useState(false);
 
@@ -40,12 +40,12 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
       setErrorApi(false);
       
       try {
-        const especialidadesResponse = await buscarEspecialidades();
-        setEspecialidades(especialidadesResponse);
+        const serviciosResponse = await buscarServicios();
+        setServicios(serviciosResponse);
         const sedesResponse = await buscarSedes();
         setSedes(sedesResponse);
       } catch (e) {
-        setEspecialidades([]);
+        setServicios([]);
         setSedes([]);
         setMedicos([]);
         setErrorApi(true);
@@ -58,9 +58,9 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
   }, []);
 
   useEffect(() => {
-    const especialidadSeleccionada = filtros?.especialidad;
+    const servicioSeleccionado = filtros?.servicio;
 
-    if (!especialidadSeleccionada) {
+    if (!servicioSeleccionado) {
       setMedicos([]);
       setCargandoMedicos(false);
       return;
@@ -72,7 +72,7 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
       setMedicos([]);
       setCargandoMedicos(true);
       try {
-        const medicosResponse = await buscarMedicos(especialidadSeleccionada);
+        const medicosResponse = await buscarMedicos(servicioSeleccionado);
         if (!ignore) {
           setMedicos(medicosResponse);
         }
@@ -92,7 +92,7 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
     return () => {
       ignore = true;
     };
-  }, [filtros?.especialidad]);
+  }, [filtros?.servicio]);
 
  
   if (loading) {
@@ -139,12 +139,12 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
       <Divider />
 
       {/* SERVICIO */}
-      <SeccionFiltro icon={<EspecialidadIcon fontSize="small" />} label="Servicio">
+      <SeccionFiltro icon={<ServicioIcon fontSize="small" />} label="Servicio">
         <FormControl size="small" fullWidth>
           <Select
-            value={filtros.especialidad}
+            value={filtros.servicio}
             onChange={(e) => {
-              onChange('especialidad', e.target.value);
+              onChange('servicio', e.target.value);
               onChange('profesional', '');
             }}
             displayEmpty
@@ -152,13 +152,13 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
               if (!selected) {
                 return 'Seleccionar Servicio';
               }
-              const especialidadSeleccionada = especialidades.find((e) => e.id === selected);
-              return especialidadSeleccionada?.nombre || 'Seleccionar Servicio';
+              const servicioSeleccionado = servicios.find((s) => s.id === selected);
+              return servicioSeleccionado?.nombre || 'Seleccionar Servicio';
             }}
           >
-            {especialidades.map((e) => (
-              <MenuItem key={e.id} value={e.id}>
-                {e.nombre}
+            {servicios.map((servicio) => (
+              <MenuItem key={servicio.id} value={servicio.id}>
+                {servicio.nombre}
               </MenuItem>
             ))}
           </Select>
@@ -173,10 +173,10 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
         <Autocomplete
           size="small"
           fullWidth
-          disabled={!filtros?.especialidad}
+          disabled={!filtros?.servicio}
           options={medicos}
           loading={cargandoMedicos}
-          noOptionsText={filtros?.especialidad ? 'No hay médicos para esta especialidad' : 'Seleccione una especialidad primero'}
+          noOptionsText={filtros?.servicio ? 'No hay médicos para este servicio' : 'Seleccione un servicio primero'}
           getOptionLabel={(option) => option?.nombre || ''}
           value={medicos.find((m) => m.id === filtros?.profesional) || null}
           onChange={(event, nuevoMedico) => {
@@ -186,7 +186,7 @@ export default function FiltrosBusqueda({ filtros, onChange, onAplicar }) {
           renderInput={(params) => (
             <TextField
               {...params}
-              placeholder={filtros?.especialidad ? 'Nombre del médico...' : 'Seleccione Especialidad'}
+              placeholder={filtros?.servicio ? 'Nombre del médico...' : 'Seleccione Servicio'}
               InputProps={{
                 ...params.InputProps,
                 startAdornment: (
