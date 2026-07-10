@@ -192,7 +192,7 @@ export default function DashboardMedico() {
                 onClick={() => navigate('/notificaciones')}
                 sx={{ bgcolor: 'white', color: 'primary.main', boxShadow: 'none', '&:hover': { bgcolor: 'primary.light', boxShadow: 'none' } }}
               >
-                Revisar
+                Ver todas
               </Button>
             </CardContent>
           </Card>

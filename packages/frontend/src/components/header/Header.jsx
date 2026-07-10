@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Menu, MenuItem } f
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import HeaderMenu from './HeaderMenu.jsx';
 import { obtenerCantidadNoLeidas } from '../../services/notificacionesService.js';
 
@@ -14,11 +14,30 @@ const navItems = [
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
   const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
 
   useEffect(() => {
     cargarCantidadNotificaciones();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const actualizarContador = () => {
+      cargarCantidadNotificaciones();
+    };
+
+    window.addEventListener(
+      "actualizar-notificaciones",
+      actualizarContador
+    );
+
+    return () => {
+      window.removeEventListener(
+        "actualizar-notificaciones",
+        actualizarContador
+      );
+    };
   }, []);
 
   const cargarCantidadNotificaciones = async () => {

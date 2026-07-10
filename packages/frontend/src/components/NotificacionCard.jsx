@@ -49,7 +49,6 @@ function NotificacionCard({ notificacion, onMarcarLeida }) {
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 2,
         px: 3,
         py: 2,
         cursor: "pointer",
@@ -98,7 +97,10 @@ function NotificacionCard({ notificacion, onMarcarLeida }) {
         <NotificationsIcon fontSize="small" />
       </Avatar>
 
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ 
+        flex: 1,
+        minWidth: 0,
+        }}>
         <Typography
           variant="body2"
           sx={{

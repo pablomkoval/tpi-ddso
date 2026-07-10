@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Paper, 
-  CircularProgress, 
-  Alert, 
-  Stack, 
-  Chip, 
-  TextField, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions 
+import {
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  Paper,
+  CircularProgress,
+  Alert,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
 
 import DoneAllIcon from "@mui/icons-material/DoneAll";
@@ -24,13 +22,13 @@ import NotificacionFilter from "../components/NotificacionFilter.jsx";
 import NotificacionCard from "../components/NotificacionCard.jsx";
 
 // Importamos tus servicios y agregamos los de tu compañero para los cambios de turno
-import { 
-  obtenerNotificaciones, 
-  marcarNotificacionComoLeida, 
-  marcarTodasComoLeidas, 
+import {
+  obtenerNotificaciones,
+  marcarNotificacionComoLeida,
+  marcarTodasComoLeidas,
   obtenerResumenNotificaciones,
   confirmarSolicitudCambio,
-  rechazarSolicitudCambio 
+  rechazarSolicitudCambio
 } from "../services/notificacionesService.js";
 
 const NotificacionPage = () => {
@@ -67,12 +65,31 @@ const NotificacionPage = () => {
     cargarResumen();
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
   // ─── FUNCIONES DE CARGA ───
   const cargarNotificaciones = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await obtenerNotificaciones({ page, filter });
+
+      let leida;
+
+      switch (filter) {
+        case "read":
+          leida = true;
+          break;
+        case "unread":
+          leida = false;
+          break;
+        default:
+          leida = undefined;
+      }
+
+      const data = await obtenerNotificaciones(page, 10, leida);
+
       setNotificaciones(data.notificaciones || []);
       setTotalPages(data.totalPages || 1);
     } catch (err) {
@@ -92,12 +109,19 @@ const NotificacionPage = () => {
     }
   };
 
+  const actualizarNavbar = () => {
+    window.dispatchEvent(new Event("actualizar-notificaciones"));
+  };
+
   // ─── ACCIONES DE NOTIFICACIONES (TUS FUNCIONES) ───
   const handleLeer = async (id) => {
     try {
       await marcarNotificacionComoLeida(id);
-      cargarNotificaciones();
-      cargarResumen();
+
+      await cargarNotificaciones();
+      await cargarResumen();
+
+      actualizarNavbar();
     } catch (err) {
       console.error("Error al marcar como leída:", err);
     }
@@ -106,8 +130,11 @@ const NotificacionPage = () => {
   const handleMarcarTodasLeidas = async () => {
     try {
       await marcarTodasComoLeidas();
-      cargarNotificaciones();
-      cargarResumen();
+
+      await cargarNotificaciones();
+      await cargarResumen();
+
+      actualizarNavbar();
     } catch (err) {
       console.error("Error al marcar todas como leídas:", err);
     }
@@ -133,10 +160,10 @@ const NotificacionPage = () => {
 
   const handleConfirmarRechazo = async () => {
     if (!notificacionSeleccionadaParaRechazo) return;
-    
+
     try {
       await rechazarSolicitudCambio(
-        notificacionSeleccionadaParaRechazo.idTurno, 
+        notificacionSeleccionadaParaRechazo.idTurno,
         motivoRechazo
       );
       await handleLeer(notificacionSeleccionadaParaRechazo.idNotificacion);
@@ -151,15 +178,32 @@ const NotificacionPage = () => {
 
   return (
     // Contenedor principal corregido para que se estire al 100% simétricamente
-    <Box sx={{ p: 3, width: "100%", boxSizing: "border-box" }}>
-      
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 1280,
+        mx: "auto",
+        p: { xs: 2, md: 3 },
+        boxSizing: "border-box",
+      }}
+    >
+
       {/* Cabecera perfectamente alineada */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, width: "100%" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          justifyContent: "space-between",
+          alignItems: { xs: "flex-start", sm: "center" },
+          gap: 2,
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" fontWeight="bold">
           Notificaciones
         </Typography>
-        <Button 
-          startIcon={<DoneAllIcon />} 
+        <Button
+          startIcon={<DoneAllIcon />}
           variant="outlined"
           onClick={handleMarcarTodasLeidas}
           disabled={resumen.noLeidas === 0 || loading}
@@ -169,12 +213,8 @@ const NotificacionPage = () => {
       </Box>
 
       {/* Resumen y Filtros */}
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-        <Chip label={`No leídas: ${resumen.noLeidas}`} color="primary" />
-        <Chip label={`Leídas: ${resumen.leidas}`} variant="outlined" />
-      </Stack>
 
-      <Box sx={{ mb: 3, width: "100%" }}>
+      <Box sx={{ mb: 3 }}>
         <NotificacionFilter filter={filter} setFilter={setFilter} resumen={resumen} />
       </Box>
 
@@ -192,7 +232,13 @@ const NotificacionPage = () => {
           </Paper>
         ) : (
           // El Paper ahora ocupa el 100% de manera consistente
-          <Paper sx={{ p: 2, width: "100%", boxSizing: "border-box" }} elevation={1}>
+          <Paper
+            elevation={1}
+            sx={{
+              overflow: "hidden",
+              borderRadius: 3,
+            }}
+          >
             {notificaciones.map((notificacion) => (
               <NotificacionCard
                 key={notificacion.id || notificacion._id}
@@ -213,10 +259,8 @@ const NotificacionPage = () => {
             flexDirection: { xs: "column", sm: "row" },
             justifyContent: "space-between",
             alignItems: "center",
-            mt: 3,
-            px: 1, // Un mínimo de margen interno para que no pegue al borde del todo
             gap: 2,
-            width: "100%"
+            mt: 2,
           }}
         >
           <Typography variant="body2" color="text.secondary">

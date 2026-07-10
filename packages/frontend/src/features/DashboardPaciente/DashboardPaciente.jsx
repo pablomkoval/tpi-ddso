@@ -212,7 +212,7 @@ export default function DashboardPaciente() {
               </Box>
 
               <Typography variant="h6" fontWeight={700} sx={{ color: 'white', mb: 1 }}>
-                {datosNotificaciones.noLeidas} Nuevos mensajes
+                {datosNotificaciones.noLeidas} Notificaciones no leídas
               </Typography>
 
               <Typography
