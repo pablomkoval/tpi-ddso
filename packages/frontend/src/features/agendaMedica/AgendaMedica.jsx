@@ -748,3 +748,5 @@ const AgendaMedica = () => {
         </Box>
     );
 }
+
+export default AgendaMedica;
