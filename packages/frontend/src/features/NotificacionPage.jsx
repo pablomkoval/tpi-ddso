@@ -1,17 +1,40 @@
-import { useState, useEffect } from "react";
-import { Box, Typography, Button, IconButton, Paper } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  IconButton, 
+  Paper, 
+  CircularProgress, 
+  Alert, 
+  Stack, 
+  Chip, 
+  TextField, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions 
+} from "@mui/material";
+
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import PendingIcon from "@mui/icons-material/PendingActions";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
 
 import NotificacionFilter from "../components/NotificacionFilter.jsx";
 import NotificacionCard from "../components/NotificacionCard.jsx";
-import { obtenerNotificaciones, marcarNotificacionComoLeida, marcarTodasComoLeidas, obtenerResumenNotificaciones } from "../services/notificacionesService.js";
+
+// Importamos tus servicios y agregamos los de tu compañero para los cambios de turno
+import { 
+  obtenerNotificaciones, 
+  marcarNotificacionComoLeida, 
+  marcarTodasComoLeidas, 
+  obtenerResumenNotificaciones,
+  confirmarSolicitudCambio,
+  rechazarSolicitudCambio 
+} from "../services/notificacionesService.js";
 
 const NotificacionPage = () => {
+  // ─── TUS ESTADOS (BASE SÓLIDA) ───
   const [filter, setFilter] = useState("all");
   const [notificaciones, setNotificaciones] = useState([]);
   const [error, setError] = useState(null);
@@ -23,40 +46,38 @@ const NotificacionPage = () => {
     leidas: 0,
     noLeidas: 0
   });
+
+  // ─── ESTADOS DE TU COMPAÑERO (MODAL DE RECHAZO) ───
+  const [openRechazo, setOpenRechazo] = useState(false);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [notificacionSeleccionadaParaRechazo, setNotificacionSeleccionadaParaRechazo] = useState(null);
+
+  // ─── LÓGICA DE PAGINACIÓN ───
   const paginaFinal = Math.max(totalPages, 1);
   const puedeIrAtras = page > 1 && !loading;
   const puedeIrAdelante = page < paginaFinal && !loading;
 
+  // ─── EFECTOS ───
   useEffect(() => {
     cargarNotificaciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filter]);
 
   useEffect(() => {
     cargarResumen();
   }, []);
 
+  // ─── FUNCIONES DE CARGA ───
   const cargarNotificaciones = async () => {
     try {
       setLoading(true);
-      const data = await obtenerNotificaciones(
-        page,
-        10,
-        filter === "all"
-          ? undefined
-          : filter === "read"
-            ? true
-            : false
-      );
-
-      setNotificaciones(data.notificaciones);
-
-      const totalPaginas = Math.max(Number(data.totalPages) || 1, 1);
-      setTotalPages(totalPaginas);
-      setPage((paginaActual) => Math.min(paginaActual, totalPaginas));
-
-    } catch (error) {
-      console.error(error);
-      setError("No se pudieron cargar las notificaciones");
+      setError(null);
+      const data = await obtenerNotificaciones({ page, filter });
+      setNotificaciones(data.notificaciones || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (err) {
+      console.error("Error al cargar notificaciones:", err);
+      setError("No se pudieron cargar las notificaciones.");
     } finally {
       setLoading(false);
     }
@@ -66,146 +87,136 @@ const NotificacionPage = () => {
     try {
       const data = await obtenerResumenNotificaciones();
       setResumen(data);
-    }
-    catch (error) {
-      console.error(error);
-    }
-  }
-
-  const handleLeer = async (id) => {
-    try {
-      await marcarNotificacionComoLeida(id);
-
-      setNotificaciones(prev =>
-        prev.map(n =>
-          n.id === id
-            ? { ...n, leida: true }
-            : n
-        )
-      );
-
-      cargarResumen();
-
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error("Error al cargar resumen:", err);
     }
   };
 
-  if (loading) {
-    return <Typography>Cargando...</Typography>;
-  }
+  // ─── ACCIONES DE NOTIFICACIONES (TUS FUNCIONES) ───
+  const handleLeer = async (id) => {
+    try {
+      await marcarNotificacionComoLeida(id);
+      cargarNotificaciones();
+      cargarResumen();
+    } catch (err) {
+      console.error("Error al marcar como leída:", err);
+    }
+  };
+
+  const handleMarcarTodasLeidas = async () => {
+    try {
+      await marcarTodasComoLeidas();
+      cargarNotificaciones();
+      cargarResumen();
+    } catch (err) {
+      console.error("Error al marcar todas como leídas:", err);
+    }
+  };
+
+  // ─── ACCIONES DE CAMBIO DE TURNO (DE TU COMPAÑERO) ───
+  const handleAceptarCambio = async (idNotificacion, idTurno) => {
+    try {
+      await confirmarSolicitudCambio(idTurno);
+      await handleLeer(idNotificacion);
+      cargarNotificaciones();
+    } catch (err) {
+      console.error("Error al aceptar el cambio:", err);
+      setError("No se pudo aceptar el cambio de turno.");
+    }
+  };
+
+  const abrirModalRechazo = (idNotificacion, idTurno) => {
+    setNotificacionSeleccionadaParaRechazo({ idNotificacion, idTurno });
+    setMotivoRechazo("");
+    setOpenRechazo(true);
+  };
+
+  const handleConfirmarRechazo = async () => {
+    if (!notificacionSeleccionadaParaRechazo) return;
+    
+    try {
+      await rechazarSolicitudCambio(
+        notificacionSeleccionadaParaRechazo.idTurno, 
+        motivoRechazo
+      );
+      await handleLeer(notificacionSeleccionadaParaRechazo.idNotificacion);
+      setOpenRechazo(false);
+      setNotificacionSeleccionadaParaRechazo(null);
+      cargarNotificaciones();
+    } catch (err) {
+      console.error("Error al rechazar el cambio:", err);
+      setError("No se pudo rechazar el cambio de turno.");
+    }
+  };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        // Responsive Layout: Columna en celulares/tablets (<900px), Fila en Desktop
-        flexDirection: { xs: "column", md: "row" },
-        minHeight: "calc(100vh - 64px)",
-        backgroundColor: "transparent"
-      }}
-    >
-      <NotificacionFilter
-        filter={filter}
-        setFilter={(nuevoFiltro) => {
-          setPage(1);
-          setFilter(nuevoFiltro);
-        }}
-        resumen={resumen}
-      />
-
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          p: { xs: "24px 16px", md: "32px 48px" },
-          display: "flex",
-          flexDirection: "column",
-          overflowX: "hidden"
-        }}
-      >
-        <Box
-          component="header"
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", sm: "center" },
-            mb: 3,
-            gap: 2
-          }}
+    // Contenedor principal corregido para que se estire al 100% simétricamente
+    <Box sx={{ p: 3, width: "100%", boxSizing: "border-box" }}>
+      
+      {/* Cabecera perfectamente alineada */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, width: "100%" }}>
+        <Typography variant="h4" fontWeight="bold">
+          Notificaciones
+        </Typography>
+        <Button 
+          startIcon={<DoneAllIcon />} 
+          variant="outlined"
+          onClick={handleMarcarTodasLeidas}
+          disabled={resumen.noLeidas === 0 || loading}
         >
-          <Typography variant="h5" fontWeight="bold">
-            Notificaciones
-          </Typography>
+          Marcar todas como leídas
+        </Button>
+      </Box>
 
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1.5,
-              alignItems: "center",
-              width: { xs: "100%", sm: "auto" },
-              justifyContent: { xs: "space-between", sm: "flex-start" }
-            }}
-          >
-            <Button
-              variant="outlined"
-              onClick={async () => {
-                await marcarTodasComoLeidas();
-                cargarNotificaciones();
-                cargarResumen();
-              }}
-              startIcon={<DoneAllIcon />}
-              onClick={handleMarcarTodasComoLeidas}
-              disabled={unreadCount === 0 || loading}
-              sx={{
-                color: "text.primary",
-                borderColor: "divider",
-                "&:hover": { backgroundColor: "action.hover", borderColor: "text.primary" }
-              }}
-            >
-              Marcar todas como leídas
-            </Button>
+      {/* Resumen y Filtros */}
+      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+        <Chip label={`No leídas: ${resumen.noLeidas}`} color="primary" />
+        <Chip label={`Leídas: ${resumen.leidas}`} variant="outlined" />
+      </Stack>
+
+      <Box sx={{ mb: 3, width: "100%" }}>
+        <NotificacionFilter filter={filter} setFilter={setFilter} resumen={resumen} />
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 3, width: "100%" }}>{error}</Alert>}
+
+      {/* Caja de contenido unificada para evitar desalineación */}
+      <Box sx={{ width: "100%" }}>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 200, width: "100%" }}>
+            <CircularProgress />
           </Box>
-        </Box>
-        {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
+        ) : notificaciones.length === 0 ? (
+          <Paper sx={{ p: 4, textAlign: "center", color: "text.secondary", width: "100%", elevation: 1 }}>
+            No hay notificaciones para mostrar.
+          </Paper>
+        ) : (
+          // El Paper ahora ocupa el 100% de manera consistente
+          <Paper sx={{ p: 2, width: "100%", boxSizing: "border-box" }} elevation={1}>
+            {notificaciones.map((notificacion) => (
+              <NotificacionCard
+                key={notificacion.id || notificacion._id}
+                notificacion={notificacion}
+                onMarcarLeida={() => handleLeer(notificacion.id || notificacion._id)}
+                onAceptarCambio={() => handleAceptarCambio(notificacion.id, notificacion.referenciaTurnoId)}
+                onRechazarCambio={() => abrirModalRechazo(notificacion.id, notificacion.referenciaTurnoId)}
+              />
+            ))}
+          </Paper>
         )}
 
-        <Paper
-          component="section"
-          variant="outlined"
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: "12px",
-            overflow: "hidden",
-            position: "relative",
-            minHeight: "150px",
-            display: "flex",
-            flexDirection: "column"
-          }}
-        >
-          {notificaciones.map((notificacion) => (
-            <NotificacionCard
-              key={notificacion.id}
-              notificacion={notificacion}
-              onMarcarLeida={handleLeer}
-            />
-          ))}
-        </Paper>
-
+        {/* Footer de Paginación alineado con los bordes del bloque de tarjetas */}
         <Box
           component="footer"
           sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
-            justifyContent: { xs: "center", sm: "space-between" },
+            justifyContent: "space-between",
             alignItems: "center",
             mt: 3,
+            px: 1, // Un mínimo de margen interno para que no pegue al borde del todo
             gap: 2,
-            textAlign: { xs: "center", sm: "left" }
+            width: "100%"
           }}
         >
           <Typography variant="body2" color="text.secondary">
@@ -233,7 +244,7 @@ const NotificacionPage = () => {
         </Box>
       </Box>
 
-      {/* Diálogo Global de Motivo de Rechazo */}
+      {/* Modal de Rechazo */}
       <Dialog open={openRechazo} onClose={() => setOpenRechazo(false)}>
         <DialogTitle sx={{ fontWeight: 700 }}>Rechazar Solicitud de Cambio</DialogTitle>
         <DialogContent sx={{ minWidth: 320 }}>

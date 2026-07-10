@@ -45,9 +45,24 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
+import { getMiMedico, getAgenda, confirmarTurno, getHistorialTurnos, realizarTurno, cancelarTurno, proponerCambioTurno } from '../../services/medicoService.js';
+import './AgendaMedica.css';
 
-import { horasAgenda, turnosMedicos, agendaStats, agendaSemana } from '../../mockdata/agendaMedicaData.js'
-import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
+const horasAgenda = [
+  '08:00', '09:00', '10:00', '11:00', '12:00',
+  '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
+];
+
+const HORA_INICIO = 8;
+
+const getMonday = (d) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(date.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+};
 
 const formatearSemana = (inicio) => {
     const fechaInicio = new Date(inicio);
@@ -64,13 +79,33 @@ const formatearSemana = (inicio) => {
 
 const AgendaMedica = () => {
     const [loading, setLoading] = useState(true);
-    const [resumenNotificaciones, setResumenNotificaciones] = useState({
-        total: 0,
-        leidas: 0,
-        noLeidas: 0,
-    });
+    const [medico, setMedico] = useState(null);
+    const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
+    const [turnos, setTurnos] = useState([]);
+    const [selectedTurno, setSelectedTurno] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
 
-    // para el skeleton
+    // Cancelación
+    const [showCancelForm, setShowCancelForm] = useState(false);
+    const [motivoCancelacion, setMotivoCancelacion] = useState('');
+
+    // Propuesta de cambio
+    const [showChangeForm, setShowChangeForm] = useState(false);
+    const [selectedNuevoTurnoId, setSelectedNuevoTurnoId] = useState('');
+    const [motivoCambio, setMotivoCambio] = useState('');
+
+    // Histórico
+    const [historial, setHistorial] = useState([]);
+    const [historialPage, setHistorialPage] = useState(0);
+    const [historialTotal, setHistorialTotal] = useState(0);
+    const [historialLoading, setHistorialLoading] = useState(false);
+    const HISTORIAL_ROWS = 5;
+
+    // Snackbar
+    const [snackbar, setSnackbar] = useState({ open: false, mensaje: '', tipo: 'success' });
+
+    // Cargar perfil del médico
     useEffect(() => {
         const fetchMedico = async () => {
             try {
@@ -135,22 +170,31 @@ const AgendaMedica = () => {
             setSnackbar({ open: true, mensaje: "No se pudo cargar la agenda médica", tipo: "error" });
         } finally {
             setLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, []);
+        }
+    }, [medico, currentMonday]);
 
     useEffect(() => {
-        const cargarResumenNotificaciones = async () => {
-            try {
-                const data = await obtenerResumenNotificaciones();
-                setResumenNotificaciones(data);
-            } catch (error) {
-                console.error("Error cargando resumen de notificaciones", error);
-            }
-        };
+        loadAgendaData();
+    }, [loadAgendaData]);
 
-        cargarResumenNotificaciones();
-    }, []);
+    // Cargar histórico de turnos realizados
+    const loadHistorial = useCallback(async () => {
+        if (!medico) return;
+        try {
+            setHistorialLoading(true);
+            const data = await getHistorialTurnos(medico.id || medico._id, historialPage + 1, HISTORIAL_ROWS);
+            setHistorial(data.turnos || []);
+            setHistorialTotal(data.pagination?.total || 0);
+        } catch (err) {
+            console.error("Error al cargar historial:", err);
+        } finally {
+            setHistorialLoading(false);
+        }
+    }, [medico, historialPage]);
+
+    useEffect(() => {
+        loadHistorial();
+    }, [loadHistorial]);
 
     // Navegación
     const handleSemanaAnterior = () => {
@@ -645,23 +689,260 @@ const AgendaMedica = () => {
                                     <CloseIcon fontSize="small" />
                                 </IconButton>
                             </Box>
-                        </CardContent>
-                    </Card>
 
-                    <Card variant="outlined" sx={{ bgcolor: 'background.paper' }}>
-                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: '#fff3e0', color: '#e65100', width: 48, height: 48 }}>
-                                <NotificationImportantIcon />
-                            </Avatar>
-                            <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                                    {resumenNotificaciones.noLeidas}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">Cambios Solicitados</Typography>
-                            </Box>
-                        </CardContent>
-                    </Card>
-                </section>
+                            <Divider />
+
+                            <DialogContent sx={{ p: 2.5 }}>
+                                {/* Estado */}
+                                <Box sx={{ mb: 2 }}>
+                                    <Chip
+                                        label={obtenerEstilosEstado(selectedTurno.estado).label}
+                                        size="small"
+                                        sx={{
+                                            bgcolor: obtenerEstilosEstado(selectedTurno.estado).bg,
+                                            color: obtenerEstilosEstado(selectedTurno.estado).texto,
+                                            fontWeight: 'bold',
+                                            border: `1px solid ${obtenerEstilosEstado(selectedTurno.estado).border}`
+                                        }}
+                                    />
+                                </Box>
+
+                                {/* Info del turno */}
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <AccessTimeIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Hora</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    {selectedTurno.fechaHora.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <CalendarTodayIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Fecha</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    {selectedTurno.fechaHora.toLocaleDateString("es-AR", { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <PlaceIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Sede</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedTurno.sede}</Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <LocalHospitalIcon color="action" sx={{ fontSize: 18 }} />
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" display="block">Servicio</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedTurno.motivo}</Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Grid>
+                                </Grid>
+
+                                {selectedTurno.costoPaciente !== undefined && (
+                                    <>
+                                        <Divider sx={{ my: 2 }} />
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <Typography variant="body2" color="text.secondary">Costo Paciente</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>${selectedTurno.costoPaciente}</Typography>
+                                        </Box>
+                                    </>
+                                )}
+
+                                {/* Formulario de cancelación */}
+                                {showCancelForm && (
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: '#fff5f5', borderRadius: 2, border: '1px solid #ffcdd2' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#c62828' }}>
+                                            Motivo de cancelación *
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            size="small"
+                                            placeholder="Ej: Urgencia en quirófano, reprogramación..."
+                                            value={motivoCancelacion}
+                                            onChange={(e) => setMotivoCancelacion(e.target.value)}
+                                            sx={{ bgcolor: 'white' }}
+                                        />
+                                        <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => { setShowCancelForm(false); setMotivoCancelacion(''); }}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Volver
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                color="error"
+                                                disabled={actionLoading || !motivoCancelacion.trim()}
+                                                onClick={handleCancelar}
+                                                startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Confirmar Cancelación
+                                            </Button>
+                                        </Stack>
+                                    </Box>
+                                )}
+
+                                {/* Formulario de propuesta de cambio */}
+                                {showChangeForm && (
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: '#f0f4f8', borderRadius: 2, border: '1px solid #d0d7de' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'primary.main' }}>
+                                            Seleccionar nueva fecha y hora *
+                                        </Typography>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            size="small"
+                                            value={selectedNuevoTurnoId}
+                                            onChange={(e) => setSelectedNuevoTurnoId(e.target.value)}
+                                            SelectProps={{ native: true }}
+                                            sx={{ bgcolor: 'white', mb: 2 }}
+                                        >
+                                            <option value="">-- Seleccionar horario disponible --</option>
+                                            {turnos.filter(t => t.estado === 'disponible').map(t => {
+                                                const fecha = new Date(t.fechaHora);
+                                                const label = `${fecha.toLocaleDateString("es-AR")} a las ${fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs - Sede: ${t.sede}`;
+                                                return (
+                                                    <option key={t.id} value={t.id}>
+                                                        {label}
+                                                    </option>
+                                                );
+                                            })}
+                                        </TextField>
+
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                                            Motivo del cambio
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            size="small"
+                                            placeholder="Ej: Reprogramación por congreso..."
+                                            value={motivoCambio}
+                                            onChange={(e) => setMotivoCambio(e.target.value)}
+                                            sx={{ bgcolor: 'white' }}
+                                        />
+
+                                        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => { setShowChangeForm(false); setSelectedNuevoTurnoId(''); setMotivoCambio(''); }}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Volver
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                color="primary"
+                                                disabled={actionLoading || !selectedNuevoTurnoId}
+                                                onClick={handleProponerCambio}
+                                                startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
+                                                sx={{ borderRadius: 2 }}
+                                            >
+                                                Enviar Propuesta
+                                            </Button>
+                                        </Stack>
+                                    </Box>
+                                )}
+                            </DialogContent>
+
+                             {!showCancelForm && !showChangeForm && (
+                                <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                                    {/* Botón cancelar turno */}
+                                    {puedesCancelar && (
+                                        <Button
+                                            onClick={() => setShowCancelForm(true)}
+                                            color="error"
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Cancelar
+                                        </Button>
+                                    )}
+
+                                    {/* Botón proponer cambio */}
+                                    {puedesCancelar && (
+                                        <Button
+                                            onClick={() => setShowChangeForm(true)}
+                                            color="primary"
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Cambio
+                                        </Button>
+                                    )}
+
+                                    {/* Confirmar — solo si está reservado */}
+                                    {selectedTurno.estado === 'reservado' && (
+                                        <Button
+                                            onClick={handleConfirmar}
+                                            color="primary"
+                                            variant="contained"
+                                            disabled={actionLoading}
+                                            startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : null}
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Confirmar
+                                        </Button>
+                                    )}
+
+                                    {/* Marcar realizado — solo si está confirmado */}
+                                    {selectedTurno.estado === 'confirmado' && (
+                                        <Button
+                                            onClick={handleRealizar}
+                                            color="success"
+                                            variant="contained"
+                                            disabled={actionLoading}
+                                            startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : null}
+                                            sx={{ borderRadius: 2 }}
+                                        >
+                                            Realizado
+                                        </Button>
+                                    )}
+                                </DialogActions>
+                            )}
+                        </>
+                    )}
+                </Dialog>
+
+                {/* ─── SNACKBAR ─── */}
+                <Snackbar
+                    open={snackbar.open}
+                    autoHideDuration={4000}
+                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                >
+                    <Alert
+                        severity={snackbar.tipo}
+                        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+                        sx={{ width: '100%', borderRadius: 2 }}
+                    >
+                        {snackbar.mensaje}
+                    </Alert>
+                </Snackbar>
 
             </main>
         </div>

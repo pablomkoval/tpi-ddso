@@ -4,7 +4,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
-function NotificationCard({ notificacion }) {
+function NotificacionCard({ notificacion, onMarcarLeida }) {
   const isUnread = !notificacion.leida;
 
   const fecha = new Date(notificacion.fechaHoraCreacion);

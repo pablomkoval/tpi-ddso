@@ -122,3 +122,69 @@ export const marcarTodasComoLeidas = async () => {
         throw error;
     }
 };
+
+export const confirmarSolicitudCambio = async (solicitudId, confirmadorId) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.patch(
+            `${API_URL}/solicitudes-cambio/${solicitudId}/confirmar`,
+            { confirmadorId }, // Si el backend saca el ID del token, capaz no haga falta mandarlo
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Error al confirmar solicitud de cambio:", error);
+        throw error;
+    }
+};
+
+export const rechazarSolicitudCambio = async (solicitudId, confirmadorId, motivoRechazo) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.patch(
+            `${API_URL}/solicitudes-cambio/${solicitudId}/rechazar`,
+            { confirmadorId, motivoRechazo },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Error al rechazar solicitud de cambio:", error);
+        throw error;
+    }
+};
+
+export const getSolicitudesCambio = async (params) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+            `${API_URL}/solicitudes-cambio`, 
+            {
+                params,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Error al obtener solicitudes de cambio:", error);
+        throw error;
+    }
+};
