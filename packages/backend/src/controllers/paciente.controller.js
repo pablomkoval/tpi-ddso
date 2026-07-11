@@ -64,29 +64,6 @@ export class PacienteController {
         }
     }
 
-    async reservarTurno(req, res, next) {
-        try {
-            const idPaciente = parsearId(req.params.idPaciente);
-            const turnoId = parsearId(req.params.turnoId);
-            const turnoReservado = await this.pacienteService.reservarTurno(idPaciente, turnoId);
-            res.status(200).json(turnoReservado);
-        } catch (error) {
-            return next(error);
-        }
-    }
-
-    async cancelarTurno(req, res, next) {
-        try {
-            const idPaciente = parsearId(req.params.idPaciente);
-            const turnoId = parsearId(req.params.turnoId);
-            const { motivo } = req.body;
-            const turnoCancelado = await this.pacienteService.cancelarTurno(idPaciente, turnoId, motivo);
-            res.status(200).json(turnoCancelado);
-        } catch (error) {
-            return next(error);
-        }
-    }
-
     async solicitarCambioFecha(req, res, next) {
         try {
             const idPaciente = parsearId(req.params.idPaciente);

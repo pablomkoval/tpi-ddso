@@ -3,9 +3,6 @@ import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
 import { SolicitudCambioTurno } from "../domain/models/entities/turnos/SolicitudCambioTurno.js";
 import { TipoNotificacion } from "../domain/models/entities/turnos/Notificacion.js";
 
-//cancelación permitida hasta 1 hora antes, mandar a env
-const MINUTOS_MINIMOS_CANCELACION = 60;
-
 export class PacienteService {
   usuarioService
   constructor(
@@ -94,101 +91,6 @@ export class PacienteService {
       }
       return turnoObj;
     });
-  }
-
-  async reservarTurno(pacienteId, turnoId) {
-    const paciente = await this.findById(pacienteId);
-
-    const turno = await this.turnoRepository.findById(turnoId);
-    if (!turno) {
-      throw new NotFoundError(
-        `Turno con id ${turnoId} no encontrado`,
-        "TURNO_NO_ENCONTRADO",
-      );
-    }
-
-    if (turno.estado !== EstadoTurno.DISPONIBLE) {
-      throw new BadRequestError(
-        `El turno no está disponible. Estado actual: ${turno.estado}`,
-        "TURNO_NO_DISPONIBLE",
-      );
-    }
-
-    turno.paciente = pacienteId;
-    turno.actualizarEstado(
-      EstadoTurno.RESERVADO,
-      pacienteId,
-      "Reserva por paciente",
-    );
-
-    const turnoGuardado = await this.turnoRepository.guardar(turno);
-
-    const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
-    try {
-      await this.notificacionesService.create({
-        destinatario: turno.medico,
-        remitente: pacienteId,
-        mensaje: `El paciente ${paciente.nombre} reservó un turno para ${nombreServicio}.`,
-      });
-    } catch (notifErr) {
-      console.error('[PacienteService] Error al enviar notificación de reserva:', notifErr.message);
-    }
-
-    return turnoGuardado;
-  }
-
-  async cancelarTurno(pacienteId, turnoId, motivo) {
-    const paciente = await this.findById(pacienteId);
-
-    const turno = await this.turnoRepository.findById(turnoId);
-    if (!turno) {
-      throw new NotFoundError(
-        `Turno con id ${turnoId} no encontrado`,
-        "TURNO_NO_ENCONTRADO",
-      );
-    }
-
-    if (String(turno.paciente._id || turno.paciente) !== String(pacienteId)) {
-      throw new BadRequestError(
-        "No podés cancelar un turno que no te pertenece",
-        "TURNO_AJENO",
-      );
-    }
-
-    const estadosCancelables = [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO];
-    if (!estadosCancelables.includes(turno.estado)) {
-      throw new BadRequestError(
-        `No se puede cancelar un turno en estado ${turno.estado}`,
-        "TURNO_NO_CANCELABLE",
-      );
-    }
-
-    const minutosRestantes =
-      (new Date(turno.fechaHora) - new Date()) / (1000 * 60);
-    if (minutosRestantes < MINUTOS_MINIMOS_CANCELACION) {
-      throw new BadRequestError(
-        `Solo se puede cancelar con al menos ${MINUTOS_MINIMOS_CANCELACION} minutos de anticipación. ` +
-        `Faltan ${Math.floor(minutosRestantes)} minutos para el turno.`,
-        "CANCELACION_FUERA_DE_PLAZO",
-      );
-    }
-
-    turno.actualizarEstado(EstadoTurno.CANCELADO, pacienteId, motivo);
-
-    const turnoGuardado = await this.turnoRepository.guardar(turno);
-
-    const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
-    try {
-      await this.notificacionesService.create({
-        destinatario: turno.medico,
-        remitente: pacienteId,
-        mensaje: `El paciente ${paciente.nombre} canceló el turno de ${nombreServicio}. Motivo: ${motivo}`,
-      });
-    } catch (notifErr) {
-      console.error('[PacienteService] Error al enviar notificación de cancelación:', notifErr.message);
-    }
-
-    return turnoGuardado;
   }
 
   async solicitarCambioFecha(pacienteId, turnoActualId, nuevoTurnoId) {

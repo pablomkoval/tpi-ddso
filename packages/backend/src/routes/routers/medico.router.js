@@ -301,65 +301,13 @@ export class MedicoRouter {
          *              description: Historial de consultas del paciente retornado con éxito
          */
         this.medicoRouter.get("/:idMedico/turnos/historial", verifyToken, (req, res, next) => { this.controller.obtenerHistorialTurnos(req, res, next); });
+
+
         this.medicoRouter.get("/:idPaciente/turnos", (req, res, next) => { this.controller.consultarHistorialPaciente(req, res, next); });
-
-        /**
-         * @swagger
-         * /medicos/{idMedico}/turnos/{turnoId}/realizados:
-         *  post:
-         *      summary: Marcar un turno médico como realizado/completado
-         *      tags: [Medicos - Gestión Turnos]
-         *      parameters:
-         *        - name: idMedico
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *        - name: turnoId
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *      responses:
-         *          200:
-         *              description: Turno registrado como completado correctamente
-         */
-        this.medicoRouter.post("/:idMedico/turnos/:turnoId/realizados", (req, res, next) => { this.controller.realizarTurno(req, res, next); });
-
-        /**
-         * @swagger
-         * /medicos/{idMedico}/turnos/:turnoId/cancelaciones:
-         *  post:
-         *      summary: Cancelar un turno desde la agenda del médico
-         *      tags: [Medicos - Gestión Turnos]
-         *      parameters:
-         *        - name: idMedico
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *        - name: turnoId
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *      requestBody:
-         *      required: true
-         *      content:
-         *          application/json:
-         *              schema:
-         *                  type: object
-         *                  properties:
-         *                      motivoCambio:
-         *                          type: string
-         *                          example: 'Urgencia en quirófano'
-         *      responses:
-         *          200:
-         *              description: Turno cancelado por el profesional de forma exitosa
-         */
-        this.medicoRouter.post("/:idMedico/turnos/:turnoId/cancelaciones", (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
+      
+        
+        
         this.medicoRouter.get("/:idMedico/agenda", verifyToken, (req, res, next) => { this.controller.obtenerAgenda(req, res, next); });
-        this.medicoRouter.post("/:idMedico/turnos/:turnoId/confirmaciones", verifyToken, (req, res, next) => { this.controller.confirmarTurno(req, res, next); });
     }
 
     getRouter() {

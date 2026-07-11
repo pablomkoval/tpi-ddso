@@ -402,89 +402,7 @@ export class MedicoService {
 
         return await this.turnoRepository.findByPaciente(pacienteId);
     }
-
-    async realizarTurno(medicoId, turnoId) {
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) {
-          throw new NotFoundError(
-            `Turno con id ${turnoId} no encontrado`,
-            "TURNO_NO_ENCONTRADO",
-          );
-        }
-
-        if (String(turno.medico._id || turno.medico) !== String(medicoId)) {
-          throw new BadRequestError(
-            "No podés marcar como realizado un turno que no te pertenece",
-            "TURNO_AJENO",
-          );
-        }
-
-        if (turno.estado !== EstadoTurno.CONFIRMADO) {
-          throw new BadRequestError(
-            `No se puede marcar como realizado un turno en estado ${turno.estado}`,
-            "TURNO_NO_REALIZABLE",
-          );
-        }
-
-        turno.actualizarEstado(EstadoTurno.REALIZADO, medicoId, "El turno se realizó correctamente");
-
-        const turnoGuardado = await this.turnoRepository.guardar(turno);
-
-        //Optamos por no mandar una notificacion al paciente cuando un turno fue marcado como realizado porque no tiene sentido.
-
-        return turnoGuardado;
-    }
-
-    async cancelarTurno(medicoId, turnoId, motivo) {
-        const medico = await this.findById(medicoId);
-
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) {
-          throw new NotFoundError(
-            `Turno con id ${turnoId} no encontrado`,
-            "TURNO_NO_ENCONTRADO",
-          );
-        }
-
-        if (String(turno.medico._id || turno.medico) !== String(medicoId)) {
-          throw new BadRequestError(
-            "No podés cancelar un turno que no te pertenece",
-            "TURNO_AJENO",
-          );
-        }
-
-        const estadosCancelables = [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO];
-        if (!estadosCancelables.includes(turno.estado)) {
-          throw new BadRequestError(
-            `No se puede cancelar un turno en estado ${turno.estado}`,
-            "TURNO_NO_CANCELABLE",
-          );
-        }
-
-        const minutosRestantes =
-          (new Date(turno.fechaHora) - new Date()) / (1000 * 60);
-        if (minutosRestantes < MINUTOS_MINIMOS_CANCELACION) {
-          throw new BadRequestError(
-            `Solo se puede cancelar con al menos ${MINUTOS_MINIMOS_CANCELACION} minutos de anticipación. ` +
-              `Faltan ${Math.floor(minutosRestantes)} minutos para el turno.`,
-            "CANCELACION_FUERA_DE_PLAZO",
-          );
-        }
-
-        turno.actualizarEstado(EstadoTurno.CANCELADO, medicoId, motivo);
-
-        const turnoGuardado = await this.turnoRepository.guardar(turno);
-
-        const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
-        await this.notificacionesService.create({
-            destinatario: turno.paciente,
-            remitente: medicoId,
-            mensaje: `El medico ${medico.nombre} canceló el turno de ${nombreServicio}. Motivo: ${motivo}`,
-        });
-
-        return turnoGuardado;
-    }
-
+    
     async findAllConTurnos(){
         return await this.medicoRepository.findAllConTurnos();
     }
@@ -552,45 +470,5 @@ export class MedicoService {
                 totalPages: resultado.totalPages
             }
         };
-    }
-
-    async confirmarTurno(medicoId, turnoId) {
-        const turno = await this.turnoRepository.findById(turnoId);
-        if (!turno) {
-            throw new NotFoundError(
-                `Turno con id ${turnoId} no encontrado`,
-                "TURNO_NO_ENCONTRADO",
-            );
-        }
-        if (String(turno.medico._id || turno.medico) !== String(medicoId)) {
-            throw new BadRequestError(
-                "No podés confirmar un turno que no te pertenece",
-                "TURNO_AJENO",
-            );
-        }
-        if (turno.estado !== EstadoTurno.RESERVADO) {
-            throw new BadRequestError(
-                `No se puede confirmar un turno en estado ${turno.estado}`,
-                "TURNO_NO_CONFIRMABLE",
-            );
-        }
-        turno.actualizarEstado(EstadoTurno.CONFIRMADO, medicoId, "Confirmación por el médico");
-        const turnoGuardado = await this.turnoRepository.guardar(turno);
-
-        // Enviar notificación al paciente
-        try {
-            const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
-            const fechaHora = new Date(turno.fechaHora).toLocaleString("es-AR");
-
-            await this.notificacionesService.create({
-                destinatario: turno.paciente,
-                remitente: medicoId,
-                mensaje: `Tu turno de ${nombreServicio} para el ${fechaHora} fue confirmado por el médico.`,
-            });
-        } catch (notifErr) {
-            console.error('[MedicoService] Error al enviar notificación de confirmación:', notifErr.message);
-        }
-
-        return turnoGuardado;
     }
 }

@@ -122,62 +122,7 @@ export class PacienteRouter {
          */
         this.pacienteRouter.get("/:idPaciente/turnos", verifyToken, (req, res, next) => { this.controller.consultarHistorial(req, res, next); });
 
-        /**
-         * @swagger
-         * /pacientes/{idPaciente}/turnos/{turnoId}/reservaciones:
-         *  post:
-         *      summary: Reservar un turno específico para el paciente
-         *      tags: [Pacientes - Flujo Turnos]
-         *      parameters:
-         *        - name: idPaciente
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *        - name: turnoId
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *      responses:
-         *          200:
-         *              description: Turno reservado con éxito
-         */
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/reservaciones", verifyToken, (req, res, next) => { this.controller.reservarTurno(req, res, next); });
-
-        /**
-         * @swagger
-         * /pacientes/{idPaciente}/turnos/{turnoId}/cancelaciones:
-         *  post:
-         *      summary: Cancelar un turno desde el flujo del paciente
-         *      tags: [Pacientes - Flujo Turnos]
-         *      parameters:
-         *        - name: idPaciente
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *        - name: turnoId
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *      requestBody:
-         *          required: true
-         *          content:
-         *              application/json:
-         *                  schema:
-         *                      type: object
-         *                      properties:
-         *                          motivoCambio:
-         *                              type: string
-         *                              example: 'Superposición con otra consulta'
-         *      responses:
-         *          204:
-         *              description: Turno cancelado correctamente
-         */
-        this.pacienteRouter.post("/:idPaciente/turnos/:turnoId/cancelaciones", verifyToken, (req, res, next) => { this.controller.cancelarTurno(req, res, next); });
-
+  
         /**
          * @swagger
          * /pacientes/{idPaciente}/turnos/{turnoId}/cambios:

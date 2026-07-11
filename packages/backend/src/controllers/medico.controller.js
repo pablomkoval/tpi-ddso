@@ -253,29 +253,6 @@ export class MedicoController {
         }
     }
 
-    async realizarTurno(req, res, next) {
-        try {
-            const idMedico = parsearId(req.params.idMedico);
-            const turnoId = parsearId(req.params.turnoId);
-            const turnoRealizado = await this.medicoService.realizarTurno(idMedico, turnoId);
-            res.status(200).json(turnoRealizado);
-        } catch (error) {
-            return next(error);
-        }
-    }
-
-    async cancelarTurno(req, res, next) {
-        try {
-            const idMedico = parsearId(req.params.idMedico);
-            const turnoId = parsearId(req.params.turnoId);
-            const { motivo } = req.body;
-            const turnoCancelado = await this.medicoService.cancelarTurno(idMedico, turnoId, motivo);
-            res.status(200).json(turnoCancelado);
-        } catch (error) {
-            return next(error);
-        }
-    }
-
     async obtenerAgenda(req, res, next) {
         try {
             const idMedico = parsearId(req.params.idMedico);
@@ -294,17 +271,6 @@ export class MedicoController {
             const limit = parseInt(req.query.limit) || 10;
             const resultado = await this.medicoService.obtenerHistorialTurnos(idMedico, page, limit);
             res.status(200).json(resultado);
-        } catch (error) {
-            return next(error);
-        }
-    }
-
-    async confirmarTurno(req, res, next) {
-        try {
-            const idMedico = parsearId(req.params.idMedico);
-            const turnoId = parsearId(req.params.turnoId);
-            const turnoConfirmado = await this.medicoService.confirmarTurno(idMedico, turnoId);
-            res.status(200).json(turnoConfirmado);
         } catch (error) {
             return next(error);
         }

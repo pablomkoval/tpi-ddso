@@ -91,7 +91,7 @@ const obraSocialRouter = new ObraSocialRouter(obraSocialController);
 export default function inyectarDependenciasYRouter(routerGeneral) {
     routerGeneral.use("/medicos", medicoRouter.getRouter())
     routerGeneral.use("/pacientes", pacienteRouter.getRouter())
-    routerGeneral.use("/turnos", verifyToken,turnoRouter.getRouter())
+    routerGeneral.use("/turnos", verifyToken, turnoRouter.getRouter())
     routerGeneral.use("/solicitudes-cambio", verifyToken, solicitudCambioTurnoRouter.getRouter())
     routerGeneral.use("/notificaciones", verifyToken, notiRouter.getRouter())
     routerGeneral.use("/servicios", servicioRouter.getRouter())

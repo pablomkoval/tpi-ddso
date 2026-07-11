@@ -1,4 +1,5 @@
 import express from "express";
+import { verifyToken } from "../../middlewares/auth.middleware.js";
 
 
 export class TurnoRouter {
@@ -62,12 +63,9 @@ export class TurnoRouter {
          *        description: El turno solicitado no existe
          */
         this.turnoRouter.get("/:id", (req, res, next) => { this.controller.getById(req, res, next); });
+        this.turnoRouter.patch("/:id", verifyToken, (req, res, next) => { this.controller.cambiarEstado(req, res, next); });
 
-
-        //cambiar las dos rutas a unas que no tengan verbos o juntar los dos en uno llamado "/:id/estados" y mandarle el estado del turno(?)
-        // this.turnoRouter.put("/:id/reservar", (req, res, next) => { this.controller.reservar(req, res, next); });
-        // this.turnoRouter.delete("/:id/cancelar", (req, res, next) => { this.controller.cancelar(req, res, next); });
-
+    
 
         /**
          * @swagger
@@ -95,12 +93,7 @@ export class TurnoRouter {
          *          200:
          *              description: Estado actualizado e ingresado al historial de estados
          */
-        this.turnoRouter.post("/:id/estados", (req, res, next) => { this.controller.cambiarEstado(req, res, next); });
-
-        // 2 implementaciones vigentes, una vuela
-        this.turnoRouter.put("/:id/reservar", (req, res, next) => { this.controller.reservar(req, res, next); });
-        this.turnoRouter.delete("/:id/cancelar", (req, res, next) => { this.controller.cancelar(req, res, next); });
-
+        this.turnoRouter.patch("/:id/estados", (req, res, next) => { this.controller.cambiarEstado(req, res, next); });
     }
 
     getRouter() {
@@ -108,23 +101,3 @@ export class TurnoRouter {
     }
 }
 
-/* import TurnoController from "../../controllers/turnos/TurnoController.js";
-
-const turnoRouter = express.Router();
-const turnoController = new TurnoController();
-
-
-turnoRouter.route('/disponibles')
-    .get((req, res, next) => turnoController.getDisponibles(req, res, next)); 
-
-turnoRouter.route('/:id')
-    .get((req, res, next) => turnoController.getById(req, res, next));
-
-//cambiar las dos rutas a unas que no tengan verbos o juntar los dos en uno llamado "/:id/estados" y mandarle el estado del turno(?)
-turnoRouter.route('/:id/reservar')
-    .post((req, res, next) => turnoController.reservar(req, res, next));
-
-turnoRouter.route('/:id/cancelar')
-    .post((req, res, next) => turnoController.cancelar(req, res, next));
-
-export default turnoRouter; */

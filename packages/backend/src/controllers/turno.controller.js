@@ -2,6 +2,7 @@
 import { extraerPaginacion } from "../utils/extraerPaginacion.js";
 import { filtroBusqTurnoPaciente } from "../validators/turnos.schema.zod.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
+import { parsearId } from "../utils/parsearId.js";
 
 
 export class TurnoController {
@@ -83,36 +84,19 @@ export class TurnoController {
 
   async cambiarEstado(req, res, next) {
     try {
-      const { id } = req.params;
-      const { estado, ...datos } = req.body
+      const turnoId = parsearId(req.params.id);
+      const estado = this.validarEstadoTurno(req.body.estado);
+      const usuarioId = req.user.id;
+      const usuarioRol = this.validarRolUsuario(req.body.rol);
+      const motivoCambio = req.body.motivo;
 
-      if (!estado) {
-        return res.status(400).json({ status: "error", message: "Debe indicar el estado destino" });
-      }
+      const turnoActualizado = await this.turnoService.cambiarEstado(turnoId, estado, usuarioId, usuarioRol, motivoCambio);
+      //ver si cancelar devuelve el turno
+      res.status(200).json({
+        status: "success",
+        data: this.turnoDetalleToDTO(turnoActualizado),
+      });
 
-      if (estado === "RESERVADO") {
-        const { pacienteId } = datos;
-        if (!pacienteId) {
-          return res.status(400).json({ status: "error", message: "Debe indicar el pacienteId para reservar" });
-        }
-        // Usamos pacienteService para mantener todas las validaciones de negocio
-        // (estado disponible, notificación al médico, etc.)
-        const turnoReservado = await this.pacienteService.reservarTurno(pacienteId, id);
-        return res.status(200).json({
-          status: "success",
-          data: turnoReservado,
-        });
-      }
-
-      if (estado === "CANCELADO") {
-        const turnoCancelado = await this.turnoService.cancelarTurno(id, datos);
-        return res.status(200).json({
-          status: "success",
-          data: turnoCancelado
-        });
-      }
-
-      return res.status(400).json({ status: "error", message: `Estado '${estado}' no válido` });
 
     } catch (error) {
       next(error);
@@ -131,6 +115,24 @@ export class TurnoController {
 
     return resultado.data
   }
+
+  validarEstadoTurno(estado) {
+    const estadosValidos = ["RESERVADO", "CANCELADO", "CONFIRMADO", "REALIZADO"];
+    if (!estadosValidos.includes(estado)) {
+      throw new BadRequestError("Estado no válido");
+    }
+    return estado;
+  }
+
+  validarRolUsuario(rol) {
+    const rolesValidos = ["PACIENTE", "MEDICO"];
+    if (!rolesValidos.includes(rol)) {
+      throw new BadRequestError("Rol de usuario no válido");
+    }
+    return rol;
+  }
+
+
 
   turnoDisponibleToDTO(turno){
     return {
@@ -196,18 +198,3 @@ export class TurnoController {
 
 }
 
-//poner error si mandan otra cosa que no sea RESERVADO o CANCELADO, tipo error de estado no valido algo asi
-/* async reservar(req, res, next) {
-  try {
-    const turnoReservado = await this.turnoService.reservarTurno(req.params.id, req.body);
-    return res.status(200).json(turnoReservado); 
-    async cancelar(req, res, next) {
-  try {
-    await this.turnoService.cancelarTurno(req.params.id, req.body);
-    return res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-}
-    
-    */

@@ -23,6 +23,11 @@ export class Turno {
   }
 
   actualizarEstado(nuevoEstado, quien, motivoCambio) {
+
+    if (!this.esEstadoValido(nuevoEstado)) {
+      throw new Error(`Estado no válido: ${nuevoEstado}`);
+    }
+    
     this.estado = nuevoEstado;
     // Le pasamos this.id en vez de this — evita la referencia circular
     const cambio = new CambioEstadoTurno(
@@ -33,4 +38,24 @@ export class Turno {
     );
     this.historialEstados.push(cambio);
   }
+
+  esEstadoValido(estado) {
+
+    switch (this.estado) {
+      case EstadoTurno.DISPONIBLE:
+        return [EstadoTurno.RESERVADO].includes(estado);
+
+      case EstadoTurno.RESERVADO:
+        return [EstadoTurno.CONFIRMADO, EstadoTurno.CANCELADO].includes(estado);
+
+      case EstadoTurno.CONFIRMADO:
+        return [EstadoTurno.REALIZADO, EstadoTurno.CANCELADO].includes(estado);
+      //cancelado se toma que no podria volver a ser un turno disponible
+      default:
+        return false;
+    }
+  }
+
+
+
 }

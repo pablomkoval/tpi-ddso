@@ -117,56 +117,56 @@ export class TurnoRepository {
 
 
     if (filtros.servicios?.length > 0) {
-        query.servicio = {
-            $in: filtros.servicios
-        };
+      query.servicio = {
+        $in: filtros.servicios
+      };
     } else if (filtros.prestacion) {
-        query.servicio = filtros.prestacion;
+      query.servicio = filtros.prestacion;
     }
 
     if (filtros.medico) {
-        query.medico = filtros.medico;
+      query.medico = filtros.medico;
     } else if (filtros.medicoId) {
-        query.medico = filtros.medicoId;
+      query.medico = filtros.medicoId;
     }
 
     if (filtros.sede) {
-        query.sede = filtros.sede;
+      query.sede = filtros.sede;
     } else if (filtros.sedeId) {
-        query.sede = filtros.sedeId;
+      query.sede = filtros.sedeId;
     }
 
     if (filtros.fechaDesde || filtros.fechaHasta) {
-        query.fechaHora = {};
+      query.fechaHora = {};
 
-        if (filtros.fechaDesde) {
-            query.fechaHora.$gte = new Date(filtros.fechaDesde);
-        }
+      if (filtros.fechaDesde) {
+        query.fechaHora.$gte = new Date(filtros.fechaDesde);
+      }
 
-        if (filtros.fechaHasta) {
-            const fechaFin = new Date(filtros.fechaHasta);
-            if (typeof filtros.fechaHasta === 'string' && !filtros.fechaHasta.includes('T')) {
-                fechaFin.setUTCHours(23, 59, 59, 999);
-            }
-            query.fechaHora.$lte = fechaFin;
+      if (filtros.fechaHasta) {
+        const fechaFin = new Date(filtros.fechaHasta);
+        if (typeof filtros.fechaHasta === 'string' && !filtros.fechaHasta.includes('T')) {
+          fechaFin.setUTCHours(23, 59, 59, 999);
         }
+        query.fechaHora.$lte = fechaFin;
+      }
     }
 
     const turnosQuery = this.model
-        .find(query)
-        .populate("medico")
-        .populate({
-            path: "servicio",
-            populate: {
-                path: "servicioUnico"
-            }
-        })
-        .populate("sede")
-        .lean();
+      .find(query)
+      .populate("medico")
+      .populate({
+        path: "servicio",
+        populate: {
+          path: "servicioUnico"
+        }
+      })
+      .populate("sede")
+      .lean();
 
     const [turnos, total] = await Promise.all([
-        turnosQuery,
-        this.model.countDocuments(query)
+      turnosQuery,
+      this.model.countDocuments(query)
     ]);
 
     return { turnos, totalTurnos: total };
@@ -176,70 +176,70 @@ export class TurnoRepository {
     const query = {};
 
     if (filtros.medico) {
-        query.medico = filtros.medico;
+      query.medico = filtros.medico;
     }
 
     if (filtros.fechaDesde || filtros.fechaHasta) {
-        query.fechaHora = {};
-        if (filtros.fechaDesde) {
-            query.fechaHora.$gte = new Date(filtros.fechaDesde);
-        }
-        if (filtros.fechaHasta) {
-            query.fechaHora.$lte = new Date(filtros.fechaHasta);
-        }
+      query.fechaHora = {};
+      if (filtros.fechaDesde) {
+        query.fechaHora.$gte = new Date(filtros.fechaDesde);
+      }
+      if (filtros.fechaHasta) {
+        query.fechaHora.$lte = new Date(filtros.fechaHasta);
+      }
     }
 
     if (filtros.estados && filtros.estados.length > 0) {
-        query.estado = { $in: filtros.estados };
+      query.estado = { $in: filtros.estados };
     }
 
     return await this.model
-        .find(query)
-        .populate("medico")
-        .populate({
-            path: "servicio",
-            populate: { path: "servicioUnico" }
-        })
-        .populate("sede")
-        .sort({ fechaHora: 1 });
+      .find(query)
+      .populate("medico")
+      .populate({
+        path: "servicio",
+        populate: { path: "servicioUnico" }
+      })
+      .populate("sede")
+      .sort({ fechaHora: 1 });
   }
 
   async buscarTurnosPaginados(filtros, page = 1, limit = 10) {
     const query = {};
 
     if (filtros.medico) {
-        query.medico = filtros.medico;
+      query.medico = filtros.medico;
     }
 
     if (filtros.fechaDesde || filtros.fechaHasta) {
-        query.fechaHora = {};
-        if (filtros.fechaDesde) {
-            query.fechaHora.$gte = new Date(filtros.fechaDesde);
-        }
-        if (filtros.fechaHasta) {
-            query.fechaHora.$lte = new Date(filtros.fechaHasta);
-        }
+      query.fechaHora = {};
+      if (filtros.fechaDesde) {
+        query.fechaHora.$gte = new Date(filtros.fechaDesde);
+      }
+      if (filtros.fechaHasta) {
+        query.fechaHora.$lte = new Date(filtros.fechaHasta);
+      }
     }
 
     if (filtros.estados && filtros.estados.length > 0) {
-        query.estado = { $in: filtros.estados };
+      query.estado = { $in: filtros.estados };
     }
 
     const skip = (page - 1) * limit;
 
     const [turnos, total] = await Promise.all([
-        this.model
-            .find(query)
-            .populate("medico")
-            .populate({
-                path: "servicio",
-                populate: { path: "servicioUnico" }
-            })
-            .populate("sede")
-            .sort({ fechaHora: -1 })
-            .skip(skip)
-            .limit(limit),
-        this.model.countDocuments(query)
+      this.model
+        .find(query)
+        .populate("medico")
+        .populate({
+          path: "servicio",
+          populate: { path: "servicioUnico" }
+        })
+        .populate("sede")
+        .sort({ fechaHora: -1 })
+        .skip(skip)
+        .limit(limit),
+      this.model.countDocuments(query)
     ]);
 
     const totalPages = Math.ceil(total / limit);
