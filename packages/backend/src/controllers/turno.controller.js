@@ -6,7 +6,7 @@ import { parsearId } from "../utils/parsearId.js";
 
 
 export class TurnoController {
-  
+
 
   constructor(turnoService, pacienteService) {
     this.turnoService = turnoService;
@@ -20,16 +20,16 @@ export class TurnoController {
   async getDisponibles(req, res, next) {
     try {
 
-      
+
       const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
-      
+
       const paginacion = extraerPaginacion(req.query);
       const filtros = this.validarFiltros(req.query);
       const resultado = await this.turnoService.buscarDisponibles(paginacion, filtros, paciente);
-      
+
       res.status(200).json({
         status: "success",
-        data:{
+        data: {
           turnos: resultado.turnos.map(t => this.turnoDisponibleToDTO(t)),
           pagination: resultado.pagination
         }
@@ -58,7 +58,7 @@ export class TurnoController {
   async getById(req, res, next) {
     try {
       const turno = await this.turnoService.obtenerPorId(req.params.id);
-      
+
       let turnoConCosto = turno;
       if (req.user) {
         try {
@@ -83,12 +83,20 @@ export class TurnoController {
   }
 
   async cambiarEstado(req, res, next) {
+    console.error("Hola voy a cambiar el estado de un turno");
+
     try {
       const turnoId = parsearId(req.params.id);
       const estado = this.validarEstadoTurno(req.body.estado);
+      console.error("Voy a agarrar el user id");
+
       const usuarioId = req.user.id;
+      console.error("Consegui el user id", usuarioId);
       const usuarioRol = this.validarRolUsuario(req.body.rol);
+      console.error("valide usuario");
       const motivoCambio = req.body.motivo;
+      console.error("consegui motivo", motivoCambio);
+
 
       const turnoActualizado = await this.turnoService.cambiarEstado(turnoId, estado, usuarioId, usuarioRol, motivoCambio);
       //ver si cancelar devuelve el turno
@@ -134,32 +142,32 @@ export class TurnoController {
 
 
 
-  turnoDisponibleToDTO(turno){
+  turnoDisponibleToDTO(turno) {
     return {
-        id: turno._id,
+      id: turno._id,
 
-        fechaHora: turno.fechaHora,
+      fechaHora: turno.fechaHora,
 
-        medico: {
-            id: turno.medico._id,
-            nombre: turno.medico.nombre,
-        },
+      medico: {
+        id: turno.medico._id,
+        nombre: turno.medico.nombre,
+      },
 
-        sede: {
-            id: turno.sede._id,
-            nombre: turno.sede.nombre,
-            direccion: turno.sede.direccion,
-        },
+      sede: {
+        id: turno.sede._id,
+        nombre: turno.sede.nombre,
+        direccion: turno.sede.direccion,
+      },
 
-        servicio: {
-            id: turno.servicio.servicioUnico._id,
-            nombre: turno.servicio.servicioUnico.nombre,
-            tipo: turno.servicio.servicioUnico.tipoServicio,
-            duracionMinutos: turno.servicio.duracionTurnoEnMins,
-        },
+      servicio: {
+        id: turno.servicio.servicioUnico._id,
+        nombre: turno.servicio.servicioUnico.nombre,
+        tipo: turno.servicio.servicioUnico.tipoServicio,
+        duracionMinutos: turno.servicio.duracionTurnoEnMins,
+      },
 
-        cobertura: turno.cobertura,
-        costoPaciente: turno.costoPaciente,
+      cobertura: turno.cobertura,
+      costoPaciente: turno.costoPaciente,
     };
 
   }

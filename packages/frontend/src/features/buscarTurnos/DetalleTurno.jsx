@@ -29,27 +29,27 @@ import {
 } from '@mui/icons-material';
 
 const ESTADO_CONFIG = {
-  DISPONIBLE:  { label: 'Disponible',  color: 'success' },
-  RESERVADO:   { label: 'Reservado',   color: 'warning' },
-  CONFIRMADO:  { label: 'Confirmado',  color: 'primary' },
-  CANCELADO:   { label: 'Cancelado',   color: 'error'   },
-  REALIZADO:   { label: 'Realizado',   color: 'default' },
-  COMPLETADO:  { label: 'Completado',  color: 'default' },
+  DISPONIBLE: { label: 'Disponible', color: 'success' },
+  RESERVADO: { label: 'Reservado', color: 'warning' },
+  CONFIRMADO: { label: 'Confirmado', color: 'primary' },
+  CANCELADO: { label: 'Cancelado', color: 'error' },
+  REALIZADO: { label: 'Realizado', color: 'default' },
+  COMPLETADO: { label: 'Completado', color: 'default' },
 };
 
 export default function DetalleTurno() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading]       = useState(true);
-  const [turno, setTurno]           = useState(null);
-  const [paciente, setPaciente]     = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [turno, setTurno] = useState(null);
+  const [paciente, setPaciente] = useState(null);
   const [errorCarga, setErrorCarga] = useState(null);
 
   // Reserva
-  const [reservando, setReservando]     = useState(false);
+  const [reservando, setReservando] = useState(false);
   const [errorReserva, setErrorReserva] = useState(null);
-  const [snackbar, setSnackbar]         = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     const cargar = async () => {
@@ -78,9 +78,8 @@ export default function DetalleTurno() {
     setReservando(true);
     setErrorReserva(null);
     try {
-      const pacienteId = paciente._id || paciente.id;
-      const turnoId    = turno.id || turno._id;
-      await reservarTurno(pacienteId, turnoId);
+      const turnoId = turno.id || turno._id;
+      await reservarTurno(turnoId);
       setSnackbar({ open: true, message: '¡Turno reservado con éxito! Podés verlo en Mis Turnos.', severity: 'success' });
       // Recargar para mostrar el estado actualizado
       const turnoActualizado = await obtenerTurnoPorId(id);
@@ -118,9 +117,9 @@ export default function DetalleTurno() {
     );
   }
 
-  const estadoConfig   = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: 'default' };
+  const estadoConfig = ESTADO_CONFIG[turno.estado] ?? { label: turno.estado, color: 'default' };
   const estaDisponible = turno.estado === 'DISPONIBLE';
-  const iniciales      = turno.medico?.nombre
+  const iniciales = turno.medico?.nombre
     ? turno.medico.nombre.split(' ').filter(Boolean).slice(0, 2).map(n => n[0].toUpperCase()).join('')
     : '?';
 
@@ -203,18 +202,18 @@ export default function DetalleTurno() {
                       turno.cobertura === 'NO_CUBIERTA' || turno.cobertura === 'SIN_COBERTURA'
                         ? 'Sin Cobertura'
                         : turno.cobertura === 'PARCIAL'
-                        ? 'Cobertura Parcial'
-                        : turno.cobertura === 'TOTAL' || turno.cobertura === 'COMPLETA'
-                        ? 'Cobertura Completa'
-                        : turno.cobertura
+                          ? 'Cobertura Parcial'
+                          : turno.cobertura === 'TOTAL' || turno.cobertura === 'COMPLETA'
+                            ? 'Cobertura Completa'
+                            : turno.cobertura
                     }
                     size="small"
                     color={
                       turno.cobertura === 'NO_CUBIERTA' || turno.cobertura === 'SIN_COBERTURA'
                         ? 'error'
                         : turno.cobertura === 'PARCIAL'
-                        ? 'warning'
-                        : 'success'
+                          ? 'warning'
+                          : 'success'
                     }
                     sx={{ mt: 0.5, fontWeight: 700, fontSize: '0.7rem' }}
                   />
@@ -236,8 +235,8 @@ export default function DetalleTurno() {
               {turno.estado === 'RESERVADO' || turno.estado === 'CONFIRMADO'
                 ? 'Este turno ya está reservado.'
                 : turno.estado === 'CANCELADO'
-                ? 'Este turno fue cancelado.'
-                : `Estado del turno: ${turno.estado}`
+                  ? 'Este turno fue cancelado.'
+                  : `Estado del turno: ${turno.estado}`
               }
             </Alert>
           )}

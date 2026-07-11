@@ -19,8 +19,12 @@ export const getAgenda = async (medicoId, fechaDesde, fechaHasta) => {
     return response.data;
 };
 
-export const confirmarTurno = async (medicoId, turnoId) => {
-    const response = await axios.post(`${API_BASE}/medicos/${medicoId}/turnos/${turnoId}/confirmaciones`, {}, getHeaders());
+export const confirmarTurno = async (turnoId) => {
+    const response = await axios.patch(
+        `${API_BASE}/turnos/${turnoId}`,
+        { estado: 'CONFIRMADO', rol: 'MEDICO' },
+        getHeaders()
+    );
     return response.data;
 };
 
@@ -29,13 +33,21 @@ export const getHistorialTurnos = async (medicoId, page = 1, limit = 10) => {
     return response.data;
 };
 
-export const realizarTurno = async (medicoId, turnoId) => {
-    const response = await axios.post(`${API_BASE}/medicos/${medicoId}/turnos/${turnoId}/realizados`, {}, getHeaders());
+export const realizarTurno = async (turnoId) => {
+    const response = await axios.patch(
+        `${API_BASE}/turnos/${turnoId}`,
+        { estado: 'REALIZADO', rol: 'MEDICO' },
+        getHeaders()
+    );
     return response.data;
 };
 
-export const cancelarTurno = async (medicoId, turnoId, motivo) => {
-    const response = await axios.post(`${API_BASE}/medicos/${medicoId}/turnos/${turnoId}/cancelaciones`, { motivo }, getHeaders());
+export const cancelarTurno = async (turnoId, motivo) => {
+    const response = await axios.patch(
+        `${API_BASE}/turnos/${turnoId}`,
+        { estado: 'CANCELADO', rol: 'MEDICO', motivo },
+        getHeaders()
+    );
     return response.data;
 };
 

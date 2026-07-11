@@ -5,7 +5,7 @@ import pacienteRepository from "../repositories (deprecado)/pacienteRepository.j
 import { NivelCobertura } from "../domain/enum/NivelCobertura.js";
 import AppError from "../shared/errors/AppError.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
-import EstadoTurno from "../domain/enum/EstadoTurno.js";
+import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
 
 // enviar a un .env
 const PORCENTAJE_PAGO_PARCIAL = 0.5;
@@ -103,11 +103,13 @@ export class TurnoService {
     medicoService,
     pacienteService,
     servicioService,
+    notificacionesService,
   ) {
     this.turnoRepository = turnoRepository;
     this.medicoService = medicoService;
     this.pacienteService = pacienteService;
     this.servicioService = servicioService;
+    this.notificacionesService = notificacionesService
   }
 
 
@@ -264,37 +266,6 @@ export class TurnoService {
     }
   }
 
-  /* 
-  
-    async buscarDisponiblesFiltrados({ numeroPagina = 1, limitePorPagina = 10, filtros = {} } = {}) {
-  
-      validarPaginacion(numeroPagina, limitePorPagina)
-  
-      const filtrosArmados = {};
-      if (filtros?.trim()) {
-        filtrosArmados.nombre = {
-          $regex: filtroNombre,
-          $options: "i"
-        };
-      }
-  
-      const { turnos, totalTurnos } = await this.servicioRepository.findAllPaginated(
-        numeroPagina,
-        limitePorPagina,
-        filtrosArmados
-      )
-  
-      const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / limitePorPagina)
-  
-      return {
-        turnos,
-        numeroPagina,
-        limitePorPagina,
-        totalPaginas,
-        totalServicios
-      }
-    } */
-
   popularCostosTurnos(turnos, paciente) {
     return turnos.map((turno) => {
       const nivelCobertura = obtenerNivelCobertura(
@@ -355,7 +326,6 @@ export class TurnoService {
   ////////// CAMBIO ESTADO TURNO ////////////////////////////////////////
 
   async cambiarEstado(turnoId, estado, usuarioId, usuarioRol, motivoCambio = null) {
-
     /// BUSCAR DATOS ////////
     const turno = await this.turnoRepository.findById(turnoId);
     if (!turno) {
@@ -363,12 +333,14 @@ export class TurnoService {
     }
 
     let usuarioRemitente;
+    console.error("hola2");
 
     if (usuarioRol === "PACIENTE") {
       usuarioRemitente = await this.pacienteService.findByIdUsuario(usuarioId);
-    } else {
+    } else if (usuarioRol === "MEDICO") {
       usuarioRemitente = await this.medicoService.findByIdUsuario(usuarioId);
-
+    } else {
+      throw new BadRequestError("Rol de usuario invalido", "ROL_USUARIO_INVALIDO")
     }
     if (!usuarioRemitente) {
       throw new AppError("Usuario no encontrado", 404, "USUARIO_NO_ENCONTRADO");
@@ -379,9 +351,14 @@ export class TurnoService {
     this.estadoValidoSegunRolUsuario(estado, usuarioRol);
 
     if (estado !== EstadoTurno.RESERVADO) {
-      this.turnoCorrespondeAUsuario(turno, usuarioRemitente);
-    }
+      /* Si recien se quiere reservar, entonces lo hace el paciente
+      y todavia no le corresponde el turno, no se debe correr el chequeo*/
 
+      this.turnoCorrespondeAUsuario(turno, usuarioRemitente);
+    } else{
+      /* en efecto es una reserva, se tiene que asignar al turno */
+      turno.paciente = String(usuarioRemitente._id)
+    }
 
     if (estado === EstadoTurno.CANCELADO) {
       const minutosRestantes = (new Date(turno.fechaHora) - new Date()) / (1000 * 60);
@@ -393,6 +370,7 @@ export class TurnoService {
         );
       }
     }
+    console.error("hola final");
 
     /// GUARDAR TURNO /////
     turno.actualizarEstado(estado, usuarioRemitente._id, motivoCambio);
@@ -401,27 +379,18 @@ export class TurnoService {
 
     /// NOTIFICAR ////
 
-    const nombreServicio = turnoActualizado.servicio?.servicioUnico?.nombre ?? turnoActualizado.servicio?.nombre ?? "servicio no especificado";
-
     if (estado !== EstadoTurno.REALIZADO) {
-      try {
-        await this.notificacionesService.create({
-          destinatario: usuarioRol === "PACIENTE" ? turno.medico : turno.paciente,
-          remitente: usuarioRemitente._id,
-          mensaje: usuarioRol === "PACIENTE" ? `El paciente ${usuarioRemitente.nombre} ha ${estado.toLowerCase()} el turno para ${nombreServicio}.` : `El profesional ${usuarioRemitente.nombre} ha ${estado.toLowerCase()} el turno para ${nombreServicio}.`,
-        });
-      } catch (notifErr) {
-        console.error('[PacienteService] Error al enviar notificación de reserva:', notifErr.message);
-      }
+      this.notificarCambioEstadoTurno(turnoActualizado, estado, usuarioRemitente, usuarioRol)
     }
 
     return turnoActualizado;
-
   }
 
 
   turnoCorrespondeAUsuario(turno, usuario) {
-    if (turno.paciente !== usuario._id && turno.medico !== usuario._id) {
+    if (String(turno.paciente) !== String(usuario._id) && String(turno.medico._id) !== String(usuario._id)) {
+      
+
       throw new BadRequestError(
         "El turno no corresponde al usuario que intenta cambiar su estado",
         "USUARIO_NO_CORRESPONDE_TURNO",
@@ -430,23 +399,41 @@ export class TurnoService {
   }
 
 
-  estadoValidoSegunRolUsuario(estado, rolUsuario){
+  estadoValidoSegunRolUsuario(estado, rolUsuario) {
     const estadosValidosMedico = [EstadoTurno.CONFIRMADO, EstadoTurno.REALIZADO, EstadoTurno.CANCELADO];
     const estadosValidosPaciente = [EstadoTurno.RESERVADO, EstadoTurno.CANCELADO];
 
+    const esEstadoValido =
+      (rolUsuario === "PACIENTE" && estadosValidosPaciente.includes(estado)) ||
+      (rolUsuario === "MEDICO" && estadosValidosMedico.includes(estado));
 
-    if(rolUsuario === "PACIENTE" && estadosValidosPaciente.contains(estado) || rolUsuario === "MEDICO" && estadosValidosMedico.contains(estado)){
-      return; //evita lanzar error
+    if (esEstadoValido) {
+      return;
     }
 
     throw new BadRequestError(
-        "El usuario no puede solicitar el cambio de turno a este estado",
-        "USUARIO_NO_CORRESPONDE_ESTADO_TURNO",
-      );
-    
-
+      "El usuario no puede solicitar el cambio de turno a este estado",
+      "USUARIO_NO_CORRESPONDE_ESTADO_TURNO",
+    );
   }
 
+  async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol) {
 
+    const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
+    const mensaje =
+      usuarioRol === "PACIENTE"
+        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio}.`
+        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio}.`;
 
+    try {
+      console.error("MI NOTIFICACIONES SERVICE: ",this.notificacionesService)
+      await this.notificacionesService.create({
+        destinatario: usuarioRol === "PACIENTE" ? turno.medico : turno.paciente,
+        remitente: usuarioRemitente._id,
+        mensaje,
+      });
+    } catch (notifErr) {
+      console.error('[TurnoService] Error al enviar notificación de cambio estado turno:', notifErr.message);
+    }
+  }
 }

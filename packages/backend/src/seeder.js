@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+//import mongoose from "mongoose";
 import { MongoDBClient } from "./config/database.js";
 import { DiaSemana } from "./domain/enum/DiaSemana.js";
 import { EstadoSolicitudCambioTurno } from "./domain/enum/EstadoSolicitudCambioTurno.js";

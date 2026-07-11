@@ -229,7 +229,7 @@ const AgendaMedica = () => {
         if (!medico || !selectedTurno) return;
         try {
             setActionLoading(true);
-            await confirmarTurno(medico.id || medico._id, selectedTurno.id);
+            await confirmarTurno(selectedTurno.id);
             setSnackbar({ open: true, mensaje: "Turno confirmado con éxito", tipo: "success" });
             cerrarDialog();
             await loadAgendaData();
@@ -245,7 +245,7 @@ const AgendaMedica = () => {
         if (!medico || !selectedTurno) return;
         try {
             setActionLoading(true);
-            await realizarTurno(medico.id || medico._id, selectedTurno.id);
+            await realizarTurno(selectedTurno.id);
             setSnackbar({ open: true, mensaje: "Turno marcado como realizado", tipo: "success" });
             cerrarDialog();
             await loadAgendaData();
@@ -262,7 +262,7 @@ const AgendaMedica = () => {
         if (!medico || !selectedTurno || !motivoCancelacion.trim()) return;
         try {
             setActionLoading(true);
-            await cancelarTurno(medico.id || medico._id, selectedTurno.id, motivoCancelacion.trim());
+            await cancelarTurno(selectedTurno.id, motivoCancelacion.trim());
             setSnackbar({ open: true, mensaje: "Turno cancelado correctamente", tipo: "success" });
             cerrarDialog();
             await loadAgendaData();

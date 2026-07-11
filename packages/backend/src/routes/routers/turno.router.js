@@ -93,7 +93,7 @@ export class TurnoRouter {
          *          200:
          *              description: Estado actualizado e ingresado al historial de estados
          */
-        this.turnoRouter.patch("/:id/estados", (req, res, next) => { this.controller.cambiarEstado(req, res, next); });
+        //this.turnoRouter.patch("/:id/estados", (req, res, next) => { this.controller.cambiarEstado(req, res, next); });
     }
 
     getRouter() {

@@ -77,7 +77,7 @@ export default function MisTurnos() {
         try {
             const pacienteId = paciente._id || paciente.id;
             const turnoId = modalCancelar.turno._id || modalCancelar.turno.id;
-            await cancelarTurno(pacienteId, turnoId, motivo);
+            await cancelarTurno(turnoId, motivo);
             setModalCancelar({ open: false, turno: null });
             mostrarMensaje('Turno cancelado correctamente.');
             await cargarDatos();

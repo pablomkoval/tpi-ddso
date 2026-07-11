@@ -38,10 +38,10 @@ export const getMisTurnos = async (pacienteId) => {
  * @param {string} motivo - Motivo de la cancelación (requerido)
  * @returns {Promise<Object>} turno cancelado
  */
-export const cancelarTurno = async (pacienteId, turnoId, motivo) => {
-    const response = await axios.post(
-        `${API_BASE}/pacientes/${pacienteId}/turnos/${turnoId}/cancelaciones`,
-        { motivo },
+export const cancelarTurno = async (turnoId, motivo) => {
+    const response = await axios.patch(
+        `${API_BASE}/turnos/${turnoId}`,
+        { estado: 'CANCELADO', rol: 'PACIENTE', motivo },
         getHeaders()
     );
     return response.data;
@@ -53,10 +53,10 @@ export const cancelarTurno = async (pacienteId, turnoId, motivo) => {
  * @param {string} turnoId
  * @returns {Promise<Object>} turno reservado
  */
-export const reservarTurno = async (pacienteId, turnoId) => {
-    const response = await axios.post(
-        `${API_BASE}/pacientes/${pacienteId}/turnos/${turnoId}/reservaciones`,
-        {},
+export const reservarTurno = async (turnoId) => {
+    const response = await axios.patch(
+        `${API_BASE}/turnos/${turnoId}`,
+        { estado: 'RESERVADO', rol: 'PACIENTE' },
         getHeaders()
     );
     return response.data;
