@@ -16,32 +16,32 @@ import axios from 'axios';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
 const API_BASE = 'http://localhost:4000';
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 const diasSemanaMap = {
     'Lunes': 1,
-    'Martes': 2, 
-    'Miércoles': 3, 
-    'Jueves': 4, 
-    'Viernes': 5, 
-    'Sábado': 6, 
+    'Martes': 2,
+    'Miércoles': 3,
+    'Jueves': 4,
+    'Viernes': 5,
+    'Sábado': 6,
     'Domingo': 0
 };
 
 const diasSemanaMapReverse = {
-    1: 'Lunes', 
-    2: 'Martes', 
-    3: 'Miércoles', 
-    4: 'Jueves', 
-    5: 'Viernes', 
-    6: 'Sábado', 
+    1: 'Lunes',
+    2: 'Martes',
+    3: 'Miércoles',
+    4: 'Jueves',
+    5: 'Viernes',
+    6: 'Sábado',
     0: 'Domingo'
 };
 
 const DefinirDisponibilidad = () => {
     const [medico, setMedico] = useState(null);
     const [sedesCatalogo, setSedesCatalogo] = useState([]);
-    const [diasSeleccionados, setDiasSeleccionados] = useState([]);
+    const [diaSeleccionado, setDiaSeleccionado] = useState(null);
     const [horaInicio, setHoraInicio] = useState('08:00');
     const [horaFin, setHoraFin] = useState('16:00');
     const [sede, setSede] = useState('');
@@ -92,17 +92,17 @@ const DefinirDisponibilidad = () => {
     }, []);
 
     const toggleDia = (dia) => {
-        if (diasSeleccionados.includes(dia)) {
-            setDiasSeleccionados(diasSeleccionados.filter(d => d !== dia));
+        if (diaSeleccionado === dia) {
+            setDiaSeleccionado(null);
         } else {
-            setDiasSeleccionados([...diasSeleccionados, dia]);
+            setDiaSeleccionado(dia);
         }
     };
 
     const handleGuardar = async (e) => {
         e.preventDefault();
-        if (diasSeleccionados.length === 0) {
-            showMsg("Debe seleccionar al menos un día de la semana.", "warning");
+        if (!diaSeleccionado) {
+            showMsg("Debe seleccionar un día de la semana.", "warning");
             return;
         }
         if (!sede) {
@@ -117,19 +117,18 @@ const DefinirDisponibilidad = () => {
         setActionLoading(true);
         try {
             const payload = {
-                disponibilidades: diasSeleccionados.map(dia => ({
-                    diaSemana: diasSemanaMap[dia],
+                disponibilidades: [{
+                    diaSemana: diasSemanaMap[diaSeleccionado],
                     horaDesde: horaInicio,
                     horaHasta: horaFin,
                     sede: sede,
                     prestacion: prestacion
-                }))
+                }]
             };
 
             const response = await axios.post(`${API_BASE}/medicos/${medico.id || medico._id}/disponibilidades`, payload, getHeaders());
             setMedico(response.data);
             showMsg("Disponibilidad guardada exitosamente.");
-            setDiasSeleccionados([]);
         } catch (error) {
             const errorMsg = error.response?.data?.message || "No se pudo guardar la disponibilidad.";
             showMsg(errorMsg, "error");
@@ -195,7 +194,7 @@ const DefinirDisponibilidad = () => {
                     No se pudieron cargar los datos del médico
                 </Typography>
                 <Typography color="text.secondary" variant="body1" sx={{ mb: 3 }}>
-                    Verifique que su usuario esté correctamente registrado como médico en el sistema y reinicie su servidor backend.
+                    Verifique que su usuario esté correctamente registrado como médico en el sistema y reinicie su servidor backend
                 </Typography>
                 <Button variant="contained" onClick={fetchData} sx={{ px: 4 }}>
                     Reintentar cargar datos
@@ -208,6 +207,11 @@ const DefinirDisponibilidad = () => {
         ...(medico?.especialidades || []).map(p => ({ ...p, tipoServicio: 'especialidad' })),
         ...(medico?.practicas || []).map(p => ({ ...p, tipoServicio: 'practica' }))
     ];
+
+    const disponibilidadesFiltradas = medico.disponibilidades?.filter(disp => {
+        if (!diaSeleccionado) return false;
+        return Number(disp.diaSemana) === Number(diasSemanaMap[diaSeleccionado]);
+    }) || [];
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: { xs: 2, md: 3 }, minHeight: '85vh', bgcolor: '#f9f9ff' }}>
@@ -225,7 +229,7 @@ const DefinirDisponibilidad = () => {
                         Definir Disponibilidad
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-                        Configure sus horarios de atención y prestaciones por sede.
+                        Configure sus horarios de atención y prestaciones por sede
                     </Typography>
                 </Box>
 
@@ -245,7 +249,7 @@ const DefinirDisponibilidad = () => {
                                     </Typography>
                                     <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
                                         {diasSemana.map((dia) => {
-                                            const activo = diasSeleccionados.includes(dia);
+                                            const activo = diaSeleccionado === dia;
                                             return (
                                                 <Button
                                                     key={dia}
@@ -263,10 +267,29 @@ const DefinirDisponibilidad = () => {
                                     </Stack>
                                 </Box>
 
-                                <TextField label="Hora de Inicio" type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} InputLabelProps={{ shrink: true }} InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }} required />
-                                <TextField label="Hora de Fin" type="time" value={horaFin} onChange={(e) => setHoraFin(e.target.value)} InputLabelProps={{ shrink: true }} InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }} required />
+                                <TextField
+                                    label={diaSeleccionado ? `Hora de Inicio (${diaSeleccionado})` : "Hora de Inicio"}
+                                    type="time"
+                                    value={horaInicio}
+                                    onChange={(e) => setHoraInicio(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }}
+                                    required
+                                    disabled={!diaSeleccionado || actionLoading}
+                                    helperText={!diaSeleccionado && "Seleccione un día primero"}
+                                />
+                                <TextField
+                                    label={diaSeleccionado ? `Hora de Fin (${diaSeleccionado})` : "Hora de Fin"}
+                                    type="time"
+                                    value={horaFin}
+                                    onChange={(e) => setHoraFin(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }}
+                                    required
+                                    disabled={!diaSeleccionado || actionLoading}
+                                />
 
-                                <TextField select label="Prestación" value={prestacion} onChange={(e) => setPrestacion(e.target.value)} required>
+                                <TextField select label="Prestación" value={prestacion} onChange={(e) => setPrestacion(e.target.value)} required disabled={!diaSeleccionado || actionLoading}>
                                     {prestacionesMedico.map((p) => (
                                         <MenuItem key={p._id || p.id} value={p._id || p.id}>
                                             {p.servicioUnico?.nombre || p.nombre} ({p.tipoServicio === 'practica' ? 'Práctica' : 'Especialidad'})
@@ -277,7 +300,7 @@ const DefinirDisponibilidad = () => {
                                     )}
                                 </TextField>
 
-                                <TextField select label="Sede de Atención" value={sede} onChange={(e) => setSede(e.target.value)} InputProps={{ startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} /> }} required>
+                                <TextField select label="Sede de Atención" value={sede} onChange={(e) => setSede(e.target.value)} InputProps={{ startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} /> }} required disabled={!diaSeleccionado || actionLoading}>
                                     {sedesCatalogo.map((s) => (
                                         <MenuItem key={s._id || s.id} value={s._id || s.id}>
                                             {s.nombre} - {s.direccion}
@@ -288,8 +311,8 @@ const DefinirDisponibilidad = () => {
                                     )}
                                 </TextField>
 
-                                <Button type="submit" variant="contained" color="primary" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />} fullWidth>
-                                    Guardar disponibilidad
+                                <Button type="submit" variant="contained" color="primary" disabled={!diaSeleccionado || actionLoading} startIcon={actionLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />} fullWidth>
+                                    {diaSeleccionado ? `Guardar para el ${diaSeleccionado}` : "Guardar disponibilidad"}
                                 </Button>
                             </Stack>
                         </Card>
@@ -298,18 +321,27 @@ const DefinirDisponibilidad = () => {
                     {/* Panel Derecho: Tabla */}
                     <Grid item xs={12} lg={8}>
                         <Card variant="outlined" sx={{ p: 3, bgcolor: 'background.paper' }}>
-                            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <LocalHospitalIcon color="primary" /> Mis Disponibilidades Activas
-                            </Typography>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1} sx={{ mb: 1 }}>
+                                <Typography variant="h6" fontWeight={700} sx={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <LocalHospitalIcon color="primary" /> Mis Disponibilidades Activas
+                                </Typography>
+                            </Stack>
                             <Divider sx={{ my: 1.5 }} />
 
-                            {!medico.disponibilidades || medico.disponibilidades.length === 0 ? (
+                            {/* si no hay click pedimos q seleccionen un dia */}
+                            {!diaSeleccionado ? (
+                                <Box sx={{ py: 6, textAlign: 'center' }}>
+                                    <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                                        Seleccione un día de la semana para ver sus disponibilidades
+                                    </Typography>
+                                </Box>
+                            ) : disponibilidadesFiltradas.length === 0 ? (
                                 <Box sx={{ py: 6, textAlign: 'center' }}>
                                     <Typography variant="body1" color="text.secondary">
-                                        Aún no ha configurado ninguna disponibilidad horaria.
+                                        No hay horarios de atención guardados para el día {diaSeleccionado}
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
-                                        Utilice el panel de la izquierda para configurar su primer horario de atención.
+                                        Cargue una nueva disponibilidad a la izquierda
                                     </Typography>
                                 </Box>
                             ) : (
@@ -325,7 +357,7 @@ const DefinirDisponibilidad = () => {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {medico.disponibilidades.map((disp) => (
+                                            {disponibilidadesFiltradas.map((disp) => (
                                                 <TableRow key={disp.id || disp._id} hover>
                                                     <TableCell sx={{ fontWeight: 600 }}>
                                                         {diasSemanaMapReverse[disp.diaSemana] || 'No especificado'}
