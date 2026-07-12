@@ -8,7 +8,6 @@ import { NotFoundError } from "../../../../shared/errors/AppError.js";
 export default class Medico {
   disponibilidades = [];
   turnos = [];
-  _id;
 
   constructor(
     usuario,

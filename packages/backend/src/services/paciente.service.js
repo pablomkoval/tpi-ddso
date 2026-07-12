@@ -140,10 +140,28 @@ export class PacienteService {
       ]
     });
     if (solicitudExistenteOriginal) {
-      throw new BadRequestError(
-        "Ya existe una solicitud de cambio pendiente que involucra a este turno",
-        "SOLICITUD_PENDIENTE"
-      );
+      const origDoc = await this.turnoRepository.findById(solicitudExistenteOriginal.turnoOriginal);
+      const nuevoDoc = await this.turnoRepository.findById(solicitudExistenteOriginal.turnoNuevo);
+      const estadosActivos = [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO];
+
+      if (
+        origDoc && estadosActivos.includes(origDoc.estado) &&
+        nuevoDoc && [EstadoTurno.DISPONIBLE, EstadoTurno.RESERVADO].includes(nuevoDoc.estado)
+      ) {
+        throw new BadRequestError(
+          "Ya existe una solicitud de cambio pendiente que involucra a este turno",
+          "SOLICITUD_PENDIENTE"
+        );
+      } else {
+        // Auto-limpieza de solicitudes obsoletas
+        solicitudExistenteOriginal.estado = "RECHAZADA";
+        solicitudExistenteOriginal.motivoRechazo = "Cancelada automáticamente por inconsistencia de estados";
+        await this.solicitudCambioTurnoRepository.update(solicitudExistenteOriginal.id || solicitudExistenteOriginal._id, {
+          estado: solicitudExistenteOriginal.estado,
+          motivoRechazo: solicitudExistenteOriginal.motivoRechazo,
+          fechaResolucion: new Date()
+        });
+      }
     }
 
     const solicitudExistenteNuevo = await this.solicitudCambioTurnoRepository.model.findOne({
@@ -153,10 +171,28 @@ export class PacienteService {
       ]
     });
     if (solicitudExistenteNuevo) {
-      throw new BadRequestError(
-        "El turno propuesto ya está involucrado en otra solicitud de cambio pendiente",
-        "SOLICITUD_PENDIENTE"
-      );
+      const origDoc = await this.turnoRepository.findById(solicitudExistenteNuevo.turnoOriginal);
+      const nuevoDoc = await this.turnoRepository.findById(solicitudExistenteNuevo.turnoNuevo);
+      const estadosActivos = [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO];
+
+      if (
+        origDoc && estadosActivos.includes(origDoc.estado) &&
+        nuevoDoc && [EstadoTurno.DISPONIBLE, EstadoTurno.RESERVADO].includes(nuevoDoc.estado)
+      ) {
+        throw new BadRequestError(
+          "El turno propuesto ya está involucrado en otra solicitud de cambio pendiente",
+          "SOLICITUD_PENDIENTE"
+        );
+      } else {
+        // Auto-limpieza de solicitudes obsoletas
+        solicitudExistenteNuevo.estado = "RECHAZADA";
+        solicitudExistenteNuevo.motivoRechazo = "Cancelada automáticamente por inconsistencia de estados";
+        await this.solicitudCambioTurnoRepository.update(solicitudExistenteNuevo.id || solicitudExistenteNuevo._id, {
+          estado: solicitudExistenteNuevo.estado,
+          motivoRechazo: solicitudExistenteNuevo.motivoRechazo,
+          fechaResolucion: new Date()
+        });
+      }
     }
 
     turnoActual.actualizarEstado(
@@ -189,13 +225,17 @@ export class PacienteService {
         this.solicitudCambioTurnoRepository.save(nuevaSolicitud),
       ]);
 
-    await this.notificacionesService.create({
-      destinatario: turnoActual.medico,
-      remitente: pacienteId,
-      mensaje: "El paciente solicitó un cambio de turno. Revisá la solicitud para aceptarla o rechazarla.",
-      tipo: TipoNotificacion.SOLICITUD_CAMBIO,
-      referenciaId: solicitudGuardada.id || solicitudGuardada._id,
-    });
+    try {
+      await this.notificacionesService.create({
+        destinatario: turnoActual.medico,
+        remitente: pacienteId,
+        mensaje: "El paciente solicitó un cambio de turno. Revisá la solicitud para aceptarla o rechazarla.",
+        tipo: TipoNotificacion.SOLICITUD_CAMBIO,
+        referenciaId: solicitudGuardada.id || solicitudGuardada._id,
+      });
+    } catch (notifError) {
+      console.error("[PacienteService] Error al enviar notificación tras crear propuesta de cambio:", notifError);
+    }
 
     return {
       turnoActual: turnoActualGuardado,

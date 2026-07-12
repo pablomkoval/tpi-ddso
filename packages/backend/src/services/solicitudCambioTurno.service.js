@@ -72,7 +72,25 @@ export class SolicitudCambioTurnoService {
 
     const existente = await this.solicitudCambioTurnoRepository.findPendienteByTurnoOriginal(turnoId);
     if (existente) {
-      throw new ConflictError("Ya existe una solicitud pendiente para este turno", "SOLICITUD_PENDIENTE");
+      const turnoOrigDoc = await this.turnoRepository.findById(existente.turnoOriginal);
+      const turnoNuevoDoc = await this.turnoRepository.findById(existente.turnoNuevo);
+      const estadosActivos = [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO];
+
+      if (
+        turnoOrigDoc && estadosActivos.includes(turnoOrigDoc.estado) &&
+        turnoNuevoDoc && [EstadoTurno.DISPONIBLE, EstadoTurno.RESERVADO].includes(turnoNuevoDoc.estado)
+      ) {
+        throw new ConflictError("Ya existe una solicitud pendiente para este turno", "SOLICITUD_PENDIENTE");
+      } else {
+        // Auto-limpieza de solicitudes obsoletas
+        existente.estado = EstadoSolicitudCambioTurno.RECHAZADA;
+        existente.motivoRechazo = "Cancelada automáticamente por inconsistencia de estados";
+        await this.solicitudCambioTurnoRepository.update(existente.id || existente._id, {
+          estado: existente.estado,
+          motivoRechazo: existente.motivoRechazo,
+          fechaResolucion: new Date()
+        });
+      }
     }
 
     const solicitud = new SolicitudCambioTurno({
@@ -182,8 +200,13 @@ export class SolicitudCambioTurnoService {
 
     const pacienteId = turnoOriginal.paciente;
 
-    turnoOriginal.paciente = null;
-    turnoOriginal.actualizarEstado(EstadoTurno.DISPONIBLE, confirmadorId, "Cambio de turno confirmado");
+    if (solicitanteTipo === "MEDICO") {
+      turnoOriginal.paciente = pacienteId;
+      turnoOriginal.actualizarEstado(EstadoTurno.CANCELADO, confirmadorId, "Turno reprogramado por el médico");
+    } else {
+      turnoOriginal.paciente = null;
+      turnoOriginal.actualizarEstado(EstadoTurno.DISPONIBLE, confirmadorId, "Cambio de turno confirmado");
+    }
 
     turnoNuevo.paciente = pacienteId;
     turnoNuevo.actualizarEstado(
@@ -192,7 +215,10 @@ export class SolicitudCambioTurnoService {
       "Turno reprogramado",
     );
     
-    await this.turnoRepository.guardar(turnoNuevo);
+    await Promise.all([
+      this.turnoRepository.guardar(turnoOriginal),
+      this.turnoRepository.guardar(turnoNuevo),
+    ]);
 
     solicitud.confirmar(confirmadorId);
 

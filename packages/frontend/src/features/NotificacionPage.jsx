@@ -236,13 +236,13 @@ const NotificacionPage = () => {
                 onMarcarLeida={() => handleLeer(notificacion.id || notificacion._id)}
                 onAceptarCambio={() =>
                   handleAceptarCambio(
-                    notificacion.id,
+                    notificacion.id || notificacion._id,
                     notificacion.referenciaId
                   )
                 }
                 onRechazarCambio={() =>
                   abrirModalRechazo(
-                    notificacion.id,
+                    notificacion.id || notificacion._id,
                     notificacion.referenciaId
                   )
                 }

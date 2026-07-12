@@ -1,4 +1,5 @@
 import express from "express";
+import { verifyToken } from "../../middlewares/auth.middleware.js";
 
 export class SolicitudCambioTurnoRouter {
   constructor(controller) {
@@ -36,7 +37,7 @@ export class SolicitudCambioTurnoRouter {
       this.controller.listar(req, res, next),
     );
 
-    this.solicitudCambioTurnoRouter.post("/", (req, res, next) =>
+    this.solicitudCambioTurnoRouter.post("/", verifyToken, (req, res, next) =>
       this.controller.crearSolicitud(req, res, next),
     );
 
@@ -77,7 +78,7 @@ export class SolicitudCambioTurnoRouter {
      *      200:
      *        description: Solicitud confirmada y aprobada correctamente
      */
-    this.solicitudCambioTurnoRouter.patch("/:id/confirmar", (req, res, next) =>
+    this.solicitudCambioTurnoRouter.patch("/:id/confirmar", verifyToken, (req, res, next) =>
       this.controller.confirmar(req, res, next),
     );
 
@@ -97,7 +98,7 @@ export class SolicitudCambioTurnoRouter {
      *      200:
      *        description: Solicitud rechazada de forma exitosa
      */
-    this.solicitudCambioTurnoRouter.patch("/:id/rechazar", (req, res, next) =>
+    this.solicitudCambioTurnoRouter.patch("/:id/rechazar", verifyToken, (req, res, next) =>
       this.controller.rechazar(req, res, next),
     );
   }

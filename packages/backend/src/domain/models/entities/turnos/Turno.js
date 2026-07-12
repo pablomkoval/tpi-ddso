@@ -40,6 +40,7 @@ export class Turno {
   }
 
   esEstadoValido(estado) {
+    if (estado === this.estado) return true;
     if (this.historialEstados.length === 0) {
       return estado === EstadoTurno.DISPONIBLE;
     }
@@ -49,10 +50,10 @@ export class Turno {
         return [EstadoTurno.RESERVADO].includes(estado);
 
       case EstadoTurno.RESERVADO:
-        return [EstadoTurno.CONFIRMADO, EstadoTurno.CANCELADO].includes(estado);
+        return [EstadoTurno.CONFIRMADO, EstadoTurno.CANCELADO, EstadoTurno.DISPONIBLE].includes(estado);
 
       case EstadoTurno.CONFIRMADO:
-        return [EstadoTurno.REALIZADO, EstadoTurno.CANCELADO].includes(estado);
+        return [EstadoTurno.REALIZADO, EstadoTurno.CANCELADO, EstadoTurno.DISPONIBLE, EstadoTurno.RESERVADO].includes(estado);
       //cancelado se toma que no podria volver a ser un turno disponible
       default:
         return false;
