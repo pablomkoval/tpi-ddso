@@ -1,15 +1,14 @@
 import axios from "axios";
 
-const KEYCLOAK_URL = "http://localhost:8080";
-const REALM = "tpi-realm";
-const CLIENT_ID = "react-client";
-
-const USE_MOCK = import.meta.env.REACT_APP_USE_MOCK_API === 'true';
+const KEYCLOAK_URL = (process.env.REACT_APP_KEYCLOAK_URL || 'http://localhost:8080').replace(/\/+$/, '');
+const KEYCLOAK_REALM = process.env.REACT_APP_KEYCLOAK_REALM || 'tpi-realm';
+const KEYCLOAK_CLIENT_ID = process.env.REACT_APP_KEYCLOAK_CLIENT_ID || 'react-client';
+const USE_MOCK_API = process.env.REACT_APP_USE_MOCK_API === 'true';
 
 export const loginService = {
   login: async (username, password) => {
 
-    if (USE_MOCK) {
+    if (USE_MOCK_API) {
       console.warn("Usando MOCK API para el Login. No se conecta a Keycloak.");
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -25,13 +24,13 @@ export const loginService = {
     }
     const params = new URLSearchParams();
     params.append("grant_type", "password");
-    params.append("client_id", CLIENT_ID);
+    params.append("client_id", KEYCLOAK_CLIENT_ID);
     params.append("username", username);
     params.append("password", password);
 
     try {
       const response = await axios.post(
-        `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`,
+        `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`,
         params,
         {
           headers: {

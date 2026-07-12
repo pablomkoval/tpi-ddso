@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/turnos/disponibles'; 
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000').replace(/\/+$/, '');
+
+const API_URL = `${API_BASE_URL}/turnos/disponibles`;
 
 export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
     try{
@@ -35,7 +37,7 @@ export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
 export const obtenerTurnoPorId = async (id) => {
     try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`http://localhost:4000/turnos/${id}`, {
+        const response = await axios.get(`${API_BASE_URL}/turnos/${id}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -50,7 +52,8 @@ export const obtenerTurnoPorId = async (id) => {
 export const obtenerTurnosPorPaciente = async (pacienteId) => {
     try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`http://localhost:4000/turnos?pacienteId=${pacienteId}`, {
+        const response = await axios.get(`${API_BASE_URL}/turnos`, {
+            params: { pacienteId },
             headers: {
                 Authorization: `Bearer ${token}`
             }
