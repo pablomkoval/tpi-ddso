@@ -186,7 +186,8 @@ export default class Medico {
 
     const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
     this.disponibilidades.forEach((disponibilidad) => {
-      if (!disponibilidad.prestacion._id.equals(servicio._id)) {
+      const prestacionId = disponibilidad.prestacion?._id ?? disponibilidad.prestacion;
+      if (!prestacionId || String(prestacionId) !== String(servicio._id || servicio)) {
         // console.log(
         //   "La disponibilidad no corresponde al servicio, no se generan turnos para esta disponibilidad",
         // );

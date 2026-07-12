@@ -40,6 +40,9 @@ export class Turno {
   }
 
   esEstadoValido(estado) {
+    if (this.historialEstados.length === 0) {
+      return estado === EstadoTurno.DISPONIBLE;
+    }
 
     switch (this.estado) {
       case EstadoTurno.DISPONIBLE:
