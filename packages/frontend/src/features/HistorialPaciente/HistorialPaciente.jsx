@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Card, CardContent, Avatar, Chip, Stack, Divider } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, History as HistoryIcon, Person as PersonIcon } from '@mui/icons-material';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
+import { obtenerTurnosPorPaciente } from '../../services/busquedaTurnosService.js';
 
 const estadoConfig = {
     COMPLETADO: { label: 'Completado', color: 'success' },
@@ -20,20 +21,21 @@ export default function HistorialPaciente() {
     const [historial, setHistorial] = useState([]);
     const [pacienteInfo, setPacienteInfo] = useState(null);
 
+    const fetchHistorial = async () => {
+        try {
+            const turnos = await obtenerTurnosPorPaciente(idPaciente);
+            setHistorial(turnos);
+            if (turnos.length > 0) {
+                setPacienteInfo(turnos[0].paciente);
+            }
+        } catch (error) {
+            console.error("Error al obtener el historial del paciente:", error);
+        }
+    };
+
     useEffect(() => {
         setLoading(true);
-
-        // Acá iría el fetch al backend para traer el historial del paciente según idPaciente. Por ahora lo simulo con datos mock.
-        if (idPaciente === 'carlos') {
-            setPacienteInfo({ nombre: 'Carlos Ruiz', plan: 'Sancor Salud', documento: '35.123.456' });
-            setHistorial([
-                { id: 'h1', fecha: '10/05/2026', hora: '09:00', motivo: 'Consulta Gral.', estado: 'completado', medico: 'Dr. Rossi' },
-                { id: 'h3', fecha: '15/06/2026', hora: '11:00', motivo: 'Control de Presión', estado: 'completado', medico: 'Dra. Fernández' },
-                { id: 'h4', fecha: '20/07/2026', hora: '14:00', motivo: 'Chequeo Anual', estado: 'completado', medico: 'Dr. López' }
-
-            ]);
-        }
-
+        fetchHistorial();
         setLoading(false);
     }, [idPaciente]);
 

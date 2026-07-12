@@ -47,13 +47,17 @@ export const obtenerTurnoPorId = async (id) => {
     }
 }
 
-/*
-queryparams aceptados:
-medicoId
-sedeId
-servicioId *obligatorio
-fechaDesde
-fechaHasta
-sortBy: ["fechaHora", "costo"]
-sortOrder: [1, -1]
-*/
+export const obtenerTurnosPorPaciente = async (pacienteId) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`http://localhost:4000/turnos?pacienteId=${pacienteId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error al obtener los turnos por paciente:", error);
+        throw error;
+    }
+}
