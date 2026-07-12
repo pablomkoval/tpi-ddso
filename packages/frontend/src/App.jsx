@@ -4,17 +4,17 @@ import { ThemeProvider, Box, Typography } from '@mui/material';
 
 import LoginPage from './features/LoginPage.jsx';
 import NotificacionPage from './features/NotificacionPage.jsx';
-import BuscarTurnos from './features/buscarTurnos/BuscarTurnos.jsx';
-import DefinirDisponibilidad from './features/definirDisponibilidad/DefinirDisponibilidad.jsx';
-import AgendaMedica from './features/agendaMedica/AgendaMedica.jsx';
+import BuscarTurnos from './features/BuscarTurnos/BuscarTurnos.jsx';
+import DefinirDisponibilidad from './features/DefinirDisponibilidad/DefinirDisponibilidad.jsx';
+import AgendaMedica from './features/AgendaMedica/AgendaMedica.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
-import GestionarPrestaciones from './features/gestionarPrestaciones/GestionarPrestaciones.jsx';
+import GestionarPrestaciones from './features/GestionarPrestaciones/GestionarPrestaciones.jsx';
 import MisTurnos from './features/MisTurnos/MisTurnos.jsx';
-import DetalleTurno from './features/buscarTurnos/DetalleTurno.jsx';
+import DetalleTurno from './features/BuscarTurnos/DetalleTurno.jsx';
 import theme from './theme/theme.js';
 import HomePage from './features/HomePage.jsx';
 import RoleLayout from './features/RoleLayout.jsx';
-import HistorialPaciente from './features/historialPaciente/HistorialPaciente.jsx';
+import HistorialPaciente from './features/HistorialPaciente/HistorialPaciente.jsx';
 
 const RootRedirect = () => {
     const token = localStorage.getItem("token");

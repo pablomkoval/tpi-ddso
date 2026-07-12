@@ -7,6 +7,8 @@ import {
     CircularProgress, TextField
 } from '@mui/material';
 
+import BotonHistorialPaciente from '../../components/BotonHistorialPaciente.jsx';
+
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventIcon from '@mui/icons-material/Event';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -533,9 +535,14 @@ const AgendaMedica = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                            {turno.pacienteDetalle?.nombre || 'Paciente'}
-                                                        </Typography>
+                                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                                {turno.pacienteDetalle?.nombre || 'Paciente'}
+                                                            </Typography>
+                                                            {(turno.paciente?._id || turno.paciente?.id || turno.paciente) && (
+                                                                <BotonHistorialPaciente pacienteId={turno.paciente?._id || turno.paciente?.id || turno.paciente} />
+                                                            )}
+                                                        </Stack>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Typography variant="body2" color="text.secondary">
@@ -604,9 +611,7 @@ const AgendaMedica = () => {
 
                                     {/* Vinculación con tu feature de historial médico */}
                                     {selectedTurno.pacienteIdReal && selectedTurno.estado !== 'disponible' && (
-                                        <Button size="small" startIcon={<HistoryIcon />} variant="text" color="primary" onClick={() => { cerrarDialog(); navigate(`/historial/${selectedTurno.pacienteIdReal}`); }} sx={{ fontWeight: 600, textTransform: 'none' }}>
-                                            Ver Historial Clínico
-                                        </Button>
+                                        <BotonHistorialPaciente pacienteId={selectedTurno.pacienteIdReal} />
                                     )}
                                 </Box>
 
