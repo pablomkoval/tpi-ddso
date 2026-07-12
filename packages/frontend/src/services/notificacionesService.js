@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/notificaciones';
-const API_CAMBIO = 'http://localhost:4000'
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const API_URL = `${API_BASE}/notificaciones`;
+const API_CAMBIO = API_BASE;
 
 
 export const obtenerNotificaciones = async (

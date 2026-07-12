@@ -35,7 +35,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import axios from 'axios';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 
-const API_BASE = 'http://localhost:4000';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
 
 const GestionarPrestaciones = () => {
     const [medico, setMedico] = useState(null);

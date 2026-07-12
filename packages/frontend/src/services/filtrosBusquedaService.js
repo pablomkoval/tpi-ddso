@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-const API_URL_ESP = 'http://localhost:4000/servicios'; 
-
-const API_URL_SEDE = 'http://localhost:4000/sedes'; 
-
-const API_URL_MED = 'http://localhost:4000/medicos'; 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const API_URL_ESP = `${API_BASE}/servicios`; 
+const API_URL_SEDE = `${API_BASE}/sedes`; 
+const API_URL_MED = `${API_BASE}/medicos`; 
 
 export const buscarServicios = async () => {
     try{

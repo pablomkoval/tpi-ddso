@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const KEYCLOAK_URL = "http://localhost:8080";
-const REALM = "tpi-realm";
-const CLIENT_ID = "react-client";
+const KEYCLOAK_URL = process.env.REACT_APP_KEYCLOAK_URL || "http://localhost:8080";
+const REALM = process.env.REACT_APP_KEYCLOAK_REALM || "tpi-realm";
+const CLIENT_ID = process.env.REACT_APP_KEYCLOAK_CLIENT_ID || "react-client";
 
-const USE_MOCK = import.meta.env.REACT_APP_USE_MOCK_API === 'true';
+const USE_MOCK = process.env.REACT_APP_USE_MOCK_API === 'true';
 
 export const loginService = {
   login: async (username, password) => {
