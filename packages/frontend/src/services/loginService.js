@@ -1,6 +1,10 @@
 import axios from "axios";
 
-const KEYCLOAK_URL = process.env.REACT_APP_KEYCLOAK_URL || "http://localhost:8080";
+let rawKeycloakUrl = process.env.REACT_APP_KEYCLOAK_URL || "http://localhost:8080";
+if (!rawKeycloakUrl.startsWith("http://") && !rawKeycloakUrl.startsWith("https://")) {
+    rawKeycloakUrl = `https://${rawKeycloakUrl}`;
+}
+const KEYCLOAK_URL = rawKeycloakUrl;
 const REALM = process.env.REACT_APP_KEYCLOAK_REALM || "tpi-realm";
 const CLIENT_ID = process.env.REACT_APP_KEYCLOAK_CLIENT_ID || "react-client";
 
