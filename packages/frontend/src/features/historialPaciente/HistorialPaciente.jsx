@@ -22,16 +22,18 @@ export default function HistorialPaciente() {
 
     useEffect(() => {
         setLoading(true);
-        if (idPaciente === 'Carlos Ruiz') {
+
+        // Acá iría el fetch al backend para traer el historial del paciente según idPaciente. Por ahora lo simulo con datos mock.
+        if (idPaciente === 'carlos') {
             setPacienteInfo({ nombre: 'Carlos Ruiz', plan: 'Sancor Salud', documento: '35.123.456' });
-            setHistorial([{ id: 'h1', fecha: '10/05/2026', hora: '09:00', motivo: 'Consulta Gral.', estado: 'completado', medico: 'Dr. Rossi' }]);
-        } else if (idPaciente === 'Elena Gómez') {
-            setPacienteInfo({ nombre: 'Elena Gómez', plan: 'OSDE 310', documento: '38.432.112' });
-            setHistorial([{ id: 'h2', fecha: '12/04/2026', hora: '10:30', motivo: 'Control Post-Op', estado: 'completado', medico: 'Dr. Rossi' }]);
-        } else {
-            setPacienteInfo({ nombre: idPaciente, plan: 'Particular', documento: '-' });
-            setHistorial([]);
+            setHistorial([
+                { id: 'h1', fecha: '10/05/2026', hora: '09:00', motivo: 'Consulta Gral.', estado: 'completado', medico: 'Dr. Rossi' },
+                { id: 'h3', fecha: '15/06/2026', hora: '11:00', motivo: 'Control de Presión', estado: 'completado', medico: 'Dra. Fernández' },
+                { id: 'h4', fecha: '20/07/2026', hora: '14:00', motivo: 'Chequeo Anual', estado: 'completado', medico: 'Dr. López' }
+
+            ]);
         }
+
         setLoading(false);
     }, [idPaciente]);
 
@@ -45,10 +47,6 @@ export default function HistorialPaciente() {
 
     return (
         <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 800, mx: 'auto', mt: 6 }}>
-            <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/agenda-medica')} sx={{ mb: 3, fontWeight: 600, textTransform: 'none' }}>
-                Volver a la Agenda
-            </Button>
-
             <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', mb: 3, bgcolor: 'background.default' }}>
                 <CardContent sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
                     <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', color: 'white' }}>
@@ -58,8 +56,11 @@ export default function HistorialPaciente() {
                         <Typography variant="h5" fontWeight={700}>
                             {pacienteInfo?.nombre}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                            Obra Social: <strong>{pacienteInfo?.plan?.nombre || pacienteInfo?.plan || "No especificado"}</strong> · DNI: {pacienteInfo?.documento || pacienteInfo?.dni}
+                        <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+                            <strong>Obra Social: </strong>{pacienteInfo?.plan?.nombre || pacienteInfo?.plan || "No especificado"}
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            <strong>DNI: </strong>{pacienteInfo?.documento || pacienteInfo?.dni}
                         </Typography>
                     </Box>
                 </CardContent>
@@ -83,8 +84,8 @@ export default function HistorialPaciente() {
                                             <Typography variant="body1" fontWeight={600}>
                                                 {item.servicio?.nombre || item.motivo || "Consulta Médica"}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                                Fecha: {item.fechaHora ? new Date(item.fechaHora).toLocaleDateString() : item.fecha} · Atendido por: {item.medico?.nombre || "Profesional"}
+                                            <Typography variant="body2" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                                Fecha: {item.fechaHora ? new Date(item.fechaHora).toLocaleDateString() : item.fecha}
                                             </Typography>
                                         </Box>
                                         <Chip label={cfg.label} color={cfg.color} size="small" sx={{ fontWeight: 600 }} />
