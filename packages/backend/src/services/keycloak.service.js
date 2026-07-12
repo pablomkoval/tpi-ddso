@@ -1,16 +1,22 @@
 import KeycloakAdminClient from "@keycloak/keycloak-admin-client";
+import dotenv from 'dotenv';
+dotenv.config({ path: new URL('../.env', import.meta.url) });
 
 export class KeycloakService {
     constructor() {
+        let keycloakUrl = process.env.KEYCLOAK_URL || "http://localhost:8080";
+        if (!keycloakUrl.startsWith("http://") && !keycloakUrl.startsWith("https://")) {
+            keycloakUrl = `https://${keycloakUrl}`;
+        }
         this.kcAdminClient = new KeycloakAdminClient({
-            baseUrl: "http://localhost:8080"
+            baseUrl: keycloakUrl
         });
     }
 
     async #authenticateAdmin() {
         await this.kcAdminClient.auth({
-            username: "admin",
-            password: "admin",
+            username: process.env.KEYCLOAK_ADMIN_USER || "admin",
+            password: process.env.KEYCLOAK_ADMIN_PASSWORD || "admin",
             grantType: "password",
             clientId: "admin-cli",
         });
