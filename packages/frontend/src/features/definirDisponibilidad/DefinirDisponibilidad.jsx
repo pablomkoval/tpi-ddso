@@ -267,10 +267,29 @@ const DefinirDisponibilidad = () => {
                                     </Stack>
                                 </Box>
 
-                                <TextField label="Hora de Inicio" type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} InputLabelProps={{ shrink: true }} InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }} required />
-                                <TextField label="Hora de Fin" type="time" value={horaFin} onChange={(e) => setHoraFin(e.target.value)} InputLabelProps={{ shrink: true }} InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }} required />
+                                <TextField
+                                    label={diaSeleccionado ? `Hora de Inicio (${diaSeleccionado})` : "Hora de Inicio"}
+                                    type="time"
+                                    value={horaInicio}
+                                    onChange={(e) => setHoraInicio(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }}
+                                    required
+                                    disabled={!diaSeleccionado || actionLoading}
+                                    helperText={!diaSeleccionado && "Seleccione un día primero"}
+                                />
+                                <TextField
+                                    label={diaSeleccionado ? `Hora de Fin (${diaSeleccionado})` : "Hora de Fin"}
+                                    type="time"
+                                    value={horaFin}
+                                    onChange={(e) => setHoraFin(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    InputProps={{ startAdornment: <AccessTimeIcon color="action" sx={{ mr: 1 }} /> }}
+                                    required
+                                    disabled={!diaSeleccionado || actionLoading}
+                                />
 
-                                <TextField select label="Prestación" value={prestacion} onChange={(e) => setPrestacion(e.target.value)} required>
+                                <TextField select label="Prestación" value={prestacion} onChange={(e) => setPrestacion(e.target.value)} required disabled={!diaSeleccionado || actionLoading}>
                                     {prestacionesMedico.map((p) => (
                                         <MenuItem key={p._id || p.id} value={p._id || p.id}>
                                             {p.servicioUnico?.nombre || p.nombre} ({p.tipoServicio === 'practica' ? 'Práctica' : 'Especialidad'})
@@ -281,7 +300,7 @@ const DefinirDisponibilidad = () => {
                                     )}
                                 </TextField>
 
-                                <TextField select label="Sede de Atención" value={sede} onChange={(e) => setSede(e.target.value)} InputProps={{ startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} /> }} required>
+                                <TextField select label="Sede de Atención" value={sede} onChange={(e) => setSede(e.target.value)} InputProps={{ startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} /> }} required disabled={!diaSeleccionado || actionLoading}>
                                     {sedesCatalogo.map((s) => (
                                         <MenuItem key={s._id || s.id} value={s._id || s.id}>
                                             {s.nombre} - {s.direccion}
@@ -292,8 +311,8 @@ const DefinirDisponibilidad = () => {
                                     )}
                                 </TextField>
 
-                                <Button type="submit" variant="contained" color="primary" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />} fullWidth>
-                                    Guardar disponibilidad
+                                <Button type="submit" variant="contained" color="primary" disabled={!diaSeleccionado || actionLoading} startIcon={actionLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />} fullWidth>
+                                    {diaSeleccionado ? `Guardar para el ${diaSeleccionado}` : "Guardar disponibilidad"}
                                 </Button>
                             </Stack>
                         </Card>
