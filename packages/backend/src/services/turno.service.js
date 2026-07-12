@@ -201,6 +201,36 @@ export class TurnoService {
     return turno;
   }
 
+  async findAll({ numeroPagina = 1, limitePorPagina = 10, filtros = {} } = {}) {
+    const criterios = {};
+
+    if (filtros?.estado) {
+      criterios.estado = filtros.estado;
+    }
+
+    if (filtros?.pacienteId) {
+      criterios.paciente = String(filtros.pacienteId);
+    }
+
+    if (filtros?.medicoId) {
+      criterios.medico = filtros.medicoId;
+    }
+
+    const resultado = await this.turnoRepository.findAllPaginated(
+      criterios,
+      numeroPagina,
+      limitePorPagina,
+    );
+
+    return {
+      turnos: resultado.turnos,
+      totalTurnos: resultado.totalTurnos,
+      numeroPagina: resultado.numeroPagina,
+      limitePorPagina: resultado.limitePorPagina,
+      totalPaginas: resultado.totalPaginas,
+    };
+  }
+
   async generarTurnos() {
     try {
       console.log("Antes de la búsqueda de médicos.")
@@ -355,7 +385,7 @@ export class TurnoService {
       y todavia no le corresponde el turno, no se debe correr el chequeo*/
 
       this.turnoCorrespondeAUsuario(turno, usuarioRemitente);
-    } else{
+    } else {
       /* en efecto es una reserva, se tiene que asignar al turno */
       turno.paciente = String(usuarioRemitente._id)
     }
@@ -374,9 +404,9 @@ export class TurnoService {
 
     /// GUARDAR TURNO /////
     turno.actualizarEstado(estado, usuarioRemitente._id, motivoCambio);
-
+    console.error("##########Este es el turno: ", turno);
     const turnoActualizado = await this.turnoRepository.update(turnoId, turno);
-
+    console.error("##########Este es el turno actualizado: ", turnoActualizado);
     /// NOTIFICAR ////
 
     if (estado !== EstadoTurno.REALIZADO) {
@@ -389,7 +419,7 @@ export class TurnoService {
 
   turnoCorrespondeAUsuario(turno, usuario) {
     if (String(turno.paciente) !== String(usuario._id) && String(turno.medico._id) !== String(usuario._id)) {
-      
+
 
       throw new BadRequestError(
         "El turno no corresponde al usuario que intenta cambiar su estado",
@@ -418,15 +448,26 @@ export class TurnoService {
   }
 
   async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol) {
-
+    console.error("Este es el turno: ", turno);
     const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
+    
+    const fecha = new Date(turno.fechaHora);
+
+    const fechaTexto = fecha.toLocaleDateString("es-AR");
+    const horaTexto = fecha.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  /*   const mensaje = `Su turno es el ${fechaTexto} a las ${horaTexto}.`; */
+
     const mensaje =
       usuarioRol === "PACIENTE"
-        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio}.`
-        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio}.`;
+        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`
+        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`;
 
     try {
-      console.error("MI NOTIFICACIONES SERVICE: ",this.notificacionesService)
+      console.error("MI NOTIFICACIONES SERVICE: ", this.notificacionesService)
       await this.notificacionesService.create({
         destinatario: usuarioRol === "PACIENTE" ? turno.medico : turno.paciente,
         remitente: usuarioRemitente._id,

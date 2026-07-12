@@ -23,6 +23,43 @@ export class TurnoRepository {
     return await this.model.find();
   }
 
+  async findAllPaginated(criterios = {}, numeroPagina = 1, limitePorPagina = 10) {
+    const page = Number(numeroPagina) || 1;
+    const limit = Number(limitePorPagina) || 10;
+    const skip = (page - 1) * limit;
+
+    const query = { ...criterios };
+
+    if (query.paciente) {
+      query.paciente = String(query.paciente);
+    }
+
+    const [turnos, totalTurnos] = await Promise.all([
+      this.model
+        .find(query)
+        .populate("medico")
+        .populate({
+          path: "servicio",
+          populate: { path: "servicioUnico" },
+        })
+        .populate("sede")
+        .sort({ fechaHora: -1 })
+        .skip(skip)
+        .limit(limit),
+      this.model.countDocuments(query),
+    ]);
+
+    const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / limit);
+
+    return {
+      turnos,
+      totalTurnos,
+      numeroPagina: page,
+      limitePorPagina: limit,
+      totalPaginas,
+    };
+  }
+
   async findById(id) {
     return await this.model
       .findById(id)
@@ -35,7 +72,11 @@ export class TurnoRepository {
   }
 
   async update(id, data) {
-    return await this.model.findByIdAndUpdate(id, data, { new: true });
+    return await this.model.findByIdAndUpdate(id, data, { new: true })
+      .populate({
+        path: "servicio",
+        populate: { path: "servicioUnico" },
+      });
   }
 
 

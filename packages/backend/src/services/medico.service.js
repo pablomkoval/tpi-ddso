@@ -1,12 +1,10 @@
 import AppError, { BadRequestError } from "../shared/errors/AppError.js";
 import Medico from '../domain/models/entities/medico/Medico.js';
 import { DisponibilidadHoraria } from "../domain/models/entities/medico/DisponibilidadHoraria.js";
-import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
 import { NotFoundError } from "../shared/errors/AppError.js"
 import mongoose from 'mongoose'
 import { PacienteModel } from "../schemas/paciente.schema.js";
 
-const MINUTOS_MINIMOS_CANCELACION = 60;
 
 
 const toObjectId = (value) =>

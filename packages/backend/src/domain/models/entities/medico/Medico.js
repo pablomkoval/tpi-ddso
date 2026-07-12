@@ -74,6 +74,12 @@ export default class Medico {
     this.sedes.push(nuevaSedeId);
   }
 
+  obtenerSedes(){ //!!recorrer las disponibilidades y devolver las sedes unicas
+    if (!this.disponibilidades){
+      return null;
+    }
+  }
+
   ////////////////////////////    Disponibilidades   /////////////////////////////////////////////////////
   validarDisponibilidad(nuevaDisponibilidad) {
     // Validar que la nueva disponibilidad no se solape con las existentes

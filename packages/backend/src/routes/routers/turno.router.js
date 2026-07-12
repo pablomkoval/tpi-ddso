@@ -11,6 +11,10 @@ export class TurnoRouter {
 
     initRoutes() {
 
+        this.turnoRouter.get("", (req, res, next) => { this.controller.getTurnos(req, res, next); });
+
+
+
         /**
          * @swagger
          * /turnos/disponibles:
