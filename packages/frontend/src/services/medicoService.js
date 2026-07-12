@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:4000';
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000').replace(/\/+$/, '');
+
+const API_BASE = API_BASE_URL;
 
 const getHeaders = () => {
     const token = localStorage.getItem('token');
@@ -15,7 +17,10 @@ export const getMiMedico = async () => {
 };
 
 export const getAgenda = async (medicoId, fechaDesde, fechaHasta) => {
-    const response = await axios.get(`${API_BASE}/medicos/${medicoId}/agenda?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`, getHeaders());
+    const response = await axios.get(`${API_BASE}/medicos/${medicoId}/agenda`, {
+        ...getHeaders(),
+        params: { fechaDesde, fechaHasta },
+    });
     return response.data;
 };
 
@@ -29,7 +34,10 @@ export const confirmarTurno = async (turnoId) => {
 };
 
 export const getHistorialTurnos = async (medicoId, page = 1, limit = 10) => {
-    const response = await axios.get(`${API_BASE}/medicos/${medicoId}/turnos/historial?page=${page}&limit=${limit}`, getHeaders());
+    const response = await axios.get(`${API_BASE}/medicos/${medicoId}/turnos/historial`, {
+        ...getHeaders(),
+        params: { page, limit },
+    });
     return response.data;
 };
 

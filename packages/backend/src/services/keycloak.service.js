@@ -3,14 +3,14 @@ import KeycloakAdminClient from "@keycloak/keycloak-admin-client";
 export class KeycloakService {
     constructor() {
         this.kcAdminClient = new KeycloakAdminClient({
-            baseUrl: "http://localhost:8080"
+            baseUrl: process.env.KEYCLOAK_URL || 'http://localhost:8080'
         });
     }
 
     async #authenticateAdmin() {
         await this.kcAdminClient.auth({
-            username: "admin",
-            password: "admin",
+            username: process.env.KEYCLOAK_ADMIN_USER || "admin",
+            password: process.env.KEYCLOAK_ADMIN_PASSWORD || "admin",
             grantType: "password",
             clientId: "admin-cli",
         });
@@ -21,7 +21,7 @@ export class KeycloakService {
 
         try {
             await this.kcAdminClient.users.create({
-                realm: "tpi-realm", 
+                realm: process.env.KEYCLOAK_REALM || "tpi-realm", 
                 username: username,
                 email: username,
                 firstName: nombre, 
@@ -39,7 +39,7 @@ export class KeycloakService {
             });
 
             const users = await this.kcAdminClient.users.find({ 
-                realm: "tpi-realm",
+                realm: process.env.KEYCLOAK_REALM || "tpi-realm",
                 username 
             });
             

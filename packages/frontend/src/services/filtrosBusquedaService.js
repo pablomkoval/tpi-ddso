@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_URL_ESP = 'http://localhost:4000/servicios'; 
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000').replace(/\/+$/, '');
 
-const API_URL_SEDE = 'http://localhost:4000/sedes'; 
-
-const API_URL_MED = 'http://localhost:4000/medicos'; 
+const API_URL_ESP = `${API_BASE_URL}/servicios`;
+const API_URL_SEDE = `${API_BASE_URL}/sedes`;
+const API_URL_MED = `${API_BASE_URL}/medicos`;
 
 export const buscarServicios = async () => {
     try{
@@ -42,8 +42,9 @@ export const buscarSedes = async () => {
 
 export const buscarMedicos = async (servicioId = '') => {
     try{
-        const url = servicioId ? `${API_URL_MED}?servicioId=${servicioId}` : API_URL_MED;
-        const response = await axios.get(url);
+        const response = await axios.get(API_URL_MED, {
+            params: servicioId ? { servicioId } : undefined,
+        });
 
         const datosMedicos = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
         const medicos = datosMedicos.map(medico => ({
