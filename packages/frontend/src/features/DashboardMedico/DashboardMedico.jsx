@@ -13,10 +13,7 @@ import {
 import {
   CalendarMonth as CalendarIcon,
   AccessTime as ClockIcon,
-  PersonSearch as PersonSearchIcon,
   EventAvailable as EventAvailableIcon,
-  CheckCircle as CheckCircleIcon,
-  PendingActions as PendingIcon,
   NotificationsNone as NotificationsIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -146,24 +143,6 @@ export default function DashboardMedico() {
         </Box>
       </Box>
 
-<<<<<<< Updated upstream
-=======
-      {/* Stats rápidas */}
-      {/* <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' },
-          gap: 2,
-          mb: 3,
-        }}
-      >
-        <StatCard icon={<CheckCircleIcon />} iconColor="#2e7d32" bg="#e8f5e9" value={dashboardStats.atendidosMes} label="Atendidos este mes" />
-        <StatCard icon={<CalendarIcon />}    iconColor="#1565c0" bg="#e3f2fd" value={dashboardStats.proximasCitas} label="Próximas citas"      />
-        <StatCard icon={<PendingIcon />}     iconColor="#e65100" bg="#fff3e0" value={resumenNotificaciones.noLeidas}  label="Cambios solicitados" />
-        <StatCard icon={<ClockIcon />}       iconColor="#6a1b9a" bg="#f3e5f5" value={dashboardStats.turnosHoy}  label="Turnos de hoy"       />
-      </Box> */}
-
->>>>>>> Stashed changes
       {/* Cuerpo principal */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 320px' }, gap: 3 }}>
 
@@ -171,7 +150,7 @@ export default function DashboardMedico() {
         <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
-              <Typography variant="h6" fontWeight={700}>Turnos de hoy: {dashboardStats.turnosHoy}</Typography>
+              <Typography variant="h6" fontWeight={700}>Turnos de hoy: {turnosHoy.length}</Typography>
               <Button size="small" onClick={() => navigate('/agenda-medica')}>Ver agenda completa</Button>
             </Box>
 
@@ -282,16 +261,4 @@ export default function DashboardMedico() {
   );
 }
 
-function StatCard({ icon, iconColor, bg, value, label }) {
-  return (
-    <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
-      <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, '&:last-child': { pb: 2 } }}>
-        <Avatar sx={{ bgcolor: bg, color: iconColor, width: 44, height: 44 }}>{icon}</Avatar>
-        <Box>
-          <Typography variant="h5" fontWeight={700}>{value}</Typography>
-          <Typography variant="caption" color="text.secondary">{label}</Typography>
-        </Box>
-      </CardContent>
-    </Card>
-  );
-}
+

@@ -78,7 +78,7 @@ describe("Capa de servicio - NotificacionService", () => {
         expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({
             destinatario: "647012398765432109876543",
             remitente: "6470abc12345678901234567",
-            mensaje: "El turno esta en estado: RESERVADO por el motivo: Cambio solicitado hacia turno 647012398765432109876544"
+            mensaje: "El turno está en estado: RESERVADO Motivo: Cambio solicitado hacia turno 647012398765432109876544"
         }));
         expect(resultado.leida).toBe(false);
     });

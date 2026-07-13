@@ -31,11 +31,12 @@ describe("Capa de dominio - Notificacion", () => {
             ]
         };
 
-        const notificacion = Notificacion.crearSegunEstadoTurno(mockTurno);
+        const datos = Notificacion.datosSegunEstadoTurno(mockTurno);
+        const notificacion = new Notificacion(datos.destinatario, datos.remitente, datos.mensaje, datos.tipo, datos.referenciaId);
 
         expect(notificacion.destinatario).toBe("647012398765432109876543");
         expect(notificacion.remitente).toBe("6470abc12345678901234567");
-        expect(notificacion.mensaje).toBe("El turno esta en estado: Confirmado por el motivo: Paciente confirma asistencia");
+        expect(notificacion.mensaje).toBe("El turno está en estado: Confirmado Motivo: Paciente confirma asistencia");
         expect(notificacion.leida).toBe(false);
         expect(notificacion.fechaHoraCreacion).toBeInstanceOf(Date);
     });
