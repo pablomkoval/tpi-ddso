@@ -41,8 +41,9 @@ export const buscarSedes = async () => {
 
 export const buscarMedicos = async (servicioId = '') => {
     try{
-        const url = servicioId ? `${API_URL_MED}?servicioId=${servicioId}` : API_URL_MED;
-        const response = await axios.get(url);
+        const response = await axios.get(API_URL_MED, {
+            params: servicioId ? { servicioId } : undefined,
+        });
 
         const datosMedicos = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
         const medicos = datosMedicos.map(medico => ({

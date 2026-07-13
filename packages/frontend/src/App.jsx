@@ -15,6 +15,9 @@ import theme from './theme/theme.js';
 import HomePage from './features/HomePage.jsx';
 import RoleLayout from './features/RoleLayout.jsx';
 import HistorialPaciente from './features/HistorialPaciente/HistorialPaciente.jsx';
+import Terminos from './features/Terminos/Terminos.jsx';
+import Privacidad from './features/Privacidad/Privacidad.jsx';
+import Ayuda from './features/Ayuda/Ayuda.jsx';
 
 const RootRedirect = () => {
     const token = localStorage.getItem("token");
@@ -45,6 +48,10 @@ function App() {
                 }>
                     <Route index element={<RootRedirect />} />
                     <Route path="home" element={<HomePage />} />
+
+                    <Route path="terminos" element={<Terminos />} />
+                    <Route path="privacidad" element={<Privacidad />} />
+                    <Route path="ayuda" element={<Ayuda />} />
 
                     {/* rutas de pacientes */}
                     <Route path="buscar-turnos" element={
