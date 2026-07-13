@@ -65,32 +65,6 @@ export class PacienteService {
     return paciente;
   }
 
-
-  async consultarHistorial(pacienteId) {
-    await this.findById(pacienteId);
-    const turnos = await this.turnoRepository.findByPaciente(pacienteId);
-
-    const solicitudesPendientes = await this.solicitudCambioTurnoRepository.model.find({
-      pacienteId: String(pacienteId),
-      estado: "PENDIENTE",
-    });
-
-    const originalIds = new Set(solicitudesPendientes.map((s) => String(s.turnoOriginal)));
-    const nuevoIds = new Set(solicitudesPendientes.map((s) => String(s.turnoNuevo)));
-
-    return turnos.map((turno) => {
-      const turnoObj = turno.toObject ? turno.toObject() : turno;
-      const idStr = String(turnoObj._id || turnoObj.id);
-      if (originalIds.has(idStr) || nuevoIds.has(idStr)) {
-        return {
-          ...turnoObj,
-          estado: "PENDIENTE",
-        };
-      }
-      return turnoObj;
-    });
-  }
-
   async solicitarCambioFecha(pacienteId, turnoActualId, nuevoTurnoId) {
     await this.findById(pacienteId);
 
