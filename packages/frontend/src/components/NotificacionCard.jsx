@@ -3,6 +3,7 @@ import { Box, Avatar, Typography, Button, Stack } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import { ZONA_HORARIA_ARGENTINA } from "../utils/dateUtils.js";
 
 function NotificacionCard({ notificacion, onMarcarLeida, onAceptarCambio, onRechazarCambio }) {
   const isUnread = !notificacion.leida;
@@ -13,7 +14,8 @@ function NotificacionCard({ notificacion, onMarcarLeida, onAceptarCambio, onRech
     month: "2-digit",
     year: "numeric",
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    timeZone: ZONA_HORARIA_ARGENTINA
   }) + " hs";
   
   const esSolicitud = notificacion.tipo === "SOLICITUD_CAMBIO"; 

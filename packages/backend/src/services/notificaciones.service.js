@@ -99,7 +99,6 @@ export class NotificacionesService {
         if (!mensaje) {
             throw new ValidationError("El mensaje de la notificacion es requerido");
         }
-        console.error("MI DESTINATARIO:", destinatario)
         const resolvedDestinatario = await this.resolverUsuarioId(destinatario);
         const resolvedRemitente = await this.resolverUsuarioId(remitente);
 

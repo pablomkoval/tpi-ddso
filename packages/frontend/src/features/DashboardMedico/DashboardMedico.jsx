@@ -23,6 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
 import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
 import { getMiMedico, getAgenda } from '../../services/medicoService.js';
+import { ZONA_HORARIA_ARGENTINA, obtenerPartesEnZonaArgentina } from '../../utils/dateUtils.js';
 
 const estadoConfig = {
   realizado: { label: 'Realizado', color: 'success' },
@@ -91,7 +92,7 @@ export default function DashboardMedico() {
               id: turno.id || turno._id,
               paciente: turno.pacienteDetalle?.nombre || 'Paciente',
               motivo: turno.servicio?.nombre || turno.servicio?.servicioUnico?.nombre || 'Consulta general',
-              hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+              hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: ZONA_HORARIA_ARGENTINA }),
               estado: turno.estado.toLowerCase(),
             };
           })
@@ -108,7 +109,8 @@ export default function DashboardMedico() {
 
   const nombreCompleto = username ? username : 'Médico';
 
-  const ahoraEnMinutos = new Date().getHours() * 60 + new Date().getMinutes();
+  const partesAhora = obtenerPartesEnZonaArgentina(new Date());
+  const ahoraEnMinutos = partesAhora.hora * 60 + partesAhora.minuto;
   const proximoTurno = [...turnosHoy]
     .sort((a, b) => horaAMinutos(a.hora) - horaAMinutos(b.hora))
     .find((t) => horaAMinutos(t.hora) >= ahoraEnMinutos) ?? null;
@@ -123,7 +125,7 @@ export default function DashboardMedico() {
             Hola, {nombreCompleto}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Panel médico · {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            Panel médico · {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: ZONA_HORARIA_ARGENTINA })}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, flexShrink: 0 }}>
@@ -144,6 +146,24 @@ export default function DashboardMedico() {
         </Box>
       </Box>
 
+<<<<<<< Updated upstream
+=======
+      {/* Stats rápidas */}
+      {/* <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' },
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        <StatCard icon={<CheckCircleIcon />} iconColor="#2e7d32" bg="#e8f5e9" value={dashboardStats.atendidosMes} label="Atendidos este mes" />
+        <StatCard icon={<CalendarIcon />}    iconColor="#1565c0" bg="#e3f2fd" value={dashboardStats.proximasCitas} label="Próximas citas"      />
+        <StatCard icon={<PendingIcon />}     iconColor="#e65100" bg="#fff3e0" value={resumenNotificaciones.noLeidas}  label="Cambios solicitados" />
+        <StatCard icon={<ClockIcon />}       iconColor="#6a1b9a" bg="#f3e5f5" value={dashboardStats.turnosHoy}  label="Turnos de hoy"       />
+      </Box> */}
+
+>>>>>>> Stashed changes
       {/* Cuerpo principal */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 320px' }, gap: 3 }}>
 
@@ -151,7 +171,7 @@ export default function DashboardMedico() {
         <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
-              <Typography variant="h6" fontWeight={700}>Turnos de hoy</Typography>
+              <Typography variant="h6" fontWeight={700}>Turnos de hoy: {dashboardStats.turnosHoy}</Typography>
               <Button size="small" onClick={() => navigate('/agenda-medica')}>Ver agenda completa</Button>
             </Box>
 

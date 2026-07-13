@@ -4,6 +4,7 @@ import { Box, Typography, Button, Card, CardContent, Avatar, Chip, Stack, Divide
 import { ArrowBack as ArrowBackIcon, History as HistoryIcon, Person as PersonIcon } from '@mui/icons-material';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 import { obtenerTurnosPorPaciente } from '../../services/busquedaTurnosService.js';
+import { formatearFecha } from '../../utils/dateUtils.js';
 
 const estadoConfig = {
     COMPLETADO: { label: 'Completado', color: 'success' },
@@ -87,7 +88,7 @@ export default function HistorialPaciente() {
                                                 {item.servicio?.nombre || item.motivo || "Consulta Médica"}
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                                Fecha: {item.fechaHora ? new Date(item.fechaHora).toLocaleDateString() : item.fecha}
+                                                Fecha: {item.fechaHora ? formatearFecha(item.fechaHora) : item.fecha}
                                             </Typography>
                                         </Box>
                                         <Chip label={cfg.label} color={cfg.color} size="small" sx={{ fontWeight: 600 }} />

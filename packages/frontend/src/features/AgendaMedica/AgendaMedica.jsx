@@ -29,6 +29,7 @@ import {
     getMiMedico, getAgenda, confirmarTurno, getHistorialTurnos,
     realizarTurno, cancelarTurno, proponerCambioTurno
 } from '../../services/medicoService.js';
+import { ZONA_HORARIA_ARGENTINA, obtenerPartesEnZonaArgentina, esMismoDiaEnArgentina } from '../../utils/dateUtils.js';
 
 const horasAgenda = [
     '08:00', '09:00', '10:00', '11:00', '12:00',
@@ -117,10 +118,8 @@ const AgendaMedica = () => {
                 .filter(turno => turno.estado.toLowerCase() !== 'cancelado')
                 .map(turno => {
                     const fecha = new Date(turno.fechaHora);
-                    const diaSemana = fecha.getDay();
+                    const { diaSemana, hora: horas, minuto: minutos } = obtenerPartesEnZonaArgentina(fecha);
                     const columna = diaSemana === 0 ? 7 : diaSemana;
-                    const horas = fecha.getHours();
-                    const minutos = fecha.getMinutes();
                     const top = (horas - HORA_INICIO) * 60 + minutos;
                     const duracion = turno.servicio?.duracionMinutos ?? turno.servicio?.duracionTurnoEnMins ?? 30;
                     const height = Math.max(duracion, 40);
@@ -299,8 +298,7 @@ const AgendaMedica = () => {
 
     // Estadísticas
     const turnosHoy = turnos.filter(t => {
-        const hoy = new Date();
-        return t.fechaHora.toDateString() === hoy.toDateString() && (t.estado === 'confirmado' || t.estado === 'reservado');
+        return esMismoDiaEnArgentina(t.fechaHora, new Date()) && (t.estado === 'confirmado' || t.estado === 'reservado');
     }).length;
     const confirmados = turnos.filter(t => t.estado === 'confirmado').length;
     const pendientesConfirmacion = turnos.filter(t => t.estado === 'reservado').length;
@@ -308,20 +306,21 @@ const AgendaMedica = () => {
     // Días de la semana
     const diasCabecera = [];
     const hoy = new Date();
+    const partesHoy = obtenerPartesEnZonaArgentina(hoy);
     for (let i = 0; i < 5; i++) {
         const d = new Date(currentMonday);
         d.setDate(currentMonday.getDate() + i);
         diasCabecera.push({
             label: ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE'][i],
             numero: d.getDate(),
-            esHoy: d.toDateString() === hoy.toDateString(),
+            esHoy: esMismoDiaEnArgentina(d, hoy),
             columna: i + 1
         });
     }
 
-    const timeIndicatorTop = (hoy.getHours() - HORA_INICIO) * 60 + hoy.getMinutes();
-    const showTimeIndicator = esEstaSemana() && hoy.getDay() >= 1 && hoy.getDay() <= 5 && hoy.getHours() >= HORA_INICIO && hoy.getHours() <= 18;
-    const todayCol = hoy.getDay();
+    const timeIndicatorTop = (partesHoy.hora - HORA_INICIO) * 60 + partesHoy.minuto;
+    const showTimeIndicator = esEstaSemana() && partesHoy.diaSemana >= 1 && partesHoy.diaSemana <= 5 && partesHoy.hora >= HORA_INICIO && partesHoy.hora <= 18;
+    const todayCol = partesHoy.diaSemana;
 
     const puedesCancelar = selectedTurno && (selectedTurno.estado === 'reservado' || selectedTurno.estado === 'confirmado');
 
@@ -528,10 +527,10 @@ const AgendaMedica = () => {
                                                 <TableRow key={turno._id || turno.id || idx} hover>
                                                     <TableCell>
                                                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem' }}>
-                                                            {fecha.toLocaleDateString("es-AR", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                            {fecha.toLocaleDateString("es-AR", { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: ZONA_HORARIA_ARGENTINA })}
                                                         </Typography>
                                                         <Typography variant="caption" color="text.secondary">
-                                                            {fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs
+                                                            {fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit', timeZone: ZONA_HORARIA_ARGENTINA })} hs
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell>
@@ -622,7 +621,7 @@ const AgendaMedica = () => {
                                             <Box sx={{ textAlign: 'left' }}>
                                                 <Typography variant="caption" color="text.secondary" display="block">Hora</Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    {selectedTurno.fechaHora.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs
+                                                    {selectedTurno.fechaHora.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit', timeZone: ZONA_HORARIA_ARGENTINA })} hs
                                                 </Typography>
                                             </Box>
                                         </Stack>
@@ -633,7 +632,7 @@ const AgendaMedica = () => {
                                             <Box sx={{ textAlign: 'left' }}>
                                                 <Typography variant="caption" color="text.secondary" display="block">Fecha</Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    {selectedTurno.fechaHora.toLocaleDateString("es-AR", { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                    {selectedTurno.fechaHora.toLocaleDateString("es-AR", { day: '2-digit', month: 'short', year: 'numeric', timeZone: ZONA_HORARIA_ARGENTINA })}
                                                 </Typography>
                                             </Box>
                                         </Stack>
@@ -694,7 +693,7 @@ const AgendaMedica = () => {
                                             <option value="">-- Seleccionar horario disponible --</option>
                                             {turnos.filter(t => t.estado === 'disponible').map(t => {
                                                 const fecha = new Date(t.fechaHora);
-                                                const label = `${fecha.toLocaleDateString("es-AR")} a las ${fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit' })} hs - Sede: ${t.sede}`;
+                                                const label = `${fecha.toLocaleDateString("es-AR", { timeZone: ZONA_HORARIA_ARGENTINA })} a las ${fecha.toLocaleTimeString("es-AR", { hour: '2-digit', minute: '2-digit', timeZone: ZONA_HORARIA_ARGENTINA })} hs - Sede: ${t.sede}`;
                                                 return (
                                                     <option key={t.id} value={t.id}>{label}</option>
                                                 );

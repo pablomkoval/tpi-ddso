@@ -23,6 +23,37 @@ export class ObraSocialRouter {
         this.obraSocialRouter.get("/", (req, res, next) => {
             this.controller.obtenerTodas(req, res, next);
         });
+
+        this.obraSocialRouter.post("/", (req, res, next) => {
+            this.controller.create(req, res, next);
+        })
+
+        this.obraSocialRouter.delete("/", (req, res, next) => {
+            this.controller.delete(req, res, next);
+        })
+
+        this.obraSocialRouter.get("/:id", (req, res, next) => {
+            this.controller.findById(req, res, next);
+        })
+
+        this.obraSocialRouter.patch("/:id", (req, res, next) => {
+            this.controller.update(req, res, next);
+        })
+
+
+
+        this.obraSocialRouter.post("/:id/planes", (req, res, next) => {
+            this.controller.createPlan(req, res, next);
+        })
+
+        this.obraSocialRouter.patch("/:id/planes/:idPlan", (req, res, next) => {
+            this.controller.updatePlan(req, res, next);
+        })
+
+        this.obraSocialRouter.delete("/:id/planes/:idPlan", (req, res, next) => {
+            this.controller.deletePlan(req, res, next);
+        })
+
     }
 
     getRouter() {

@@ -1,4 +1,5 @@
 //import mongoose from "mongoose";
+import { DateTime } from "luxon";
 import { MongoDBClient } from "./config/database.js";
 import { DiaSemana } from "./domain/enum/DiaSemana.js";
 import { EstadoSolicitudCambioTurno } from "./domain/enum/EstadoSolicitudCambioTurno.js";
@@ -18,6 +19,7 @@ import { UsuarioModel } from "./schemas/usuario.schema.js";
 import { SolicitudCambioTurnoModel } from "./schemas/solicitudCambioTurno.schema.js";
 import { NotificacionModel } from "./schemas/notificacion.schema.js";
 import { KeycloakService } from "./services/keycloak.service.js";
+import { ZONA_HORARIA_ARGENTINA } from "./shared/timezone.js";
 
 const SEED_PASSWORD = "1234";
 const keycloakService = new KeycloakService();
@@ -36,12 +38,12 @@ const coleccionesAReiniciar = [
   UsuarioModel,
 ];
 
-const diasDesdeHoy = (dias, hora, minutos = 0) => {
-  const fecha = new Date();
-  fecha.setDate(fecha.getDate() + dias);
-  fecha.setHours(hora, minutos, 0, 0);
-  return fecha;
-};
+const diasDesdeHoy = (dias, hora, minutos = 0) =>
+  DateTime.now()
+    .setZone(ZONA_HORARIA_ARGENTINA)
+    .plus({ days: dias })
+    .set({ hour: hora, minute: minutos, second: 0, millisecond: 0 })
+    .toJSDate();
 
 const historial = (estado, usuario, motivoCambio, fechaHoraCambio = new Date()) => [
   {
@@ -67,11 +69,18 @@ const minutosDesdeHora = (hora) => {
 };
 
 const crearFechaParaDiaYMinutos = (diaSemana, semana, minutosDelDia) => {
-  const fecha = new Date();
-  const diasHastaTurno = (Number(diaSemana) - fecha.getDay() + 7) % 7;
-  fecha.setDate(fecha.getDate() + diasHastaTurno + semana * 7);
-  fecha.setHours(Math.floor(minutosDelDia / 60), minutosDelDia % 60, 0, 0);
-  return fecha;
+  const ahora = DateTime.now().setZone(ZONA_HORARIA_ARGENTINA);
+  const diaSemanaJs = ahora.weekday % 7; // Luxon: lunes=1..domingo=7 -> domingo=0..sabado=6
+  const diasHastaTurno = (Number(diaSemana) - diaSemanaJs + 7) % 7;
+  return ahora
+    .plus({ days: diasHastaTurno + semana * 7 })
+    .set({
+      hour: Math.floor(minutosDelDia / 60),
+      minute: minutosDelDia % 60,
+      second: 0,
+      millisecond: 0,
+    })
+    .toJSDate();
 };
 
 const generarTurnosDisponibles = ({ medicos, prestaciones, turnosBase, semanas = 6 }) => {
@@ -184,7 +193,7 @@ try {
     {
       nombre: "OSDE 210",
       coberturasEspecialidad: [
-        { prestacion: prestacionPorNombre("Clinica Medica")._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.PARCIAL },
       ],
       coberturasPractica: [],
     },
