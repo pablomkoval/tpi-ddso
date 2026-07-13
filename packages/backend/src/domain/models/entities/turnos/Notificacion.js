@@ -33,7 +33,7 @@ export class Notificacion {
 
         const mensaje = "El turno está en estado: " + ultimoCambioEstado.estado + " Motivo: " + motivo;
 
-        console.log({
+        /* console.log({
             paciente: turno.paciente,
             medico: turno.medico,
             medicoUsuario: turno.medico.usuario,
@@ -42,7 +42,7 @@ export class Notificacion {
         console.log(
             "¿Es cambio solicitado?",
             motivo
-        );
+        ); */
         return {
             destinatario,
             remitente: ultimoCambioEstado.usuario,

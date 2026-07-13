@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterAll, jest } from "@jest/globals";
+import { describe, test, expect, beforeEach, beforeAll, afterAll, jest } from "@jest/globals";
 import mongoose from "mongoose";
 import { MedicoService } from "../../../src/services/medico.service.js";
 import { MedicoModel } from "../../../src/schemas/medico.schema.js";

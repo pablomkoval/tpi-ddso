@@ -1,4 +1,4 @@
-import { Notificacion } from "../../../../src/domain/models/entities/turnos/Notificacion";
+import { Notificacion } from "../../../../src/domain/models/entities/turnos/Notificacion.js";
 import { describe, test, expect } from "@jest/globals";
 
 describe("Capa de dominio - Notificacion", () => {
