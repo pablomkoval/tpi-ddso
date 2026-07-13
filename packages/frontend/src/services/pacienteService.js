@@ -19,19 +19,6 @@ export const getMiPaciente = async () => {
 };
 
 /**
- * Obtiene el historial de turnos del paciente.
- * @param {string} pacienteId
- * @returns {Promise<Array>}
- */
-export const getMisTurnos = async (pacienteId) => {
-    const response = await axios.get(
-        `${API_BASE}/pacientes/${pacienteId}/turnos`,
-        getHeaders()
-    );
-    return response.data;
-};
-
-/**
  * Cancela un turno del paciente con motivo. Solo se puede cancelar con al menos 1 hora de anticipación.
  * @param {string} pacienteId
  * @param {string} turnoId
