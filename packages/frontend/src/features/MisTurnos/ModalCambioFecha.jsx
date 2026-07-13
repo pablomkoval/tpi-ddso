@@ -63,8 +63,10 @@ export default function ModalCambioFecha({ open, turno, onClose, onConfirm, load
             setErrorCarga(null);
             setTurnoSeleccionado(null);
             try {
+                console.log('Cargando turnos disponibles para cambio...');
                 const resultados = await buscarTurnosParaCambio(medicoId, servicioId);
                 setTurnosDisponibles(resultados);
+                console.log('Turnos disponibles cargados:', resultados);
             } catch (e) {
                 setErrorCarga('No se pudieron cargar los turnos disponibles. Intente nuevamente.');
                 setTurnosDisponibles([]);
