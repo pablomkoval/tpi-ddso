@@ -417,7 +417,7 @@ export class TurnoService {
     /// NOTIFICAR ////
 
     if (estado !== EstadoTurno.REALIZADO) {
-      this.notificarCambioEstadoTurno(turnoActualizado, estado, usuarioRemitente, usuarioRol)
+      this.notificarCambioEstadoTurno(turnoActualizado, estado, usuarioRemitente, usuarioRol, motivoCambio)
     }
 
     return turnoActualizado;
