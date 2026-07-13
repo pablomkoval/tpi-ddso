@@ -50,7 +50,7 @@ const getMonday = (d) => {
 const formatearSemana = (inicio) => {
     const fechaInicio = new Date(inicio);
     const fechaFin = new Date(inicio);
-    fechaFin.setDate(fechaInicio.getDate() + 4);
+    fechaFin.setDate(fechaInicio.getDate() + 6);
     const mesInicio = fechaInicio.toLocaleDateString("es-AR", { month: "long" });
     const mesFin = fechaFin.toLocaleDateString("es-AR", { month: "long" });
     const anio = fechaInicio.getFullYear();
@@ -307,11 +307,11 @@ const AgendaMedica = () => {
     const diasCabecera = [];
     const hoy = new Date();
     const partesHoy = obtenerPartesEnZonaArgentina(hoy);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 7; i++) {
         const d = new Date(currentMonday);
         d.setDate(currentMonday.getDate() + i);
         diasCabecera.push({
-            label: ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE'][i],
+            label: ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'][i],
             numero: d.getDate(),
             esHoy: esMismoDiaEnArgentina(d, hoy),
             columna: i + 1
@@ -319,8 +319,8 @@ const AgendaMedica = () => {
     }
 
     const timeIndicatorTop = (partesHoy.hora - HORA_INICIO) * 60 + partesHoy.minuto;
-    const showTimeIndicator = esEstaSemana() && partesHoy.diaSemana >= 1 && partesHoy.diaSemana <= 5 && partesHoy.hora >= HORA_INICIO && partesHoy.hora <= 18;
-    const todayCol = partesHoy.diaSemana;
+    const showTimeIndicator = esEstaSemana() && partesHoy.hora >= HORA_INICIO && partesHoy.hora <= 18;
+    const todayCol = partesHoy.diaSemana === 0 ? 7 : partesHoy.diaSemana;
 
     const puedesCancelar = selectedTurno && (selectedTurno.estado === 'reservado' || selectedTurno.estado === 'confirmado');
 
@@ -390,8 +390,8 @@ const AgendaMedica = () => {
                 {/* ─── CALENDARIO SEMANAL ─── */}
                 <Box sx={{ bgcolor: '#ffffff', border: '1px solid', borderColor: '#dfe1ea', borderRadius: 4, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0, 71, 141, 0.04)' }}>
 
-                    {/* Header de días */}
-                    <Box sx={{ display: 'grid', gridTemplateColumns: '80px repeat(5, 1fr)', borderBottom: '2px solid', borderColor: '#e2e4ef', background: 'linear-gradient(180deg, #f6f7fc 0%, #f0f1f8 100%)' }}>
+                    {/* Header de días (Cambiado a repeat(7, 1fr)) */}
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', borderBottom: '2px solid', borderColor: '#e2e4ef', background: 'linear-gradient(180deg, #f6f7fc 0%, #f0f1f8 100%)' }}>
                         <Box sx={{ borderRight: '1px solid #e8e9f2' }} />
                         {diasCabecera.map((dia, idx) => (
                             <Box key={idx} sx={{ p: '12px 8px 10px', textStyle: 'center', bgcolor: dia.esHoy ? 'rgba(0, 94, 184, 0.06)' : 'transparent', textAlign: 'center' }}>
@@ -414,35 +414,33 @@ const AgendaMedica = () => {
                         </Box>
                     ) : (
                         <Box sx={{ overflowY: 'auto', maxHeight: { xs: 400, md: 520 } }}>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: '80px repeat(5, 1fr)', position: 'relative', height: `${horasAgenda.length * 60}px` }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', position: 'relative', height: `${horasAgenda.length * 60}px` }}>
                                 {horasAgenda.map((hora, indice) => (
                                     <React.Fragment key={hora}>
                                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start', pt: '4px', pr: '12px', color: '#8b8fa3', fontSize: 12, fontWeight: 600, letterSpacing: '0.3px', borderRight: '1px solid #e8e9f2', borderBottom: '1px solid #f2f3fb', gridRowStart: indice + 1 }}>
                                             {hora}
                                         </Box>
-                                        {[1, 2, 3, 4, 5].map(col => (
+                                        {[1, 2, 3, 4, 5, 6, 7].map(col => (
                                             <Box key={col} sx={{ height: 60, borderBottom: '1px solid #f2f3fb', borderRight: '1px solid #f2f3fb', bgcolor: diasCabecera[col - 1]?.esHoy ? 'rgba(0, 94, 184, 0.018)' : 'transparent', gridRowStart: indice + 1 }} />
                                         ))}
                                     </React.Fragment>
                                 ))}
 
-                                {/* Indicador de hora actual */}
                                 {showTimeIndicator && (
-                                    <Box sx={{ position: 'absolute', zIndex: 4, display: 'flex', alignItems: 'center', pointerEvents: 'none', top: `${timeIndicatorTop}px`, left: `calc(80px + ((100% - 80px) / 5) * ${todayCol - 1})`, width: `calc((100% - 80px) / 5)` }}>
+                                    <Box sx={{ position: 'absolute', zIndex: 4, display: 'flex', alignItems: 'center', pointerEvents: 'none', top: `${timeIndicatorTop}px`, left: `calc(80px + ((100% - 80px) / 7) * ${todayCol - 1})`, width: `calc((100% - 80px) / 7)` }}>
                                         <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#ef4444', boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)', flexShrink: 0, ml: '-5px' }} />
                                         <Box sx={{ height: '2px', width: '100%', bgcolor: '#ef4444', opacity: 0.7 }} />
                                     </Box>
                                 )}
 
-                                {/* Turnos en Posicionamiento Absoluto */}
-                                {turnos.filter(t => t.columna >= 1 && t.columna <= 5).map((turno) => {
+                                {turnos.filter(t => t.columna >= 1 && t.columna <= 7).map((turno) => {
                                     const config = obtenerEstilosEstado(turno.estado);
                                     return (
                                         <Box key={turno.id} onClick={() => { setSelectedTurno(turno); setOpenDialog(true); }}
                                             sx={{
                                                 position: 'absolute',
-                                                left: `calc(80px + ((100% - 80px) / 5) * ${turno.columna - 1} + 3px)`,
-                                                width: `calc((100% - 80px) / 5 - 6px)`,
+                                                left: `calc(80px + ((100% - 80px) / 7) * ${turno.columna - 1} + 3px)`,
+                                                width: `calc((100% - 80px) / 7 - 6px)`,
                                                 top: `${turno.top}px`,
                                                 height: `${turno.height}px`,
                                                 bgcolor: config.bg,
@@ -455,11 +453,6 @@ const AgendaMedica = () => {
                                                 textAlign: 'left',
                                                 zIndex: 2,
                                                 overflow: 'hidden',
-                                                animation: 'turnoFadeIn 0.3s ease-out',
-                                                '@keyframes turnoFadeIn': {
-                                                    from: { opacity: 0, transform: 'translateX(-4px)' },
-                                                    to: { opacity: 1, transform: 'translateX(0)' }
-                                                },
                                                 '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 3px 8px rgba(0,0,0,0.1)', zIndex: 3 }
                                             }}
                                         >
