@@ -706,6 +706,11 @@ const AgendaMedica = () => {
                                         </Stack>
                                     </Box>
                                 )}
+                                {selectedTurno.estado === 'confirmado' && new Date() < selectedTurno.fechaHora && (
+                                    <Alert severity="info" sx={{ mt: 2, borderRadius: 2, fontSize: '0.85rem', textAlign: 'left' }}>
+                                        Este turno está programado para el futuro y no puede marcarse como realizado todavía.
+                                    </Alert>
+                                )}
                             </DialogContent>
                             {!showCancelForm && !showChangeForm && (
                                 <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid', borderColor: 'divider' }}>
@@ -725,7 +730,7 @@ const AgendaMedica = () => {
                                         </Button>
                                     )}
                                     {selectedTurno.estado === 'confirmado' && (
-                                        <Button onClick={handleRealizar} color="success" variant="contained" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : null} sx={{ borderRadius: 2 }}>
+                                        <Button onClick={handleRealizar} color="success" variant="contained" disabled={actionLoading || new Date() < selectedTurno.fechaHora} startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : null} sx={{ borderRadius: 2 }}>
                                             Realizado
                                         </Button>
                                     )}
