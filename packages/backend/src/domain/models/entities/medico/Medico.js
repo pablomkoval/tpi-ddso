@@ -179,7 +179,8 @@ export default class Medico {
     }
     const fechaInicio = new Date();
     const fechaFinal = new Date(fechaInicio);
-    fechaFinal.setDate(fechaFinal.getDate() + diasACubrir);
+    fechaFinal.setUTCDate(fechaFinal.getUTCDate() + diasACubrir);
+    fechaFinal.setUTCHours(0, 0, 0, 0);
     const duracionTurnoEnMins = servicio.duracionTurnoEnMins;
     const siguienteFechaParaDia = (fechaBase, diaSemana) => {
       const fecha = new Date(fechaBase);
@@ -203,7 +204,7 @@ export default class Medico {
           fechaInicio,
           disponibilidad.diaSemana,
         );
-        fechaActual <= fechaFinal;
+        fechaActual < fechaFinal;
         fechaActual = new Date(fechaActual.getTime() + SEMANA_MS)
       ) {
         // me fijo todos los lunes hasta llegar al limite

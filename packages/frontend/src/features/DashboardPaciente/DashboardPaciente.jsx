@@ -24,6 +24,7 @@ import { getUsernameFromToken } from '../../utils/authUtils';
 import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
 import { getMiPaciente } from '../../services/pacienteService.js';
 import { obtenerTurnosPorPaciente } from '../../services/busquedaTurnosService.js';
+import { ZONA_HORARIA_ARGENTINA } from '../../utils/dateUtils.js';
 
 const estadoPendienteLabel = {
   reservado: 'Esperando confirmación médica',
@@ -40,9 +41,9 @@ const mapearTurno = (turno) => {
     iniciales: nombreMedico
       ? nombreMedico.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
       : '??',
-    fecha: fechaHora.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }),
+    fecha: fechaHora.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: ZONA_HORARIA_ARGENTINA }),
     fechaLabel: turno.estado.toLowerCase() === 'confirmado' ? 'Fecha confirmada' : 'Pendiente de confirmación',
-    hora: fechaHora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+    hora: fechaHora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: ZONA_HORARIA_ARGENTINA }),
     duracion: `${turno.servicio?.duracionMinutos || 30} min`,
     lugar: turno.sede?.nombre || 'Sede a confirmar',
     ciudad: turno.sede?.direccion || '',

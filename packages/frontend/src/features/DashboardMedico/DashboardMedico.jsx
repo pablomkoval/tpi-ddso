@@ -23,6 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
 import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
 import { getMiMedico, getAgenda } from '../../services/medicoService.js';
+import { ZONA_HORARIA_ARGENTINA, obtenerPartesEnZonaArgentina } from '../../utils/dateUtils.js';
 
 const estadoConfig = {
   realizado: { label: 'Realizado', color: 'success' },
@@ -91,7 +92,7 @@ export default function DashboardMedico() {
               id: turno.id || turno._id,
               paciente: turno.pacienteDetalle?.nombre || 'Paciente',
               motivo: turno.servicio?.nombre || turno.servicio?.servicioUnico?.nombre || 'Consulta general',
-              hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+              hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: ZONA_HORARIA_ARGENTINA }),
               estado: turno.estado.toLowerCase(),
             };
           })
@@ -108,7 +109,8 @@ export default function DashboardMedico() {
 
   const nombreCompleto = username ? username : 'Médico';
 
-  const ahoraEnMinutos = new Date().getHours() * 60 + new Date().getMinutes();
+  const partesAhora = obtenerPartesEnZonaArgentina(new Date());
+  const ahoraEnMinutos = partesAhora.hora * 60 + partesAhora.minuto;
   const proximoTurno = [...turnosHoy]
     .sort((a, b) => horaAMinutos(a.hora) - horaAMinutos(b.hora))
     .find((t) => horaAMinutos(t.hora) >= ahoraEnMinutos) ?? null;
@@ -123,7 +125,7 @@ export default function DashboardMedico() {
             Hola, {nombreCompleto}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Panel médico · {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            Panel médico · {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: ZONA_HORARIA_ARGENTINA })}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, flexShrink: 0 }}>
