@@ -1,4 +1,3 @@
-import { SedeNoAutorizadaError } from "../../../errors/SedeNoAutorizadaError.js";
 import { ServicioNoPrestadoError } from "../../../errors/ServicioNoPrestadoError.js";
 import { DisponibilidadHoraria } from "./DisponibilidadHoraria.js";
 import { Turno } from "../turnos/Turno.js";
