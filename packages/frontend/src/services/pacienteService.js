@@ -98,3 +98,13 @@ export const buscarTurnosParaCambio = async (medicoId, servicioId) => {
     });
     return response.data?.data?.turnos || [];
 };
+
+/**
+ * Obtiene los detalles de un paciente por su ID.
+ * @param {string} pacienteId
+ * @returns {Promise<Object>} datos del paciente
+ */
+export const getPacienteById = async (pacienteId) => {
+    const response = await axios.get(`${API_BASE}/pacientes/${pacienteId}`, getHeaders());
+    return response.data;
+};

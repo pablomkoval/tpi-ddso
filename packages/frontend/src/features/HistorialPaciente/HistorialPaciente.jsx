@@ -4,6 +4,7 @@ import { Box, Typography, Button, Card, CardContent, Avatar, Chip, Stack, Divide
 import { ArrowBack as ArrowBackIcon, History as HistoryIcon, Person as PersonIcon } from '@mui/icons-material';
 import { CustomSkeleton } from '../../components/CustomSkeleton.jsx';
 import { obtenerTurnosPorPaciente } from '../../services/busquedaTurnosService.js';
+import { getPacienteById } from '../../services/pacienteService.js';
 import { formatearFecha } from '../../utils/dateUtils.js';
 
 const estadoConfig = {
@@ -24,20 +25,22 @@ export default function HistorialPaciente() {
 
     const fetchHistorial = async () => {
         try {
-            const turnos = await obtenerTurnosPorPaciente(idPaciente);
+            setLoading(true);
+            const [turnos, paciente] = await Promise.all([
+                obtenerTurnosPorPaciente(idPaciente),
+                getPacienteById(idPaciente)
+            ]);
             setHistorial(turnos);
-            if (turnos.length > 0) {
-                setPacienteInfo(turnos[0].paciente);
-            }
+            setPacienteInfo(paciente);
         } catch (error) {
             console.error("Error al obtener el historial del paciente:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        setLoading(true);
         fetchHistorial();
-        setLoading(false);
     }, [idPaciente]);
 
     if (loading) {
