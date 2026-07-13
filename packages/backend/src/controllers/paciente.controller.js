@@ -54,16 +54,6 @@ export class PacienteController {
         }
     }
 
-    async consultarHistorial(req, res, next) {
-        try {
-            const idPaciente = parsearId(req.params.idPaciente);
-            const historial = await this.pacienteService.consultarHistorial(idPaciente);
-            res.status(200).json(historial);
-        } catch (error) {
-            return next(error);
-        }
-    }
-
     async solicitarCambioFecha(req, res, next) {
         try {
             const idPaciente = parsearId(req.params.idPaciente);

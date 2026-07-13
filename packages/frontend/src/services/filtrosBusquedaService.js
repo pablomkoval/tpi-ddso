@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000').replace(/\/+$/, '');
-
-const API_URL_ESP = `${API_BASE_URL}/servicios`;
-const API_URL_SEDE = `${API_BASE_URL}/sedes`;
-const API_URL_MED = `${API_BASE_URL}/medicos`;
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const API_URL_ESP = `${API_BASE}/servicios`; 
+const API_URL_SEDE = `${API_BASE}/sedes`; 
+const API_URL_MED = `${API_BASE}/medicos`; 
 
 export const buscarServicios = async () => {
     try{

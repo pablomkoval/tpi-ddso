@@ -1,6 +1,6 @@
 export class CoberturaEspecialidad{
     constructor(especialidad, nivel){
-        this.especialidad = especialidad;
+        this.servicio = especialidad;
         this.nivel = nivel;
     }
 }

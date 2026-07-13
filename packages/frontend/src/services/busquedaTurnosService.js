@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000').replace(/\/+$/, '');
-
-const API_URL = `${API_BASE_URL}/turnos/disponibles`;
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const API_URL = `${API_BASE}/turnos/disponibles`; 
 
 export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
     try{
@@ -37,7 +36,7 @@ export const buscarTurnos = async (filtros, pagina = 1, limite = 10) => {
 export const obtenerTurnoPorId = async (id) => {
     try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${API_BASE_URL}/turnos/${id}`, {
+        const response = await axios.get(`${API_BASE}/turnos/${id}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -52,8 +51,7 @@ export const obtenerTurnoPorId = async (id) => {
 export const obtenerTurnosPorPaciente = async (pacienteId) => {
     try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${API_BASE_URL}/turnos`, {
-            params: { pacienteId },
+        const response = await axios.get(`${API_BASE}/turnos?pacienteId=${pacienteId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -68,7 +66,7 @@ export const obtenerTurnosPorPaciente = async (pacienteId) => {
 export const obtenerTurnosDiariosPorMedico = async (medicoId, fecha) => {
     try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${API_BASE_URL}/turnos?medicoId=${medicoId}&fecha=${fecha}`, {
+        const response = await axios.get(`${API_BASE}/turnos?medicoId=${medicoId}&fecha=${fecha}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

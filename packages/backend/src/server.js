@@ -2,7 +2,7 @@ import app from "./app.js";
 import "./jobs/GeneracionTurnosJob.js"; //mover a otro
 import { MongoDBClient } from "./config/database.js";
 
-const puerto =  4000;
+const puerto = process.env.PORT || 4000;
 
 
 

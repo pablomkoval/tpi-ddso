@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000').replace(/\/+$/, '');
-
-const API_BASE = API_BASE_URL;
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
 
 const getHeaders = () => {
     const token = localStorage.getItem('token');
@@ -27,10 +25,10 @@ export const getMiPaciente = async () => {
  */
 export const getMisTurnos = async (pacienteId) => {
     const response = await axios.get(
-        `${API_BASE}/pacientes/${pacienteId}/turnos`,
+        `${API_BASE}/turnos?pacienteId=${pacienteId}`,
         getHeaders()
     );
-    return response.data;
+    return response.data?.data || [];
 };
 
 /**

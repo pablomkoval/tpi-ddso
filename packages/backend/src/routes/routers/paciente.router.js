@@ -101,27 +101,6 @@ export class PacienteRouter {
 
 
         // Rutas del ciclo de vida de los turnos del paciente //
-
-
-
-        /**
-         * @swagger
-         * /pacientes/{idPaciente}/turnos:
-         *  get:
-         *      summary: Consultar historial de turnos de un paciente
-         *      tags: [Pacientes - Flujo Turnos]
-         *      parameters:
-         *        - name: idPaciente
-         *          in: path
-         *          required: true
-         *          schema:
-         *              type: string
-         *      responses:
-         *          200:
-         *              description: Historial de turnos obtenido correctamente
-         */
-        this.pacienteRouter.get("/:idPaciente/turnos", verifyToken, (req, res, next) => { this.controller.consultarHistorial(req, res, next); });
-
   
         /**
          * @swagger

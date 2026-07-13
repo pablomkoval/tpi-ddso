@@ -29,8 +29,8 @@ export class PacienteRepository {
         return await this.model.findOne({usuario: idUsuario}).populate({
             path: 'plan',
             populate: [
-                { path: 'coberturasEspecialidad.prestacion' },
-                { path: 'coberturasPractica.practica' }
+                { path: 'coberturasEspecialidad.servicio' },
+                { path: 'coberturasPractica.servicio' }
             ]
         });
     }

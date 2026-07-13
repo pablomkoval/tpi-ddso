@@ -1,9 +1,18 @@
 import KeycloakAdminClient from "@keycloak/keycloak-admin-client";
+import dotenv from 'dotenv';
+dotenv.config({ path: new URL('../.env', import.meta.url) });
+
+const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM || "tpi-realm";
+const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID || "react-client";
 
 export class KeycloakService {
     constructor() {
+        let keycloakUrl = process.env.KEYCLOAK_URL || "http://localhost:8080";
+        if (!keycloakUrl.startsWith("http://") && !keycloakUrl.startsWith("https://")) {
+            keycloakUrl = `https://${keycloakUrl}`;
+        }
         this.kcAdminClient = new KeycloakAdminClient({
-            baseUrl: process.env.KEYCLOAK_URL || 'http://localhost:8080'
+            baseUrl: keycloakUrl
         });
     }
 
@@ -21,7 +30,7 @@ export class KeycloakService {
 
         try {
             await this.kcAdminClient.users.create({
-                realm: process.env.KEYCLOAK_REALM || "tpi-realm", 
+                realm: KEYCLOAK_REALM, 
                 username: username,
                 email: username,
                 firstName: nombre, 
@@ -39,7 +48,7 @@ export class KeycloakService {
             });
 
             const users = await this.kcAdminClient.users.find({ 
-                realm: process.env.KEYCLOAK_REALM || "tpi-realm",
+                realm: KEYCLOAK_REALM,
                 username 
             });
             
@@ -60,13 +69,13 @@ export class KeycloakService {
         await this.#authenticateAdmin();
 
         const users = await this.kcAdminClient.users.find({
-            realm: "tpi-realm",
+            realm: KEYCLOAK_REALM,
             max: 1000,
         });
 
         for (const user of users) {
             await this.kcAdminClient.users.del({
-                realm: "tpi-realm",
+                realm: KEYCLOAK_REALM,
                 id: user.id,
             });
         }
@@ -79,28 +88,28 @@ export class KeycloakService {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const clients = await this.kcAdminClient.clients.find({
-                realm: "tpi-realm"
+                realm: KEYCLOAK_REALM
             });
 
-            const client = clients.find(c => c.clientId === "react-client");
+            const client = clients.find(c => c.clientId === KEYCLOAK_CLIENT_ID);
 
             if (!client) {
-                throw new Error("No existe el client react-client en tpi-realm");
+                throw new Error(`No existe el client ${KEYCLOAK_CLIENT_ID} en ${KEYCLOAK_REALM}`);
             }
 
             const roles = await this.kcAdminClient.clients.listRoles({
-                realm: "tpi-realm",
+                realm: KEYCLOAK_REALM,
                 id: client.id
             });
 
             const role = roles.find(r => r.name === roleName);
 
             if (!role) {
-                throw new Error(`El rol ${roleName} no existe en el cliente react-client`);
+                throw new Error(`El rol ${roleName} no existe en el cliente ${KEYCLOAK_CLIENT_ID}`);
             }
 
            await this.kcAdminClient.users.addClientRoleMappings({
-                realm: "tpi-realm",
+                realm: KEYCLOAK_REALM,
                 id: userId,
                 clientUniqueId: client.id,
                 roles: [

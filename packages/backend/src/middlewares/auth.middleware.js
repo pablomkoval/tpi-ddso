@@ -1,8 +1,14 @@
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { UsuarioModel } from '../schemas/usuario.schema.js';
+import dotenv from 'dotenv';
+dotenv.config({ path: new URL('../.env', import.meta.url) });
 
-const KEYCLOAK_URL = process.env.KEYCLOAK_URL || 'http://localhost:8080';
+let rawKeycloakUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
+if (!rawKeycloakUrl.startsWith('http://') && !rawKeycloakUrl.startsWith('https://')) {
+    rawKeycloakUrl = `https://${rawKeycloakUrl}`;
+}
+const KEYCLOAK_URL = rawKeycloakUrl;
 const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM || 'tpi-realm';
 const CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID || 'react-client';
 

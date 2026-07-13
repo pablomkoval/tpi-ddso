@@ -28,21 +28,28 @@ const obtenerCostoBase = (turno) => {
   return 0;
 };
 
-const obtenerNivelCobertura = (turno, plan) => {
+const obtenerNivelCobertura = (turno, plan) => {  
   if (!plan) {
     return NivelCobertura.NO_CUBIERTA;
   }
 
   // El campo en el schema de Turno se llama "servicio" y referencia a Prestacion.
   // El "tipoServicio" viene del discriminator de Prestacion.
-  const servicio = turno?.servicio;
-  if (!servicio) {
+  const prestacion = turno?.servicio;
+
+
+  if (!prestacion) {
     return NivelCobertura.NO_CUBIERTA;
   }
 
-  const idServicio = obtenerId(servicio);
-  const idServicioUnicoTurno = obtenerId(servicio.servicioUnico);
+  //const idServicio = obtenerId(servicio);
+  const idServicioUnicoTurno = obtenerId(prestacion.servicioUnico);
 
+  const nivelCoberturaParaServicio = plan.obtenerCoberturaServicio(idServicioUnicoTurno);
+
+  return nivelCoberturaParaServicio ?? NivelCobertura.NO_CUBIERTA;
+
+/* 
   if (servicio.tipoServicio === "practica") {
     const coberturas = Array.isArray(plan.coberturasPractica)
       ? plan.coberturasPractica
@@ -78,9 +85,7 @@ const obtenerNivelCobertura = (turno, plan) => {
         String(idServicioUnicoCobertura) === String(idServicioUnicoTurno);
     });
     return cobertura?.nivel ?? NivelCobertura.NO_CUBIERTA;
-  }
-
-  return NivelCobertura.NO_CUBIERTA;
+  } */
 };
 
 const calcularCostoPaciente = (costoBase, nivelCobertura) => {
@@ -122,7 +127,7 @@ export class TurnoService {
         "FILTRO_REQUERIDO",
       );
     }
-
+    
     const prestacionesValidas = await this.servicioService.findPrestacionesByServicioId(filtros.servicioId);
     if (!prestacionesValidas || prestacionesValidas.length === 0) {
       throw new AppError(
@@ -144,7 +149,6 @@ export class TurnoService {
         );
       }
     }
-
     if (
       filtros.fechaDesde &&
       filtros.fechaHasta &&
@@ -172,7 +176,6 @@ export class TurnoService {
       fechaDesde: filtros.fechaDesde || null,
       fechaHasta: filtros.fechaHasta || null,
     };
-
     const { turnos, totalTurnos } = await this.turnoRepository.buscarDisponibles(filtroArmado);
     const turnosConCostos = this.popularCostosTurnos(turnos, paciente);
     const turnosOrdenados = this.ordenarYPaginarTurnos(turnosConCostos, filtros, paginacion);
@@ -181,7 +184,6 @@ export class TurnoService {
     const limite = Number(paginacion.limitePorPagina || paginacion.limit || 10);
 
     const totalPaginas = totalTurnos === 0 ? 0 : Math.ceil(totalTurnos / limite);
-
     return {
       turnos: turnosOrdenados,
       pagination: {
@@ -363,7 +365,6 @@ export class TurnoService {
     }
 
     let usuarioRemitente;
-    console.error("hola2");
 
     if (usuarioRol === "PACIENTE") {
       usuarioRemitente = await this.pacienteService.findByIdUsuario(usuarioId);
@@ -400,13 +401,10 @@ export class TurnoService {
         );
       }
     }
-    console.error("hola final");
 
     /// GUARDAR TURNO /////
     turno.actualizarEstado(estado, usuarioRemitente._id, motivoCambio);
-    console.error("##########Este es el turno: ", turno);
     const turnoActualizado = await this.turnoRepository.update(turnoId, turno);
-    console.error("##########Este es el turno actualizado: ", turnoActualizado);
     /// NOTIFICAR ////
 
     if (estado !== EstadoTurno.REALIZADO) {
@@ -448,7 +446,6 @@ export class TurnoService {
   }
 
   async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol) {
-    console.error("Este es el turno: ", turno);
     const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
     
     const fecha = new Date(turno.fechaHora);
@@ -467,7 +464,6 @@ export class TurnoService {
         : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`;
 
     try {
-      console.error("MI NOTIFICACIONES SERVICE: ", this.notificacionesService)
       await this.notificacionesService.create({
         destinatario: usuarioRol === "PACIENTE" ? turno.medico : turno.paciente,
         remitente: usuarioRemitente._id,

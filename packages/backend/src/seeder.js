@@ -193,7 +193,7 @@ try {
     {
       nombre: "OSDE 210",
       coberturasEspecialidad: [
-        { prestacion: prestacionPorNombre("Clinica Medica")._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.PARCIAL },
       ],
       coberturasPractica: [],
     },
