@@ -22,12 +22,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
 import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
-import { obtenerTurnosDiariosPorMedico } from '../../services/busquedaTurnosService.js';
+import { getMiMedico, getAgenda } from '../../services/medicoService.js';
 
 const estadoConfig = {
-  completado: { label: 'Completado', color: 'success' },
-  reservado: { label: 'Confirmado', color: 'primary' },
-  pendiente: { label: 'Pendiente', color: 'warning' },
+  realizado: { label: 'Realizado', color: 'success' },
+  confirmado: { label: 'Confirmado', color: 'primary' },
+  reservado: { label: 'Pendiente', color: 'warning' },
 };
 
 const horaAMinutos = (hora) => {
@@ -68,16 +68,42 @@ export default function DashboardMedico() {
   }, []);
 
   useEffect(() => {
-    const cargarTurosDeHoy = async () => {
+    const cargarTurnosDeHoy = async () => {
       try {
-        const turnos_diarios = await obtenerTurnosDiariosPorMedico();
-        setTurnosHoy(turnos_diarios);
+        const medico = await getMiMedico();
+        const medicoId = medico.id || medico._id;
+
+        const inicioDia = new Date();
+        inicioDia.setHours(0, 0, 0, 0);
+        const finDia = new Date();
+        finDia.setHours(23, 59, 59, 999);
+
+        const agendaData = await getAgenda(medicoId, inicioDia.toISOString(), finDia.toISOString());
+
+        const turnosDeHoy = agendaData
+          .filter((turno) => {
+            const estado = turno.estado.toLowerCase();
+            return estado !== 'disponible' && estado !== 'cancelado';
+          })
+          .map((turno) => {
+            const fecha = new Date(turno.fechaHora);
+            return {
+              id: turno.id || turno._id,
+              paciente: turno.pacienteDetalle?.nombre || 'Paciente',
+              motivo: turno.servicio?.nombre || turno.servicio?.servicioUnico?.nombre || 'Consulta general',
+              hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+              estado: turno.estado.toLowerCase(),
+            };
+          })
+          .sort((a, b) => horaAMinutos(a.hora) - horaAMinutos(b.hora));
+
+        setTurnosHoy(turnosDeHoy);
       } catch (error) {
         console.error("Error cargando turnos de hoy", error);
       }
     };
 
-    cargarTurosDeHoy();
+    cargarTurnosDeHoy();
   }, []);
 
   const nombreCompleto = username ? username : 'Médico';
@@ -94,7 +120,7 @@ export default function DashboardMedico() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, gap: 2 }}>
         <Box>
           <Typography variant="h4" sx={{ mb: 0.5 }}>
-            Hola, Dr. {nombreCompleto}
+            Hola, {nombreCompleto}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Panel médico · {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
