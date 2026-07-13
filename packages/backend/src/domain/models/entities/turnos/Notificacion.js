@@ -1,6 +1,7 @@
 export const TipoNotificacion = {
     INFO: "INFO",
     SOLICITUD_CAMBIO: "SOLICITUD_CAMBIO",
+    RECORDATORIO: "RECORDATORIO",
 };
 
 export class Notificacion {

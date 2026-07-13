@@ -1,5 +1,6 @@
 import app from "./app.js";
 import "./jobs/GeneracionTurnosJob.js"; //mover a otro
+import "./jobs/NotificacionTurnosJob.js";
 import { MongoDBClient } from "./config/database.js";
 
 const puerto = process.env.PORT || 4000;

@@ -6,6 +6,9 @@ import { NivelCobertura } from "../domain/enum/NivelCobertura.js";
 import AppError from "../shared/errors/AppError.js";
 import { BadRequestError } from "../shared/errors/AppError.js";
 import { EstadoTurno } from "../domain/enum/EstadoTurno.js";
+import { TipoNotificacion } from "../domain/models/entities/turnos/Notificacion.js";
+import { DateTime } from "luxon";
+import { ZONA_HORARIA_ARGENTINA } from "../shared/timezone.js";
 
 // enviar a un .env
 const PORCENTAJE_PAGO_PARCIAL = 0.5;
@@ -216,6 +219,12 @@ export class TurnoService {
 
     if (filtros?.medicoId) {
       criterios.medico = filtros.medicoId;
+    }
+
+    if (filtros?.futuros === true){
+      criterios.fechaHora = {
+        $gte: new Date()
+      };
     }
 
     const resultado = await this.turnoRepository.findAllPaginated(
@@ -445,7 +454,7 @@ export class TurnoService {
     );
   }
 
-  async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol) {
+  async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol, motivo = null) {
     const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
     
     const fecha = new Date(turno.fechaHora);
@@ -456,12 +465,12 @@ export class TurnoService {
       minute: "2-digit",
     });
 
-  /*   const mensaje = `Su turno es el ${fechaTexto} a las ${horaTexto}.`; */
+    const textoMotivo = motivo ? `. Motivo: ${motivo}` : "";
 
     const mensaje =
       usuarioRol === "PACIENTE"
-        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`
-        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`;
+        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto} ${textoMotivo}`
+        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto} ${textoMotivo}`;
 
     try {
       await this.notificacionesService.create({
@@ -471,6 +480,103 @@ export class TurnoService {
       });
     } catch (notifErr) {
       console.error('[TurnoService] Error al enviar notificación de cambio estado turno:', notifErr.message);
+    }
+  }
+
+  async enviarRecordatoriosTurnos() {
+    try {
+      const ahora = DateTime.now().setZone(ZONA_HORARIA_ARGENTINA);
+      
+    
+      const mañanaInicio = ahora.plus({ days: 1 }).startOf('day').toJSDate();
+      const mañanaFin = ahora.plus({ days: 1 }).endOf('day').toJSDate();
+
+      console.log(`[TurnoService] Buscando turnos para notificar entre ${mañanaInicio.toISOString()} y ${mañanaFin.toISOString()}...`);
+
+      const turnos = await this.turnoRepository.buscarTurnos({
+        fechaDesde: mañanaInicio,
+        fechaHasta: mañanaFin,
+        estados: [EstadoTurno.RESERVADO, EstadoTurno.CONFIRMADO]
+      });
+
+      console.log(`[TurnoService] Se encontraron ${turnos.length} turnos para mañana.`);
+
+      for (const turno of turnos) {
+        try {
+          if (!turno.paciente) {
+            console.log(`[TurnoService] El turno ${turno._id} no tiene paciente asignado.`);
+            continue;
+          }
+          if (!turno.medico) {
+            console.log(`[TurnoService] El turno ${turno._id} no tiene médico asignado (posible inconsistencia).`);
+            continue;
+          }
+
+          const paciente = await this.pacienteService.findById(turno.paciente);
+          if (!paciente) {
+            console.log(`[TurnoService] No se encontró el paciente ${turno.paciente} para el turno ${turno._id}.`);
+            continue;
+          }
+
+          const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
+          
+          const fechaLuxon = DateTime.fromJSDate(turno.fechaHora).setZone(ZONA_HORARIA_ARGENTINA);
+          const fechaTexto = fechaLuxon.toFormat("dd/MM/yyyy");
+          const horaTexto = fechaLuxon.toFormat("HH:mm");
+
+          const resolvedPacienteUser = paciente.usuario;
+          if (resolvedPacienteUser) {
+            const yaNotificadoPaciente = await this.notificacionesService.count({
+              referenciaId: String(turno._id),
+              destinatario: resolvedPacienteUser,
+              tipo: TipoNotificacion.RECORDATORIO
+            });
+
+            if (yaNotificadoPaciente === 0) {
+              const mensajePaciente = `Recordatorio: Tenés un turno reservado para el día ${fechaTexto} a las ${horaTexto} con el profesional ${turno.medico.nombre} para ${nombreServicio}.`;
+              
+              await this.notificacionesService.create({
+                destinatario: resolvedPacienteUser,
+                remitente: String(turno.medico.usuario),
+                mensaje: mensajePaciente,
+                tipo: TipoNotificacion.RECORDATORIO,
+                referenciaId: String(turno._id)
+              });
+              console.log(`[TurnoService] Recordatorio enviado al paciente ${paciente.nombre} para el turno ${turno._id}.`);
+            } else {
+              console.log(`[TurnoService] El paciente ${paciente.nombre} ya fue notificado para el turno ${turno._id}.`);
+            }
+          }
+
+          const resolvedMedicoUser = String(turno.medico.usuario);
+          if (resolvedMedicoUser) {
+            const yaNotificadoMedico = await this.notificacionesService.count({
+              referenciaId: String(turno._id),
+              destinatario: resolvedMedicoUser,
+              tipo: TipoNotificacion.RECORDATORIO
+            });
+
+            if (yaNotificadoMedico === 0) {
+              const mensajeMedico = `Recordatorio: Tenés un turno programado para el día ${fechaTexto} a las ${horaTexto} con el paciente ${paciente.nombre} para ${nombreServicio}.`;
+
+              await this.notificacionesService.create({
+                destinatario: resolvedMedicoUser,
+                remitente: resolvedPacienteUser,
+                mensaje: mensajeMedico,
+                tipo: TipoNotificacion.RECORDATORIO,
+                referenciaId: String(turno._id)
+              });
+              console.log(`[TurnoService] Recordatorio enviado al médico ${turno.medico.nombre} para el turno ${turno._id}.`);
+            } else {
+              console.log(`[TurnoService] El médico ${turno.medico.nombre} ya fue notificado para el turno ${turno._id}.`);
+            }
+          }
+        } catch (errorInterno) {
+          console.error(`[TurnoService] Error al procesar notificaciones para el turno ${turno._id}:`, errorInterno);
+        }
+      }
+    } catch (error) {
+      console.error("[TurnoService] Error en la ejecución de enviarRecordatoriosTurnos:", error);
     }
   }
 }

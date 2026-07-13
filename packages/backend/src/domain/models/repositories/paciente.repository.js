@@ -19,8 +19,8 @@ export class PacienteRepository {
         return await this.model.findById(id).populate({
             path: 'plan',
             populate: [
-                { path: 'coberturasEspecialidad.prestacion' },
-                { path: 'coberturasPractica.practica' }
+                { path: 'coberturasEspecialidad.servicio' },
+                { path: 'coberturasPractica.servicio' }
             ]
         });
     }
@@ -40,8 +40,8 @@ export class PacienteRepository {
         return await this.model.findOne({ usuario: { $regex: username, $options: 'i' } }).populate({
             path: 'plan',
             populate: [
-                { path: 'coberturasEspecialidad.prestacion' },
-                { path: 'coberturasPractica.practica' }
+                { path: 'coberturasEspecialidad.servicio' },
+                { path: 'coberturasPractica.servicio' }
             ]
         });
     }
@@ -58,8 +58,8 @@ export class PacienteRepository {
         return await this.model.findById(id).populate({
             path: 'plan',
             populate: [
-                { path: 'coberturasEspecialidad.prestacion' },
-                { path: 'coberturasPractica.practica' }
+                { path: 'coberturasEspecialidad.servicio' },
+                { path: 'coberturasPractica.servicio' }
             ]
         });
     }

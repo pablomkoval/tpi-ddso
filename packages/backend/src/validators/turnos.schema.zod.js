@@ -11,7 +11,7 @@ export const filtroBusqTurnoPaciente = z.object({
     //turnos disponibles no tienen paciente asignado
     sedeId: idMongoSchema.optional(), //sede se intentan autocompletar en la busqueda
 
-    fechaDesde: z.string().optional(),
+    fechaDesde: z.string().default(() => new Date().toISOString()),
     fechaHasta: z.string().optional(),
     sortBy: z
         .enum(["fechaHora", "costo"])
