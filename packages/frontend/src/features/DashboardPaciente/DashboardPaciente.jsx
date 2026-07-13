@@ -21,20 +21,72 @@ import {
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUsernameFromToken } from '../../utils/authUtils';
-import { proximoTurnoData, turnosPendientesData } from '../../mockdata/dashboardPacienteMock';
 import { obtenerResumenNotificaciones } from '../../services/notificacionesService.js';
+import { getMiPaciente } from '../../services/pacienteService.js';
+import { obtenerTurnosPorPaciente } from '../../services/busquedaTurnosService.js';
 
+const estadoPendienteLabel = {
+  reservado: 'Esperando confirmación médica',
+  confirmado: 'Confirmado',
+};
 
+const mapearTurno = (turno) => {
+  const fechaHora = new Date(turno.fechaHora);
+  const nombreMedico = turno.medico?.nombre || '';
+  return {
+    id: turno.id,
+    especialidad: turno.servicio?.nombre || 'Consulta general',
+    medico: nombreMedico ? `Dr. ${nombreMedico}` : 'Médico a confirmar',
+    iniciales: nombreMedico
+      ? nombreMedico.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+      : '??',
+    fecha: fechaHora.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }),
+    fechaLabel: turno.estado.toLowerCase() === 'confirmado' ? 'Fecha confirmada' : 'Pendiente de confirmación',
+    hora: fechaHora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+    duracion: `${turno.servicio?.duracionMinutos || 30} min`,
+    lugar: turno.sede?.nombre || 'Sede a confirmar',
+    ciudad: turno.sede?.direccion || '',
+    estado: turno.estado.toLowerCase(),
+    fechaHoraDate: fechaHora,
+  };
+};
 
 export default function DashboardPaciente() {
 
   const [proximoTurno, setProximoTurno] = useState(null);
   const [turnosPendientes, setTurnosPendientes] = useState([]);
   const [datosNotificaciones, setNotificaciones] = useState(null);
+  const [cargandoTurnos, setCargandoTurnos] = useState(true);
 
   useEffect(() => {
-    setProximoTurno(proximoTurnoData);
-    setTurnosPendientes(turnosPendientesData);
+    const cargarTurnos = async () => {
+      try {
+        const paciente = await getMiPaciente();
+        const pacienteId = paciente.id || paciente._id;
+
+        const turnos = await obtenerTurnosPorPaciente(pacienteId);
+        const ahora = new Date();
+
+        const turnosFuturos = turnos
+          .filter((t) => {
+            const estado = t.estado.toLowerCase();
+            return (estado === 'reservado' || estado === 'confirmado') && new Date(t.fechaHora) >= ahora;
+          })
+          .map(mapearTurno)
+          .sort((a, b) => a.fechaHoraDate - b.fechaHoraDate);
+
+        setProximoTurno(turnosFuturos[0] || null);
+        setTurnosPendientes(turnosFuturos.slice(1));
+      } catch (error) {
+        console.error("Error cargando turnos del paciente", error);
+        setProximoTurno(null);
+        setTurnosPendientes([]);
+      } finally {
+        setCargandoTurnos(false);
+      }
+    };
+
+    cargarTurnos();
 
     const cargarResumenNotificaciones = async () => {
       try {
@@ -58,7 +110,7 @@ export default function DashboardPaciente() {
 
   const nombreCompleto = username ? username : 'Paciente';
 
-  if (!proximoTurno || !datosNotificaciones) {
+  if (cargandoTurnos || !datosNotificaciones) {
     return <div>Cargando...</div>;
   }
 
@@ -112,47 +164,55 @@ export default function DashboardPaciente() {
               }}
             />
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Box>
-                <Typography variant="h5" sx={{ mb: 0.5 }}>
-                  {proximoTurno.especialidad}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {proximoTurno.medico}
-                </Typography>
-              </Box>
-              <Avatar
-                sx={{
-                  width: 64,
-                  height: 64,
-                  bgcolor: 'primary.main',
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                }}
-              >
-                {proximoTurno.iniciales}
-              </Avatar>
-            </Box>
+            {proximoTurno ? (
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Box>
+                    <Typography variant="h5" sx={{ mb: 0.5 }}>
+                      {proximoTurno.especialidad}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {proximoTurno.medico}
+                    </Typography>
+                  </Box>
+                  <Avatar
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      bgcolor: 'primary.main',
+                      fontSize: '1.25rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {proximoTurno.iniciales}
+                  </Avatar>
+                </Box>
 
-            <Divider sx={{ my: 3 }} />
+                <Divider sx={{ my: 3 }} />
 
-            <Box sx={{ display: 'flex', gap: { xs: 2, md: 5 }, flexWrap: 'wrap' }}>
-              <InfoItem
-                icon={<CalendarIcon />}
-                main={proximoTurno.fecha}
-                sub={proximoTurno.fechaLabel}
-              />
-              <InfoItem
-                icon={<ClockIcon />}
-                main={proximoTurno.hora}
-                sub={`Duración: ${proximoTurno.duracion}`}
-              />
-              <InfoItem
-                icon={<LocationIcon />}
-                main={proximoTurno.lugar}
-                sub={proximoTurno.ciudad}
-              />
-            </Box>
+                <Box sx={{ display: 'flex', gap: { xs: 2, md: 5 }, flexWrap: 'wrap' }}>
+                  <InfoItem
+                    icon={<CalendarIcon />}
+                    main={proximoTurno.fecha}
+                    sub={proximoTurno.fechaLabel}
+                  />
+                  <InfoItem
+                    icon={<ClockIcon />}
+                    main={proximoTurno.hora}
+                    sub={`Duración: ${proximoTurno.duracion}`}
+                  />
+                  <InfoItem
+                    icon={<LocationIcon />}
+                    main={proximoTurno.lugar}
+                    sub={proximoTurno.ciudad}
+                  />
+                </Box>
+              </>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No tenés turnos programados próximamente.
+              </Typography>
+            )}
           </CardContent>
         </Card>
 
@@ -177,19 +237,25 @@ export default function DashboardPaciente() {
               </Box>
 
               <Stack spacing={1.5}>
-                {turnosPendientes.map((t) => (
-                  <Box
-                    key={t.id}
-                    sx={{ bgcolor: 'background.default', borderRadius: 2, p: 1.5 }}
-                  >
-                    <Typography variant="body2" fontWeight={600}>
-                      {t.especialidad}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {t.estado}
-                    </Typography>
-                  </Box>
-                ))}
+                {turnosPendientes.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    No tenés turnos pendientes.
+                  </Typography>
+                ) : (
+                  turnosPendientes.map((t) => (
+                    <Box
+                      key={t.id}
+                      sx={{ bgcolor: 'background.default', borderRadius: 2, p: 1.5 }}
+                    >
+                      <Typography variant="body2" fontWeight={600}>
+                        {t.especialidad}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {estadoPendienteLabel[t.estado] || t.estado}
+                      </Typography>
+                    </Box>
+                  ))
+                )}
               </Stack>
             </CardContent>
           </Card>
