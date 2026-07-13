@@ -15,6 +15,7 @@ import { MedicoModel } from "./schemas/medico.schema.js";
 import { TurnoModel } from "./schemas/turno.schema.js";
 import { PrestacionModel } from "./schemas/prestacion.schema.js";
 import { EspecialidadModel } from "./schemas/especialidad.schema.js";
+import { PracticaModel } from "./schemas/practica.schema.js";
 import { UsuarioModel } from "./schemas/usuario.schema.js";
 import { SolicitudCambioTurnoModel } from "./schemas/solicitudCambioTurno.schema.js";
 import { NotificacionModel } from "./schemas/notificacion.schema.js";
@@ -156,6 +157,14 @@ try {
   // 1. Crear Servicios (catalogo)
   const servicios = await ServicioModel.insertMany([
     { nombre: "Clinica Medica", tipoServicio: TipoServicio.ESPECIALIDAD },
+    { nombre: "Pediatría", tipoServicio: TipoServicio.ESPECIALIDAD },
+    { nombre: "Cardiología", tipoServicio: TipoServicio.ESPECIALIDAD },
+    { nombre: "Traumatología", tipoServicio: TipoServicio.ESPECIALIDAD },
+    { nombre: "Ginecología", tipoServicio: TipoServicio.ESPECIALIDAD },
+    { nombre: "Análisis de Sangre", tipoServicio: TipoServicio.PRACTICA },
+    { nombre: "Radiografía de Tórax", tipoServicio: TipoServicio.PRACTICA },
+    { nombre: "Ecografía Abdominal", tipoServicio: TipoServicio.PRACTICA },
+    { nombre: "Electrocardiograma", tipoServicio: TipoServicio.PRACTICA },
   ]);
   console.log(`${servicios.length} servicios creados.`);
 
@@ -166,10 +175,21 @@ try {
   // 2. Crear Prestaciones (Especialidades y Practicas) ligadas a cada servicio
   const especialidades = await EspecialidadModel.insertMany([
     { servicioUnico: servicioPorNombre["Clinica Medica"]._id, duracionTurnoEnMins: 20, costo: 3000 },
+    { servicioUnico: servicioPorNombre["Pediatría"]._id, duracionTurnoEnMins: 20, costo: 3500 },
+    { servicioUnico: servicioPorNombre["Cardiología"]._id, duracionTurnoEnMins: 30, costo: 5000 },
+    { servicioUnico: servicioPorNombre["Traumatología"]._id, duracionTurnoEnMins: 20, costo: 4000 },
+    { servicioUnico: servicioPorNombre["Ginecología"]._id, duracionTurnoEnMins: 30, costo: 4500 },
   ]);
 
-  const prestaciones = [...especialidades];
-  console.log(`${prestaciones.length} prestaciones creadas.`);
+  const practicas = await PracticaModel.insertMany([
+    { servicioUnico: servicioPorNombre["Análisis de Sangre"]._id, duracionTurnoEnMins: 15, costo: 1500, codigo: "P001" },
+    { servicioUnico: servicioPorNombre["Radiografía de Tórax"]._id, duracionTurnoEnMins: 15, costo: 2500, codigo: "P002" },
+    { servicioUnico: servicioPorNombre["Ecografía Abdominal"]._id, duracionTurnoEnMins: 20, costo: 3000, codigo: "P003" },
+    { servicioUnico: servicioPorNombre["Electrocardiograma"]._id, duracionTurnoEnMins: 20, costo: 2000, codigo: "P004" },
+  ]);
+
+  const prestaciones = [...especialidades, ...practicas];
+  console.log(`${prestaciones.length} prestaciones creadas (${especialidades.length} especialidades, ${practicas.length} prácticas).`);
 
   const prestacionPorNombre = (nombreServicio) => {
     const servicio = servicioPorNombre[nombreServicio];
@@ -181,6 +201,8 @@ try {
   // 3. Crear Sedes
   const sedes = await SedeModel.insertMany([
     { nombre: "Sede Centro", direccion: "Av. Corrientes 1234, CABA" },
+    { nombre: "Sede Norte", direccion: "Av. Cabildo 2450, CABA" },
+    { nombre: "Sede Palermo", direccion: "Av. Santa Fe 3400, CABA" },
   ]);
   console.log(`${sedes.length} sedes creadas.`);
 
@@ -194,8 +216,112 @@ try {
       nombre: "OSDE 210",
       coberturasEspecialidad: [
         { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.PARCIAL },
       ],
-      coberturasPractica: [],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+    },
+    {
+      nombre: "OSDE 310",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Cardiología"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Traumatología"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Radiografía de Tórax"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+    },
+    {
+      nombre: "OSDE 410",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Cardiología"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Traumatología"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Ginecología"]._id, nivel: NivelCobertura.TOTAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Radiografía de Tórax"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Ecografía Abdominal"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Electrocardiograma"]._id, nivel: NivelCobertura.TOTAL },
+      ],
+    },
+    {
+      nombre: "Swiss Medical SMG20",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+    },
+    {
+      nombre: "Swiss Medical SMG30",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Cardiología"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Traumatología"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Radiografía de Tórax"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Ecografía Abdominal"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+    },
+    {
+      nombre: "Galeno Plata",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Traumatología"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.PARCIAL },
+        { servicio: servicioPorNombre["Electrocardiograma"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+    },
+    {
+      nombre: "Galeno Oro",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Cardiología"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Traumatología"]._id, nivel: NivelCobertura.TOTAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Radiografía de Tórax"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Ecografía Abdominal"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Electrocardiograma"]._id, nivel: NivelCobertura.TOTAL },
+      ],
+    },
+    {
+      nombre: "Sancor 1000",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.PARCIAL },
+      ],
+    },
+    {
+      nombre: "Sancor 3000",
+      coberturasEspecialidad: [
+        { servicio: servicioPorNombre["Clinica Medica"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Pediatría"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Cardiología"]._id, nivel: NivelCobertura.TOTAL },
+      ],
+      coberturasPractica: [
+        { servicio: servicioPorNombre["Análisis de Sangre"]._id, nivel: NivelCobertura.TOTAL },
+        { servicio: servicioPorNombre["Electrocardiograma"]._id, nivel: NivelCobertura.TOTAL },
+      ],
     },
   ]);
   console.log(`${planes.length} planes creados.`);
@@ -207,9 +333,35 @@ try {
   const obrasSociales = await ObraSocialModel.insertMany([
     {
       nombre: "OSDE",
-      planes: [planPorNombre["OSDE 210"]._id],
+      planes: [
+        planPorNombre["OSDE 210"]._id,
+        planPorNombre["OSDE 310"]._id,
+        planPorNombre["OSDE 410"]._id,
+      ],
+    },
+    {
+      nombre: "Swiss Medical",
+      planes: [
+        planPorNombre["Swiss Medical SMG20"]._id,
+        planPorNombre["Swiss Medical SMG30"]._id,
+      ],
+    },
+    {
+      nombre: "Galeno",
+      planes: [
+        planPorNombre["Galeno Plata"]._id,
+        planPorNombre["Galeno Oro"]._id,
+      ],
+    },
+    {
+      nombre: "Sancor Salud",
+      planes: [
+        planPorNombre["Sancor 1000"]._id,
+        planPorNombre["Sancor 3000"]._id,
+      ],
     },
   ]);
+  console.log(`${obrasSociales.length} obras sociales creadas.`);
 
   const obraSocialPorNombre = Object.fromEntries(
     obrasSociales.map((obraSocial) => [obraSocial.nombre, obraSocial]),
@@ -237,9 +389,107 @@ try {
         prestacion: prestacionPorNombre("Clinica Medica")._id,
       })),
     },
+    {
+      username: "pediatra@mail.com",
+      matricula: "MN-200000",
+      nombre: "Dra. Maria Pediatra",
+      especialidades: [prestacionPorNombre("Pediatría")._id],
+      practicas: [],
+      sedes: [sedePorNombre["Sede Norte"]._id],
+      disponibilidades: [
+        DiaSemana.LUNES,
+        DiaSemana.MIERCOLES,
+        DiaSemana.VIERNES,
+      ].map((diaSemana) => ({
+        diaSemana,
+        horaDesde: "14:00",
+        horaHasta: "17:00",
+        sede: sedePorNombre["Sede Norte"]._id,
+        prestacion: prestacionPorNombre("Pediatría")._id,
+      })),
+    },
+    {
+      username: "cardiologo@mail.com",
+      matricula: "MN-300000",
+      nombre: "Dr. Carlos Cardiologo",
+      especialidades: [prestacionPorNombre("Cardiología")._id],
+      practicas: [prestacionPorNombre("Electrocardiograma")._id],
+      sedes: [sedePorNombre["Sede Palermo"]._id],
+      disponibilidades: [
+        DiaSemana.MARTES,
+        DiaSemana.JUEVES,
+      ].flatMap((diaSemana) => [
+        {
+          diaSemana,
+          horaDesde: "09:00",
+          horaHasta: "12:00",
+          sede: sedePorNombre["Sede Palermo"]._id,
+          prestacion: prestacionPorNombre("Cardiología")._id,
+        },
+        {
+          diaSemana,
+          horaDesde: "13:00",
+          horaHasta: "15:00",
+          sede: sedePorNombre["Sede Palermo"]._id,
+          prestacion: prestacionPorNombre("Electrocardiograma")._id,
+        }
+      ]),
+    },
+    {
+      username: "traumatologa@mail.com",
+      matricula: "MN-400000",
+      nombre: "Dra. Ana Traumatologa",
+      especialidades: [prestacionPorNombre("Traumatología")._id],
+      practicas: [prestacionPorNombre("Radiografía de Tórax")._id],
+      sedes: [sedePorNombre["Sede Centro"]._id, sedePorNombre["Sede Norte"]._id],
+      disponibilidades: [
+        {
+          diaSemana: DiaSemana.LUNES,
+          horaDesde: "09:00",
+          horaHasta: "12:00",
+          sede: sedePorNombre["Sede Centro"]._id,
+          prestacion: prestacionPorNombre("Traumatología")._id,
+        },
+        {
+          diaSemana: DiaSemana.MIERCOLES,
+          horaDesde: "09:00",
+          horaHasta: "12:00",
+          sede: sedePorNombre["Sede Norte"]._id,
+          prestacion: prestacionPorNombre("Traumatología")._id,
+        },
+        {
+          diaSemana: DiaSemana.VIERNES,
+          horaDesde: "13:00",
+          horaHasta: "16:00",
+          sede: sedePorNombre["Sede Centro"]._id,
+          prestacion: prestacionPorNombre("Radiografía de Tórax")._id,
+        }
+      ],
+    },
+    {
+      username: "bioquimico@mail.com",
+      matricula: "MN-500000",
+      nombre: "Bioq. Luis Bioquimico",
+      especialidades: [],
+      practicas: [prestacionPorNombre("Análisis de Sangre")._id],
+      sedes: [sedePorNombre["Sede Centro"]._id],
+      disponibilidades: [
+        DiaSemana.LUNES,
+        DiaSemana.MARTES,
+        DiaSemana.MIERCOLES,
+        DiaSemana.JUEVES,
+        DiaSemana.VIERNES,
+      ].map((diaSemana) => ({
+        diaSemana,
+        horaDesde: "07:30",
+        horaHasta: "10:30",
+        sede: sedePorNombre["Sede Centro"]._id,
+        prestacion: prestacionPorNombre("Análisis de Sangre")._id,
+      })),
+    },
   ];
 
-  console.log("Creando usuario de medico en Keycloak...");
+  console.log("Creando usuarios de medicos en Keycloak...");
   const medicos = [];
   for (const { username, ...datosMedico } of medicosData) {
     const usuario = await crearUsuarioParaSeed({
@@ -250,9 +500,9 @@ try {
     const medico = await MedicoModel.create({ ...datosMedico, usuario: String(usuario._id) });
     medicos.push(medico);
   }
-  console.log(`${medicos.length} medico creado (Keycloak + Mongo).`);
+  console.log(`${medicos.length} medicos creados (Keycloak + Mongo).`);
 
-  const medico = medicos[0];
+  const medico = medicos[0]; // Dr. Juan Medico (para compatibilidad de turnos estáticos)
 
   const pacientesData = [
     {
@@ -262,9 +512,30 @@ try {
       obraSocial: obraSocialPorNombre.OSDE._id,
       plan: planPorNombre["OSDE 210"]._id,
     },
+    {
+      username: "paciente2@mail.com",
+      dni: "31222333",
+      nombre: "María Swiss",
+      obraSocial: obraSocialPorNombre["Swiss Medical"]._id,
+      plan: planPorNombre["Swiss Medical SMG30"]._id,
+    },
+    {
+      username: "paciente3@mail.com",
+      dni: "32333444",
+      nombre: "Carlos Galeno",
+      obraSocial: obraSocialPorNombre.Galeno._id,
+      plan: planPorNombre["Galeno Oro"]._id,
+    },
+    {
+      username: "paciente4@mail.com",
+      dni: "33444555",
+      nombre: "Ana Sancor",
+      obraSocial: obraSocialPorNombre["Sancor Salud"]._id,
+      plan: planPorNombre["Sancor 1000"]._id,
+    },
   ];
 
-  console.log("Creando usuario de paciente en Keycloak...");
+  console.log("Creando usuarios de pacientes en Keycloak...");
   const pacientes = [];
   for (const { username, ...datosPaciente } of pacientesData) {
     const usuario = await crearUsuarioParaSeed({
@@ -275,9 +546,9 @@ try {
     const paciente = await PacienteModel.create({ ...datosPaciente, usuario: String(usuario._id) });
     pacientes.push(paciente);
   }
-  console.log(`${pacientes.length} paciente creado (Keycloak + Mongo).`);
+  console.log(`${pacientes.length} pacientes creados (Keycloak + Mongo).`);
 
-  const paciente = pacientes[0];
+  const paciente = pacientes[0]; // Juan Paciente (para compatibilidad)
 
   const turnoDisponible = {
     medico: medico._id,
