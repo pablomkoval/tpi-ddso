@@ -28,7 +28,7 @@ export const getMisTurnos = async (pacienteId) => {
         `${API_BASE}/turnos?pacienteId=${pacienteId}`,
         getHeaders()
     );
-    return response.data;
+    return response.data?.data || [];
 };
 
 /**
