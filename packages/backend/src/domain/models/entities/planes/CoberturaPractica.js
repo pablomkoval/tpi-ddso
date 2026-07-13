@@ -1,6 +1,6 @@
 export class CoberturaPractica{
     constructor(practica, nivel){
-        this.practica = practica;
+        this.servicio = practica;
         this.nivel = nivel;
     }
 }

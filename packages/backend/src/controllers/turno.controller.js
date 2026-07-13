@@ -45,13 +45,10 @@ export class TurnoController {
   async getDisponibles(req, res, next) {
     try {
 
-
       const paciente = await this.pacienteService.findByIdUsuario(req.user.id);
-
       const paginacion = extraerPaginacion(req.query);
       const filtros = this.validarFiltros(req.query);
       const resultado = await this.turnoService.buscarDisponibles(paginacion, filtros, paciente);
-
       res.status(200).json({
         status: "success",
         data: {
@@ -108,19 +105,14 @@ export class TurnoController {
   }
 
   async cambiarEstado(req, res, next) {
-    console.error("Hola voy a cambiar el estado de un turno");
 
     try {
       const turnoId = parsearId(req.params.id);
       const estado = this.validarEstadoTurno(req.body.estado);
-      console.error("Voy a agarrar el user id");
 
       const usuarioId = req.user.id;
-      console.error("Consegui el user id", usuarioId);
       const usuarioRol = this.validarRolUsuario(req.body.rol);
-      console.error("valide usuario");
       const motivoCambio = req.body.motivo;
-      console.error("consegui motivo", motivoCambio);
 
 
       const turnoActualizado = await this.turnoService.cambiarEstado(turnoId, estado, usuarioId, usuarioRol, motivoCambio);

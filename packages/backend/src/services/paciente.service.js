@@ -47,7 +47,7 @@ export class PacienteService {
     return paciente;
   }
 
-  async findByIdUsuario(id, username) {
+  async findByIdUsuario(id, username = null) {
     // Buscar primero por el ID de usuario de MongoDB
     let paciente = await this.pacienteRepository.findByIdUsuario(id);
 
@@ -59,11 +59,9 @@ export class PacienteService {
         await this.pacienteRepository.updateUsuarioId(paciente._id, id);
       }
     }
-
     if (!paciente) {
       throw new NotFoundError("Paciente no encontrado para el usuario actual", "PACIENTE_NO_ENCONTRADO");
     }
-
     return paciente;
   }
 

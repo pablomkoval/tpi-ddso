@@ -7,11 +7,23 @@ export class Plan {
         this.coberturasEspecialidad = cobEsp;
         this.coberturasPractica = cobPrac;
     }
-    obtenerCoberturaEspecialidad(e){ //recorrer las 2 listas para polimorfismo? por qué 2 métodos mismo nombre
-        return this.coberturasEspecialidad.find(elem => elem.especialidad.id === e.id).nivel;
+    /* obtenerCoberturaEspecialidad(especialidadId){ //recorrer las 2 listas para polimorfismo? por qué 2 métodos mismo nombre
+        return this.coberturasEspecialidad.find(elem => elem.especialidad.equals(especialidadId))?.nivel;
     }
-    obtenerCoberturaPractica(p){
-        return this.coberturasPractica.find(elem => elem.practica.id === p.id).nivel;
+    obtenerCoberturaPractica(practicaId){
+        return this.coberturasPractica.find(elem => elem.practica.id.equals(practicaId))?.nivel;
     }
+ */
+    obtenerCoberturaServicio(servicioId) {
+
+    return (
+        this.coberturasEspecialidad.find(
+            elem => String(elem.servicio._id) === String(servicioId)
+        ) ||
+        this.coberturasPractica.find(
+            elem => String(elem.servicio._id) === String(servicioId)
+        )
+    )?.nivel ?? null;
+}
 
 }
