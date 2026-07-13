@@ -50,9 +50,9 @@ export default function ModalCambioFecha({ open, turno, onClose, onConfirm, load
     const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
 
     // Obtener el ID del servicio base (servicioUnico) y del médico
-    const medicoId = turno?.medico?._id || turno?.medico;
-    const servicioId = turno?.servicio?.servicioUnico?._id || turno?.servicio?.servicioUnico;
-    const nombreServicio = turno?.servicio?.servicioUnico?.nombre || turno?.servicio?.nombre || '—';
+    const medicoId = turno?.medico?.id || turno?.medico?._id || (typeof turno?.medico === 'string' ? turno.medico : null);
+    const servicioId = turno?.servicio?.id || turno?.servicio?._id || turno?.servicio?.servicioUnico?._id || (typeof turno?.servicio === 'string' ? turno.servicio : null);
+    const nombreServicio = turno?.servicio?.nombre || turno?.servicio?.servicioUnico?.nombre || '—';
     const nombreMedico = turno?.medico?.nombre || '—';
 
     useEffect(() => {
