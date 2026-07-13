@@ -221,6 +221,12 @@ export class TurnoService {
       criterios.medico = filtros.medicoId;
     }
 
+    if (filtros?.futuros === true){
+      criterios.fechaHora = {
+        $gte: new Date()
+      };
+    }
+
     const resultado = await this.turnoRepository.findAllPaginated(
       criterios,
       numeroPagina,
