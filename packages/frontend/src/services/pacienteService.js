@@ -25,7 +25,7 @@ export const getMiPaciente = async () => {
  */
 export const getMisTurnos = async (pacienteId) => {
     const response = await axios.get(
-        `${API_BASE}/turnos?pacienteId=${pacienteId}/`,
+        `${API_BASE}/turnos?pacienteId=${pacienteId}`,
         getHeaders()
     );
     return response.data;
