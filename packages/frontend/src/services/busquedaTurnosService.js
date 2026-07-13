@@ -64,3 +64,18 @@ export const obtenerTurnosPorPaciente = async (pacienteId) => {
         throw error;
     }
 }
+
+export const obtenerTurnosDiariosPorMedico = async (medicoId, fecha) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${API_BASE_URL}/turnos?medicoId=${medicoId}&fecha=${fecha}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error al obtener los turnos diarios por médico:", error);
+        throw error;
+    }
+}
