@@ -161,6 +161,10 @@ export class TurnoController {
       filtros.medicoId = parsearId(query.medicoId);
     }
 
+    if (query.futuros !== undefined && query.futuro === "true"){
+      filtros.futuros = true; 
+    }
+
     return filtros;
   }
 

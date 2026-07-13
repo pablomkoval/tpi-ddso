@@ -221,6 +221,12 @@ export class TurnoService {
       criterios.medico = filtros.medicoId;
     }
 
+    if (filtros?.futuros === true){
+      criterios.fechaHora = {
+        $gte: new Date()
+      };
+    }
+
     const resultado = await this.turnoRepository.findAllPaginated(
       criterios,
       numeroPagina,
@@ -448,7 +454,7 @@ export class TurnoService {
     );
   }
 
-  async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol) {
+  async notificarCambioEstadoTurno(turno, estadoTurno, usuarioRemitente, usuarioRol, motivo = null) {
     const nombreServicio = turno.servicio?.servicioUnico?.nombre ?? turno.servicio?.nombre ?? "servicio no especificado";
     
     const fecha = new Date(turno.fechaHora);
@@ -459,12 +465,12 @@ export class TurnoService {
       minute: "2-digit",
     });
 
-  /*   const mensaje = `Su turno es el ${fechaTexto} a las ${horaTexto}.`; */
+    const textoMotivo = motivo ? `. Motivo: ${motivo}` : "";
 
     const mensaje =
       usuarioRol === "PACIENTE"
-        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`
-        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto}`;
+        ? `El paciente ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto} ${textoMotivo}`
+        : `El profesional ${usuarioRemitente.nombre} ha ${estadoTurno.toLowerCase()} el turno para ${nombreServicio} para el día ${fechaTexto} a las ${horaTexto} ${textoMotivo}`;
 
     try {
       await this.notificacionesService.create({
